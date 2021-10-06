@@ -11,8 +11,8 @@ Actually provided types
 3. [Examples](#examples)
    - [Json](#examples-json)
 
-<a name="install"></a>
-<a name="user-content-install"></a>
+<a id="install" name="install"></a>
+<a id="user-content-install" name="user-content-install"></a>
 ## How to install
 ### Install via composer
 ```
