@@ -1,4 +1,4 @@
-# The Serializer Component
+# the serializer component
 This component is for serialize and deserialize.
 
 Actually provided types
