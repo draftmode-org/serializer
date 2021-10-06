@@ -23,10 +23,11 @@ class JsonSerializerFactory implements SerializerInterface {
     }
 
     /**
-     * @param string $className
+     * @param class-string<T> $className
      * @param mixed $input
-     * @return object
+     * @return T
      * @throws ReflectionException
+     * @template T
      */
     public function deserialize(string $className, $input): object {
         return (new Deserializer($this->decoder, $this->denormalizer))
