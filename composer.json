@@ -2,7 +2,7 @@
     "name": "terrazza/component-serializer",
     "type" : "library",
     "version": "1.0.0",
-    "description": "core-class-loader",
+    "description": "Terrazza Component Serializer",
     "license": "MIT",
     "config" : {
         "vendor-dir" : "plugin"
