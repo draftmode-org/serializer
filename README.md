@@ -26,7 +26,7 @@ composer require terrazza/component-serializer
 ### php extension 
 - ext-json
 ### composer packages
-- terrazza/component-serializer
+- terrazza/component-reflectionclass
 
 <a id="examples" name="examples"/></a>
 <a id="user-content-examples" name="user-content-examples"/></a>
