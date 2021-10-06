@@ -13,7 +13,7 @@ Actually provided types
 ### How to install
 #### install via composer
 ```
-compose require terrazza/component-serializer
+composer require terrazza/component-serializer
 ``` 
 
 <a name="examples"/></a>
