@@ -4,7 +4,8 @@ This component is for serialize and deserialize.
 Actually provided types
 - JSON
     - method: deserialize
-
+<hr>
+    
 1. [How to install](#install)
 2. [Requirements](#require)
 3. [Examples](#examples)
