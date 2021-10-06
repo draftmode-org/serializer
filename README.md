@@ -6,12 +6,22 @@ Actually provided types
     - method: deserialize
 
 1. [How to install](#install)
-2. [Examples](#examples)
+2. [Requirements](#require)
+3. [Examples](#examples)
    - [Json](#examples-json)
 
 <a name="install"></a>
 ### How to install
 #### install via composer
+```
+composer require terrazza/component-serializer
+```
+<a name="require"></a>
+### Requirements
+#### php version
+- \>= 7.4
+#### php extension 
+- ext-json
 ```
 composer require terrazza/component-serializer
 ``` 
