@@ -18,8 +18,8 @@ Actually provided types
 ```
 composer require terrazza/component-serializer
 ```
-<a name="require"></a>
-<a name="user-content-require"></a>
+<a id="require" name="require"></a>
+<a id="user-content-require" name="user-content-require"></a>
 ## Requirements
 ### php version
 - \>= 7.4
@@ -28,12 +28,12 @@ composer require terrazza/component-serializer
 ### composer packages
 - terrazza/component-serializer
 
-<a name="examples"/></a>
-<a name="user-content-examples"/></a>
+<a id="examples" name="examples"/></a>
+<a id="user-content-examples" name="user-content-examples"/></a>
 ## Examples
 
-<a name="examples-json"></a>
-<a name="user-content-examples-json"></a>
+<a id="examples-json" name="examples-json"></a>
+<a id="user-content-examples-json" name="user-content-examples-json"></a>
 ### deserialize JSON
 ```php
 $input = json_encode(
