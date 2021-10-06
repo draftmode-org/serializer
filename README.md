@@ -11,26 +11,23 @@ Actually provided types
    - [Json](#examples-json)
 
 <a name="install"></a>
-### How to install
-#### install via composer
+## How to install
+### Install via composer
 ```
 composer require terrazza/component-serializer
 ```
 <a name="require"></a>
-### Requirements
-#### php version
+## Requirements
+### php version
 - \>= 7.4
-#### php extension 
+### php extension 
 - ext-json
-```
-composer require terrazza/component-serializer
-``` 
 
 <a name="examples"/></a>
-### Examples
+## Examples
 
 <a name="examples-json"></a>
-#### deserialize JSON
+### deserialize JSON
 ```php
 $input = json_encode(
     [
