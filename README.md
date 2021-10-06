@@ -5,17 +5,22 @@ Actually provided types
 - JSON
     - method: deserialize
 
-1. [Install](#install)
+1. [How to install](#install)
 2. [Examples](#examples)
+   - [Json](#examples-json)
 
 <a name="install"></a>
+### How to install
+#### install via composer
 ```
 compose require terrazza/component-serializer
 ``` 
 
-<a name="examples"></a>
+<a name="examples"/></a>
+### Examples
 
-## Deserialize JSON
+<a name="examples-json"></a>
+#### deserialize JSON
 ```php
 $input = json_encode(
     [
