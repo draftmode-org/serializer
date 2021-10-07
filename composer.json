@@ -1,5 +1,5 @@
 {
-    "name": "terrazza/component-serializer",
+    "name": "terrazza/serializer",
     "type" : "library",
     "version": "1.0.0",
     "description": "Terrazza Component Serializer",
