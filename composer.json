@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": ">=7.4",
-        "terrazza/component-reflectionclass": "*",
+        "terrazza/reflectionclass": "*",
         "ext-json": "*"
     },
     "require-dev" : {
