@@ -3,61 +3,64 @@ namespace Terrazza\Component\Serializer\Tests\Factory\JsonSerializer;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
-use Terrazza\Component\Serializer\Factory\JsonSerializerFactory;
+use Terrazza\Component\Serializer\Factory\Json\JsonArrayConstructorSerializer;
+use Terrazza\Component\Serializer\SerializerInterface;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleSimple;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleTypeDateTime;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleTypeInt;
 
 class JsonSerializerFactoryConstructorExceptionTest extends TestCase {
-
+    private function getSerializer() : SerializerInterface {
+        return new JsonArrayConstructorSerializer();
+    }
     function testRequiredArgument() {
         $input                                      = json_encode([]);
-        $factory                                    = new JsonSerializerFactory();
+        $serializer                                 = $this->getSerializer();
         $this->expectException(InvalidArgumentException::class);
-        $factory->deserialize(SerializerExampleSimple::class, $input);
+        $serializer->deserialize(SerializerExampleSimple::class, $input);
     }
 
     function testUnknownClass() {
         $input                                      = json_encode([]);
-        $factory                                    = new JsonSerializerFactory();
+        $serializer                                 = $this->getSerializer();
         $this->expectException(ReflectionException::class);
-        $factory->deserialize("SerializerExampleConstructorSimple::class", $input);
+        $serializer->deserialize("SerializerExampleConstructorSimple::class", $input);
     }
 
     function testMissingConstructor() {
         $input                                      = json_encode([]);
-        $factory                                    = new JsonSerializerFactory();
+        $serializer                                 = $this->getSerializer();
         $this->expectException(InvalidArgumentException::class);
-        $factory->deserialize(JsonSerializerFactoryConstructorExceptionNoConstructor::class, $input);
+        $serializer->deserialize(JsonSerializerFactoryConstructorExceptionNoConstructor::class, $input);
     }
 
     function testMultipleAnnotations() {
         $input                                      = json_encode([
             "int" => 1
         ]);
-        $factory                                    = new JsonSerializerFactory();
+        $serializer                                 = $this->getSerializer();
         $this->expectException(InvalidArgumentException::class);
-        $factory->deserialize(JsonSerializerFactoryConstructorExceptionMultipleAnnotation::class, $input);
+        $serializer->deserialize(JsonSerializerFactoryConstructorExceptionMultipleAnnotation::class, $input);
     }
 
     function testInvalidTypeStringInt() {
         $input                                      = json_encode(["number" => "string"]);
-        $factory                                    = new JsonSerializerFactory();
+        $serializer                                 = $this->getSerializer();
         $this->expectException(InvalidArgumentException::class);
-        $factory->deserialize(SerializerExampleTypeInt::class, $input);
+        $serializer->deserialize(SerializerExampleTypeInt::class, $input);
     }
 
     function testInvalidDateTimeDate() {
-        $factory                                    = new JsonSerializerFactory();
+        $serializer                                 = $this->getSerializer();
         $this->expectException(InvalidArgumentException::class);
-        $factory->deserialize(SerializerExampleTypeDateTime::class, json_encode(
+        $serializer->deserialize(SerializerExampleTypeDateTime::class, json_encode(
             ["date" => "31.02.2021"]));
     }
 
     function testInvalidDateTimeValue() {
-        $factory                                    = new JsonSerializerFactory();
+        $serializer                                 = $this->getSerializer();
         $this->expectException(InvalidArgumentException::class);
-        $factory->deserialize(SerializerExampleTypeDateTime::class, json_encode(
+        $serializer->deserialize(SerializerExampleTypeDateTime::class, json_encode(
             ["date" => "hallo"]));
     }
 }

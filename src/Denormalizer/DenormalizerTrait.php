@@ -38,10 +38,33 @@ trait DenormalizerTrait {
     }
 
     /**
+     * @param string $methodOrProperty
+     * @param bool $public
+     * @param bool $protected
+     * @param bool $private
+     */
+    private function isAllowed(string $methodOrProperty, bool $public, bool $protected, bool $private) : void {
+        if ($public) {
+            return;
+        }
+        if ($protected) {
+            if ($this->allowedAccess >= 1) {
+                return;
+            }
+            throw new InvalidArgumentException($methodOrProperty." cannot be accessed, is protected");
+        }
+        if ($private) {
+            if ($this->allowedAccess >= 2) {
+                return;
+            }
+            throw new InvalidArgumentException($methodOrProperty." cannot be accessed, is private");
+        }
+    }
+
+    /**
      * @param string|null $parameterType
      * @param mixed $inputValue
      * @return mixed
-     * @throws Exception
      */
     private function getApprovedBuiltInValue(?string $parameterType, $inputValue) {
         if ($parameterType) {
@@ -80,21 +103,5 @@ trait DenormalizerTrait {
         } catch (Exception $exception) {
             throw new InvalidArgumentException("argument ".$this->getTraceKeys()." value is not a valid date, given ".$inputValue);
         }
-    }
-
-    /**
-     * @param string $annotation
-     * @return string|null
-     */
-    private function extractTypeFromAnnotation(string $annotation) :?string {
-        $annotation                             = strtr($annotation, [
-            "[]" => ""
-        ]);
-        $annotationTypes                        = explode("|", $annotation);
-        $annotationTypes                        = array_diff($annotationTypes, ['array']);
-        if (count($annotationTypes) > 1) {
-            throw new InvalidArgumentException("unable to return a unique type, multiple types given");
-        }
-        return array_shift($annotationTypes);
     }
 }

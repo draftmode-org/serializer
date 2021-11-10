@@ -7,24 +7,21 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
-use Terrazza\Component\ReflectionClass\ClassName\ReflectionClassClassNameException;
-use Terrazza\Component\ReflectionClass\ClassName\ReflectionClassClassNameInterface;
 use Terrazza\Component\Serializer\DenormalizerInterface;
 
-class ArrayDenormalizer implements DenormalizerInterface {
+class ArrayConstructorDenormalizer implements DenormalizerInterface {
+    private AnnotationFactoryInterface $annotationFactory;
     use DenormalizerTrait;
-    private ReflectionClassClassNameInterface $reflectionClassClassName;
-    public function __construct(ReflectionClassClassNameInterface $reflectionClassClassName) {
-        $this->reflectionClassClassName             = $reflectionClassClassName;
+    public function __construct(AnnotationFactoryInterface $annotationFactory) {
+        $this->annotationFactory                    = $annotationFactory;
     }
 
     /**
      * @param object|string $class
      * @param mixed $input
-     * @throws ReflectionException
-     * @throws InvalidArgumentException
-     * @throws ReflectionClassClassNameException
      * @return object
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function denormalize($class, $input) : object {
         $rClass                                     = new ReflectionClass($class);
@@ -102,7 +99,6 @@ class ArrayDenormalizer implements DenormalizerInterface {
      * @param ReflectionParameter $parameter
      * @param ReflectionMethod $method
      * @return string|null
-     * @throws ReflectionClassClassNameException
      */
     private function getParameterType(ReflectionParameter $parameter, ReflectionMethod $method) :?string {
         $parameterName                              = $parameter->name;
@@ -126,18 +122,13 @@ class ArrayDenormalizer implements DenormalizerInterface {
      * @param ReflectionMethod $method
      * @param string $parameterName
      * @return string|null
-     * @throws ReflectionClassClassNameException
      */
     private function getParameterTypeByAnnotation(ReflectionMethod $method, string $parameterName) :?string {
-        if (preg_match('/@param\\s+(\\S+)\\s+\\$' . $parameterName . '/', $method->getDocComment(), $matches)) {
-            if ($annotationType = $this->extractTypeFromAnnotation($matches[1])) {
-                if ($this->isBuiltIn($annotationType)) {
-                    return $annotationType;
-                }
-                $propertyClassName                      = $method->getDeclaringClass()->getName();
-                if ($propertyTypeClassName = $this->reflectionClassClassName->getClassName($propertyClassName, $annotationType)) {
-                    return $propertyTypeClassName;
-                }
+        if ($annotationType = $this->annotationFactory->getParameterTypeByAnnotation($method, $parameterName)) {
+            if ($this->isBuiltIn($annotationType)) {
+                return $annotationType;
+            } elseif ($annotationTypeClass = $this->annotationFactory->getClassName($method->getDeclaringClass()->getName(), $annotationType)) {
+                return $annotationTypeClass;
             }
         }
         return null;
