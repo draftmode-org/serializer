@@ -11,4 +11,12 @@ class SerializerExampleArrayAsBuiltIn {
     public function __construct(array $array) {
         $this->array = $array;
     }
+
+    /**
+     * @param array|int[] $array
+     */
+    public function setArray(array $array): void
+    {
+        $this->array = $array;
+    }
 }

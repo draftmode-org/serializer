@@ -11,4 +11,12 @@ class SerializerExampleVariadicViaParam {
     public function __construct(...$int) {
         $this->int = $int;
     }
+
+    /**
+     * @param array|SerializerExampleTypeInt[] $int
+     */
+    public function setInt(array $int): void
+    {
+        $this->int = $int;
+    }
 }

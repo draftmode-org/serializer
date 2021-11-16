@@ -1,12 +1,11 @@
 <?php
 namespace Terrazza\Component\Serializer\Tests\Factory\JsonSerializer;
 use PHPUnit\Framework\TestCase;
-use Terrazza\Component\Serializer\Factory\Json\JsonArrayDataSerializer;
+use Terrazza\Component\Serializer\Factory\Json\JsonArraySerializer;
 use Terrazza\Component\Serializer\SerializerInterface;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleArray;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleArrayAsBuiltIn;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleArrayAsClass;
-use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleEmpty;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleSimple;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleTypeDateTime;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleTypeFloat;
@@ -16,11 +15,12 @@ use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleV
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleVariadicBuiltIn;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleVariadicViaParam;
 
-class JsonArrayDataSerializerByPropertyTest extends TestCase {
+class JsonArrayDeserializerTest extends TestCase {
     private function getSerializer() : SerializerInterface {
-        return new JsonArrayDataSerializer();
+        return new JsonArraySerializer();
     }
-    function xtestSimple() {
+
+    function testSimple() {
         $input                                      = json_encode(
             [
                     'number' => $number = 1,
@@ -53,7 +53,7 @@ class JsonArrayDataSerializerByPropertyTest extends TestCase {
         ]);
     }
 
-    function xtestArray() {
+    function testArray() {
         $input                                      = json_encode(
             [
                 'array' => $array = [1, 2]
@@ -75,7 +75,7 @@ class JsonArrayDataSerializerByPropertyTest extends TestCase {
         ]);
     }
 
-    function xtestArrayAsBuiltIn() {
+    function testArrayAsBuiltIn() {
         $input                                      = json_encode(
             [
                 'array' => [$i1 = 1,$i2 = 2]
@@ -97,7 +97,7 @@ class JsonArrayDataSerializerByPropertyTest extends TestCase {
         ]);
     }
 
-    function xtestArrayAsClass() {
+    function testArrayAsClass() {
         $input                                      = json_encode(
             [
                 'array' => [$i1 = 1,$i2 = 2]
@@ -111,76 +111,75 @@ class JsonArrayDataSerializerByPropertyTest extends TestCase {
             $object->array
         ]);
     }
-/*
-        function testVariadicAsBuiltIn() {
-            $input                                      = json_encode(
-          [
-                    'int' => [$i1 = 1,$i2 = 2]
-                ]
-            );
-            $serializer                                 = $this->getSerializer();
-            $object                                     = $serializer->deserialize(SerializerExampleVariadicBuiltIn::class, $input);
-            $this->assertEquals([
-                [$i1,$i2]
-            ],[
-                $object->int
-            ]);
-        }
 
-        function testVariadicAsClass() {
-            $input                                      = json_encode(
-                [
-                    'int' => [$i1 = 1,$i2 = 2]
-                ]
-            );
-            $serializer                                 = $this->getSerializer();
-            $object                                     = $serializer->deserialize(SerializerExampleVariadicAsClass::class, $input);
-            $this->assertEquals([
-                [new SerializerExampleTypeInt($i1), new SerializerExampleTypeInt($i2)]
-            ],[
-                $object->int
-            ]);
-        }
+    function testVariadicAsBuiltIn() {
+        $input                                      = json_encode(
+      [
+                'int' => [$i1 = 1,$i2 = 2]
+            ]
+        );
+        $serializer                                 = $this->getSerializer();
+        $object                                     = $serializer->deserialize(SerializerExampleVariadicBuiltIn::class, $input);
+        $this->assertEquals([
+            [$i1,$i2]
+        ],[
+            $object->int
+        ]);
+    }
 
-        function testVariadicViaParam() {
-            $input                                      = json_encode(
-                [
-                    'int' => [$i1 = 1,$i2 = 2]
-                ]
-            );
-            $serializer                                 = $this->getSerializer();
-            $object                                     = $serializer->deserialize(SerializerExampleVariadicViaParam::class, $input);
-            $this->assertEquals([
-                [new SerializerExampleTypeInt($i1), new SerializerExampleTypeInt($i2)]
-            ],[
-                $object->int
-            ]);
-        }
+    function testVariadicAsClass() {
+        $input                                      = json_encode(
+            [
+                'int' => [$i1 = 1,$i2 = 2]
+            ]
+        );
+        $serializer                                 = $this->getSerializer();
+        $object                                     = $serializer->deserialize(SerializerExampleVariadicAsClass::class, $input);
+        $this->assertEquals([
+            [new SerializerExampleTypeInt($i1), new SerializerExampleTypeInt($i2)]
+        ],[
+            $object->int
+        ]);
+    }
 
-        function testBuiltInSpecials() {
-            $serializer                                 = $this->getSerializer();
-            $objectDate                                 = $serializer->deserialize(SerializerExampleTypeDateTime::class, json_encode(
-                ["date" => $date = "31.01.2021"]));
-            $this->assertEquals($date, $objectDate->date->format("d.m.Y"));
-        }
+    function testVariadicViaParam() {
+        $input                                      = json_encode(
+            [
+                'int' => [$i1 = 1,$i2 = 2]
+            ]
+        );
+        $serializer                                 = $this->getSerializer();
+        $object                                     = $serializer->deserialize(SerializerExampleVariadicViaParam::class, $input);
+        $this->assertEquals([
+            [new SerializerExampleTypeInt($i1), new SerializerExampleTypeInt($i2)]
+        ],[
+            $object->int
+        ]);
+    }
 
-        function testValidTypeSwitch() {
-            $serializer                                 = $this->getSerializer();
-            $objectStringInt                            = $serializer->deserialize(SerializerExampleTypeString::class, json_encode(
-                ["string" => $valueInt = 1]));
-            $objectStringFloat                          = $serializer->deserialize(SerializerExampleTypeString::class, json_encode(
-                ["string" => $valueFloat = 1.1]));
-            $objectIntFloat                             = $serializer->deserialize(SerializerExampleTypeFloat::class, json_encode(
-                ["float" => $valueInt]));
-            $this->assertEquals([
-                (string)$valueInt,
-                (string)$valueFloat,
-                $valueInt
-            ], [
-                $objectStringInt->string,
-                $objectStringFloat->string,
-                $objectIntFloat->float,
-            ]);
-        }
-    */
+    function testBuiltInSpecials() {
+        $serializer                                 = $this->getSerializer();
+        $objectDate                                 = $serializer->deserialize(SerializerExampleTypeDateTime::class, json_encode(
+            ["date" => $date = "31.01.2021"]));
+        $this->assertEquals($date, $objectDate->date->format("d.m.Y"));
+    }
+
+    function testValidTypeSwitch() {
+        $serializer                                 = $this->getSerializer();
+        $objectStringInt                            = $serializer->deserialize(SerializerExampleTypeString::class, json_encode(
+            ["string" => $valueInt = 1]));
+        $objectStringFloat                          = $serializer->deserialize(SerializerExampleTypeString::class, json_encode(
+            ["string" => $valueFloat = 1.1]));
+        $objectIntFloat                             = $serializer->deserialize(SerializerExampleTypeFloat::class, json_encode(
+            ["float" => $valueInt]));
+        $this->assertEquals([
+            (string)$valueInt,
+            (string)$valueFloat,
+            $valueInt
+        ], [
+            $objectStringInt->string,
+            $objectStringFloat->string,
+            $objectIntFloat->float,
+        ]);
+    }
 }

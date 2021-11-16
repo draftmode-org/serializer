@@ -1,13 +1,23 @@
 <?php
 namespace Terrazza\Component\Serializer;
 
+use InvalidArgumentException;
+use ReflectionException;
+
 interface SerializerInterface {
     /**
-     * Deserializes data into the given type.
      * @param class-string<T>|object $className
-     * @template T of object
      * @param mixed $input
-     * @return mixed
+     * @return T
+     * @template T
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     public function deserialize($className, $input);
+
+    /**
+     * @param int $allowedAccess
+     * @return SerializerInterface
+     */
+    public function withAllowedAccess(int $allowedAccess) : SerializerInterface;
 }

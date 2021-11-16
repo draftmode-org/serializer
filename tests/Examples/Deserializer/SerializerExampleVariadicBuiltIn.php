@@ -8,4 +8,14 @@ class SerializerExampleVariadicBuiltIn {
     public function __construct(int ...$int) {
         $this->int = $int;
     }
+
+    /**
+     * @param array|int[] $int
+     */
+    public function setInt(array $int): void
+    {
+        $this->int = $int;
+    }
+
+
 }

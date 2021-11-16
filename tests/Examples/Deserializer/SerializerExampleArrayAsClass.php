@@ -11,4 +11,12 @@ class SerializerExampleArrayAsClass {
     public function __construct(array $array) {
         $this->array = $array;
     }
+
+    /**
+     * @param SerializerExampleTypeInt[] $array
+     */
+    public function setArray(array $array): void
+    {
+        $this->array = $array;
+    }
 }

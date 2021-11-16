@@ -7,4 +7,12 @@ class SerializerExampleTypeDateTime {
     public function __construct(DateTime $date) {
         $this->date = $date;
     }
+
+    /**
+     * @param DateTime $date
+     */
+    public function setDate(DateTime $date): void
+    {
+        $this->date = $date;
+    }
 }

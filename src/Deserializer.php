@@ -17,14 +17,15 @@ class Deserializer implements DeserializerInterface {
     }
 
     /**
-     * @param object|string $instance
+     * @param class-string<T>|object $className
      * @param mixed $input
-     * @return object
+     * @return T
+     * @template T
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */
-    public function deserialize($instance, $input) : object {
+    public function deserialize($className, $input) : object {
         $data                                       = $this->decoder->decode($input);
-        return $this->denormalizer->denormalize($instance, $data);
+        return $this->denormalizer->denormalize($className, $data);
     }
 }

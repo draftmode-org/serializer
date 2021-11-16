@@ -6,10 +6,11 @@ use Closure;
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
-use ReflectionProperty;
+use ReflectionMethod;
+use ReflectionParameter;
 use Terrazza\Component\Serializer\DenormalizerInterface;
 
-class ArrayDataDenormalizer implements DenormalizerInterface {
+class ArrayDenormalizer implements DenormalizerInterface {
     use DenormalizerTrait;
     private AnnotationFactoryInterface $annotationFactory;
     CONST ACCESS_PROTECTED                          = 1;
@@ -24,27 +25,33 @@ class ArrayDataDenormalizer implements DenormalizerInterface {
         $denormalizer->allowedAccess                = $allowedAccess;
         return $denormalizer;
     }
+
     /**
-     * @param object|string $class
+     * @param class-string<T>|object $className
      * @param mixed $input
-     * @return object
-     * @throws InvalidArgumentException
+     * @return T
+     * @template T
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
-    public function denormalize($class, $input) : object {
-        $reflect                                    = new ReflectionClass($class);
-        if (is_object($class)) {
-            $object                                 = clone $class;
-        } elseif (is_string($class)) {
-            if (class_exists($class)) {
-                $object                             = $reflect->newInstanceWithoutConstructor();
-            } else {
-                throw new InvalidArgumentException("class $class does not exists");
+    public function denormalize($className, $input) : object {
+        if (is_object($className)) {
+            $object                                 = clone $className;
+        } elseif (is_string($className)) {
+            if (!class_exists($className)) {
+                throw new InvalidArgumentException("class $className does not exists/malformed");
             }
         } else {
-            throw new InvalidArgumentException("$class has to be an object or valid className, given ".gettype($class));
+            throw new InvalidArgumentException("class $className does not exists/malformed");
         }
-        if (is_array($input)) {
+        $reflect                                    = new ReflectionClass($className);
+        if (is_string($className)) {
+            $object                                 = $reflect->newInstanceWithoutConstructor();
+        }
+        if ($this->isBuiltIn(gettype($input))) {
+            $object                                 = $this->initializeBuiltIn($object, $input);
+        }
+        elseif (is_array($input)) {
             foreach ($input as $inputKey => $inputValue) {
                 $this->pushTraceKey($inputKey);
                 if ($setter = $this->getSetterCallback($reflect, $inputKey)) {
@@ -55,6 +62,22 @@ class ArrayDataDenormalizer implements DenormalizerInterface {
         }
         $this->isInitialized($object);
         return $object;
+    }
+
+    /**
+     * @param object $object
+     * @param mixed $input
+     * @return object
+     * @throws ReflectionException
+     */
+    private function initializeBuiltIn(object $object, $input) : object {
+        $reflect                                    = new ReflectionClass($object);
+        if ($constructor = $reflect->getConstructor()) {
+            $values                                 = $this->getValuesForMethod($constructor, $input);
+            return $reflect->newInstance(...$values);
+        } else {
+            throw new InvalidArgumentException($reflect->getName()." cannot be initialized, missing __constructor");
+        }
     }
 
     /**
@@ -78,27 +101,42 @@ class ArrayDataDenormalizer implements DenormalizerInterface {
         $setMethod                                  = "set".ucfirst($propName);
         if ($reflect->hasMethod($setMethod)) {
             $method                                 = $reflect->getMethod($setMethod);
-            $this->isAllowed($reflect->getName()."->$setMethod()",$method->isPublic(),$method->isProtected(),$method->isPrivate());
+            $this->isAllowed($setMethod."() for ".$reflect->getName(),$method->isPublic(),$method->isProtected(),$method->isPrivate());
             $method->setAccessible(true);
-            return function ($object, $value) use ($method) {
-                $method->invoke($object, $value);
-            };
-        }
-        if ($reflect->hasProperty($propName)) {
-            $prop                                   = $reflect->getProperty($propName);
-            $this->isAllowed($reflect->getName()."\\$propName",$prop->isPublic(),$prop->isProtected(),$prop->isPrivate());
-            $prop->setAccessible(true);
-            return function ($object, $inputValue) use ($prop) {
-                $value                              = $this->getValue($this->getPropertyTypeByAnnotation($prop), $inputValue);
-                $prop->setValue($object, $value);
+            return function ($object, $inputValue) use ($method) {
+                $values                             = $this->getValuesForMethod($method, $inputValue);
+                $method->invoke($object, ...$values);
             };
         }
         return null;
     }
 
     /**
+     * @param ReflectionMethod $method
+     * @param mixed $inputValue
+     * @return array
      * @throws ReflectionException
+     * @throws InvalidArgumentException
+     */
+    private function getValuesForMethod(ReflectionMethod $method, $inputValue) : array {
+        $parameters                                 = $method->getParameters();
+        $this->isAllowed($method->getName(). "() for ".$method->getDeclaringClass()->getName(),$method->isPublic(),$method->isProtected(),$method->isPrivate());
+        if (count($parameters) === 1) {
+            $parameter                              = array_shift($parameters);
+            $value                                  = $this->getValue(
+                $this->getParameterTypeByAnnotation($method, $parameter),
+                $inputValue);
+            $values                                 = [$value];
+        } else {
+            throw new InvalidArgumentException("count of parameters for method ".$method->getName()." has to be 1, given ".count($parameters));
+        }
+        return $values;
+    }
+
+    /**
      * @return mixed
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     private function getValue(string $propertyType, $inputValue) {
         if ($this->isBuiltIn($propertyType)) {
@@ -128,11 +166,12 @@ class ArrayDataDenormalizer implements DenormalizerInterface {
     }
 
     /**
-     * @param ReflectionProperty $property
+     * @param ReflectionMethod $method
+     * @param ReflectionParameter $property
      * @return string|null
      */
-    private function getPropertyTypeByAnnotation(ReflectionProperty $property) :?string {
-        if ($annotationType = $this->annotationFactory->getPropertyTypeByAnnotation($property)) {
+    private function getParameterTypeByAnnotation(ReflectionMethod $method, ReflectionParameter $property) :?string {
+        if ($annotationType = $this->annotationFactory->getParameterTypeByAnnotation($method, $property->getName())) {
             if ($this->isBuiltIn($annotationType)) {
                 return $annotationType;
             } elseif ($annotationTypeClass = $this->annotationFactory->getClassName($property->getDeclaringClass()->getName(), $annotationType)) {

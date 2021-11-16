@@ -6,4 +6,12 @@ class SerializerExampleTypeFloat {
     public function __construct(float $float) {
         $this->float = $float;
     }
+
+    /**
+     * @param float $float
+     */
+    public function setFloat(float $float): void
+    {
+        $this->float = $float;
+    }
 }

@@ -8,4 +8,12 @@ class SerializerExampleArray {
     public function __construct(array $array) {
         $this->array = $array;
     }
+
+    /**
+     * @param array $array
+     */
+    public function setArray(array $array): void
+    {
+        $this->array = $array;
+    }
 }

@@ -7,11 +7,12 @@ use ReflectionException;
 
 interface DenormalizerInterface {
     /**
-     * @param object|string $class
+     * @param class-string<T>|object $className
      * @param mixed $input
-     * @return object
-     * @throws InvalidArgumentException
+     * @return T
+     * @template T
      * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
-    public function denormalize($class, $input) : object;
+    public function denormalize($className, $input) : object;
 }

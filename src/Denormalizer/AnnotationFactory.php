@@ -1,9 +1,7 @@
 <?php
 namespace Terrazza\Component\Serializer\Denormalizer;
 use InvalidArgumentException;
-use ReflectionClass;
 use ReflectionMethod;
-use ReflectionProperty;
 use Terrazza\Component\ReflectionClass\ClassNameInterface;
 
 class AnnotationFactory implements AnnotationFactoryInterface {
@@ -35,17 +33,6 @@ class AnnotationFactory implements AnnotationFactoryInterface {
      */
     public function getClassName(string $parentClass, string $findClass) :?string {
         return $this->reflectionClassName->getClassName($parentClass, $findClass);
-    }
-
-    /**
-     * @param ReflectionProperty $property
-     * @return string|null
-     */
-    public function getPropertyTypeByAnnotation(ReflectionProperty $property) :?string {
-        if (preg_match('/@var\s+([^\s]+)/', $property->getDocComment(), $matches)) {
-            return $this->extractTypeFromAnnotation($matches[1]);
-        }
-        return null;
     }
 
     /**

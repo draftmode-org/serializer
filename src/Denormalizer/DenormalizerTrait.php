@@ -44,19 +44,10 @@ trait DenormalizerTrait {
      * @param bool $private
      */
     private function isAllowed(string $methodOrProperty, bool $public, bool $protected, bool $private) : void {
-        if ($public) {
-            return;
-        }
-        if ($protected) {
-            if ($this->allowedAccess >= 1) {
-                return;
-            }
+        if ($protected && $this->allowedAccess < 1) {
             throw new InvalidArgumentException($methodOrProperty." cannot be accessed, is protected");
         }
-        if ($private) {
-            if ($this->allowedAccess >= 2) {
-                return;
-            }
+        if ($private && $this->allowedAccess < 2) {
             throw new InvalidArgumentException($methodOrProperty." cannot be accessed, is private");
         }
     }
