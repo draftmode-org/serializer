@@ -3,16 +3,16 @@ namespace Terrazza\Component\Serializer\Tests\Examples\Deserializer;
 
 class SerializerExampleSimple {
     public int $number;
-    public ?int $number2=null;
     public float $float;
     public string $string;
     public array $array;
     public int $dInt=2;
+    public ?int $number2=null;
 
     /**
      * @param int $number
      */
-    public function __construct($number, ?int $number2, float $float, string $string, array $array, int $dInt=2) {
+    public function __construct($number, float $float, string $string, array $array, int $number2=null, int $dInt=2) {
         $this->number = $number;
         $this->number2 = $number2;
         $this->float = $float;

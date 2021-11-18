@@ -1,6 +1,11 @@
 <?php
 namespace Terrazza\Component\Serializer\Tests\Factory\JsonSerializer;
 use PHPUnit\Framework\TestCase;
+use Terrazza\Component\Logger\Formatter\LineFormatter;
+use Terrazza\Component\Logger\Handler\NoHandler;
+use Terrazza\Component\Logger\Handler\StreamHandler;
+use Terrazza\Component\Logger\Log;
+use Terrazza\Component\Logger\LogInterface;
 use Terrazza\Component\Serializer\Factory\Json\JsonArraySerializer;
 use Terrazza\Component\Serializer\SerializerInterface;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleArray;
@@ -16,8 +21,24 @@ use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleV
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleVariadicViaParam;
 
 class JsonArrayDeserializerTest extends TestCase {
-    private function getSerializer() : SerializerInterface {
-        return new JsonArraySerializer();
+
+    protected function getLogger(?bool $log=null) : LogInterface {
+        $handler = $log ?
+            new StreamHandler(
+                $logLevel ?? Log::DEBUG,
+                new LineFormatter(),
+                "php://stdout"
+            ) : new NoHandler();
+        if ($log) {
+            file_put_contents("php://stdout", PHP_EOL);
+        }
+        return new Log("Serializer", $handler);
+    }
+
+    private function getSerializer(int $logLevel=null) : SerializerInterface {
+        return new JsonArraySerializer(
+            $this->getLogger($logLevel)
+        );
     }
 
     function testSimple() {
@@ -32,7 +53,8 @@ class JsonArrayDeserializerTest extends TestCase {
         $serializer                                 = $this->getSerializer();
         $object                                     = $serializer->deserialize(SerializerExampleSimple::class, $input);
         $objectUpdate                               = $serializer->deserialize($object, json_encode([
-            "number" => $numberUpdate = 3
+            "number" => $numberUpdate = 3,
+            "float" => $floatUpdate = 3.1,
         ]));
         $this->assertEquals([
             $number,
@@ -41,7 +63,8 @@ class JsonArrayDeserializerTest extends TestCase {
             $array,
             2,
 
-            $numberUpdate
+            $numberUpdate,
+            $floatUpdate,
         ],[
             $object->number,
             $object->float,
@@ -49,7 +72,8 @@ class JsonArrayDeserializerTest extends TestCase {
             $object->array,
             $object->dInt,
 
-            $objectUpdate->number
+            $objectUpdate->number,
+            $objectUpdate->float,
         ]);
     }
 
@@ -105,10 +129,17 @@ class JsonArrayDeserializerTest extends TestCase {
         );
         $serializer                                 = $this->getSerializer();
         $object                                     = $serializer->deserialize(SerializerExampleArrayAsClass::class, $input);
+        $objectUpdate                               = $serializer->deserialize($object, json_encode(
+            [
+                'array' => [$i3 = 3]
+            ]
+        ));
         $this->assertEquals([
-            [new SerializerExampleTypeInt($i1), new SerializerExampleTypeInt($i2)]
+            [new SerializerExampleTypeInt($i1), new SerializerExampleTypeInt($i2)],
+            [new SerializerExampleTypeInt($i3)]
         ],[
-            $object->array
+            $object->array,
+            $objectUpdate->array,
         ]);
     }
 
@@ -120,25 +151,39 @@ class JsonArrayDeserializerTest extends TestCase {
         );
         $serializer                                 = $this->getSerializer();
         $object                                     = $serializer->deserialize(SerializerExampleVariadicBuiltIn::class, $input);
+        $objectUpdate                               = $serializer->deserialize($object, json_encode(
+            [
+                'int' => [$i3 = 3]
+            ]
+        ));
         $this->assertEquals([
-            [$i1,$i2]
+            [$i1,$i2],
+            [$i3],
         ],[
-            $object->int
+            $object->int,
+            $objectUpdate->int,
         ]);
     }
 
     function testVariadicAsClass() {
         $input                                      = json_encode(
             [
-                'int' => [$i1 = 1,$i2 = 2]
+                'int' => [$i1 = 1, $i2 = 2]
             ]
         );
         $serializer                                 = $this->getSerializer();
         $object                                     = $serializer->deserialize(SerializerExampleVariadicAsClass::class, $input);
+        $objectUpdate                               = $serializer->deserialize($object, json_encode(
+            [
+                'int' => [$i3 = 3]
+            ]
+        ));
         $this->assertEquals([
-            [new SerializerExampleTypeInt($i1), new SerializerExampleTypeInt($i2)]
+            [new SerializerExampleTypeInt($i1), new SerializerExampleTypeInt($i2)],
+            [new SerializerExampleTypeInt($i3)],
         ],[
-            $object->int
+            $object->int,
+            $objectUpdate->int,
         ]);
     }
 
@@ -150,10 +195,17 @@ class JsonArrayDeserializerTest extends TestCase {
         );
         $serializer                                 = $this->getSerializer();
         $object                                     = $serializer->deserialize(SerializerExampleVariadicViaParam::class, $input);
+        $objectUpdate                               = $serializer->deserialize($object, json_encode(
+            [
+                'int' => [$i3 = 3]
+            ]
+        ));
         $this->assertEquals([
-            [new SerializerExampleTypeInt($i1), new SerializerExampleTypeInt($i2)]
+            [new SerializerExampleTypeInt($i1), new SerializerExampleTypeInt($i2)],
+            [new SerializerExampleTypeInt($i3)]
         ],[
-            $object->int
+            $object->int,
+            $objectUpdate->int,
         ]);
     }
 

@@ -5,6 +5,9 @@ class SerializerExampleVariadicBuiltIn {
     /** @var array|int[]  */
     public array $int;
 
+    /**
+     * @param int ...$int
+     */
     public function __construct(int ...$int) {
         $this->int = $int;
     }

@@ -16,6 +16,7 @@
     "require": {
         "php": ">=7.4",
         "terrazza/reflectionclass": "*",
+        "terrazza/logger": "*",
         "ext-json": "*"
     },
     "require-dev" : {
@@ -28,8 +29,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Terrazza\\Component\\Serializer\\Tests\\Examples\\" : "tests\\Examples",
-            "Terrazza\\Component\\ReflectionClass\\" : "..\\ReflectionClass\\src"
+            "Terrazza\\Component\\Serializer\\Tests\\Examples\\" : "tests\\Examples"
         }
     },
     "minimum-stability": "dev"

@@ -4,6 +4,7 @@ namespace Terrazza\Component\Serializer\Factory\Json;
 
 use InvalidArgumentException;
 use ReflectionException;
+use Terrazza\Component\Logger\LogInterface;
 use Terrazza\Component\ReflectionClass\ClassName;
 use Terrazza\Component\Serializer\Decoder\JsonDecoder;
 use Terrazza\Component\Serializer\DecoderInterface;
@@ -17,9 +18,10 @@ class JsonArraySerializer implements SerializerInterface {
     private DecoderInterface $decoder;
     private DenormalizerInterface $denormalizer;
 
-    public function __construct() {
+    public function __construct(LogInterface $logger) {
         $this->decoder                              = new JsonDecoder();
         $this->denormalizer                         = new ArrayDenormalizer(
+            $logger,
             new AnnotationFactory(
                 new ClassName()
             )

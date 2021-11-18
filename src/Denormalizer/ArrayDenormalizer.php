@@ -8,15 +8,18 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
+use Terrazza\Component\Logger\LogInterface;
 use Terrazza\Component\Serializer\DenormalizerInterface;
 
 class ArrayDenormalizer implements DenormalizerInterface {
     use DenormalizerTrait;
+    private LogInterface $logger;
     private AnnotationFactoryInterface $annotationFactory;
     CONST ACCESS_PROTECTED                          = 1;
     CONST ACCESS_PRIVATE                            = 2;
     private int $allowedAccess                      = 0;
-    public function __construct(AnnotationFactoryInterface $annotationFactory) {
+    public function __construct(LogInterface $logger, AnnotationFactoryInterface $annotationFactory) {
+        $this->logger                               = $logger;
         $this->annotationFactory                    = $annotationFactory;
     }
 
@@ -35,49 +38,41 @@ class ArrayDenormalizer implements DenormalizerInterface {
      * @throws InvalidArgumentException
      */
     public function denormalize($className, $input) : object {
+        $logger = $this->logger->withMethod(__METHOD__);
+        $logger->debug("class ".basename(is_object($className) ? get_class($className) : $className));
+//var_dump("call denormalize", $input);
         if (is_object($className)) {
+            $logger->debug("update class", ["arguments" => $input]);
             $object                                 = clone $className;
         } elseif (is_string($className)) {
             if (!class_exists($className)) {
                 throw new InvalidArgumentException("class $className does not exists/malformed");
             }
+            $logger->debug("create class", ["arguments" => $input]);
+            //
+            // initialize object via constructor
+            // ...if input is an array
+            //    remove found and used parameterKeys
+            //
+            $object                                 = $this->createObject($className, $input);
         } else {
             throw new InvalidArgumentException("class $className does not exists/malformed");
         }
-        $reflect                                    = new ReflectionClass($className);
-        if (is_string($className)) {
-            $object                                 = $reflect->newInstanceWithoutConstructor();
-        }
-        if ($this->isBuiltIn(gettype($input))) {
-            $object                                 = $this->initializeBuiltIn($object, $input);
-        }
-        elseif (is_array($input)) {
+        $this->updateObject($object, $input);
+        /*if (is_array($input)) {
+            $reflect                                = new ReflectionClass($className);
             foreach ($input as $inputKey => $inputValue) {
+                var_dump("run for inputKey:$inputKey");
+                var_dump($inputValue);
                 $this->pushTraceKey($inputKey);
                 if ($setter = $this->getSetterCallback($reflect, $inputKey)) {
                     $setter($object, $inputValue);
                 }
                 $this->popTraceKey();
             }
-        }
+        }*/
         $this->isInitialized($object);
         return $object;
-    }
-
-    /**
-     * @param object $object
-     * @param mixed $input
-     * @return object
-     * @throws ReflectionException
-     */
-    private function initializeBuiltIn(object $object, $input) : object {
-        $reflect                                    = new ReflectionClass($object);
-        if ($constructor = $reflect->getConstructor()) {
-            $values                                 = $this->getValuesForMethod($constructor, $input);
-            return $reflect->newInstance(...$values);
-        } else {
-            throw new InvalidArgumentException($reflect->getName()." cannot be initialized, missing __constructor");
-        }
     }
 
     /**
@@ -93,43 +88,144 @@ class ArrayDenormalizer implements DenormalizerInterface {
     }
 
     /**
-     * @param ReflectionClass $reflect
-     * @param string $propName
-     * @return Closure|null
+     * @param class-string<T>
+     * @param mixed $input
+     * @return T
+     * @template T
+     * @return object
+     * @throws ReflectionException
      */
-    private function getSetterCallback(ReflectionClass $reflect, string $propName) :?Closure {
-        $setMethod                                  = "set".ucfirst($propName);
-        if ($reflect->hasMethod($setMethod)) {
-            $method                                 = $reflect->getMethod($setMethod);
-            $this->isAllowed($setMethod."() for ".$reflect->getName(),$method->isPublic(),$method->isProtected(),$method->isPrivate());
-            $method->setAccessible(true);
-            return function ($object, $inputValue) use ($method) {
-                $values                             = $this->getValuesForMethod($method, $inputValue);
-                $method->invoke($object, ...$values);
-            };
+    private function createObject($className, &$input) : object {
+        $reflect                                    = new ReflectionClass($className);
+        if ($constructor = $reflect->getConstructor()) {
+            if ($constructor->isPublic()) {
+                $values                             = $this->getValuesForConstructor($constructor, $input);
+                return $reflect->newInstance(...$values);
+            }
         }
-        return null;
+        $reflect                                    = new ReflectionClass($className);
+        return $reflect->newInstanceWithoutConstructor();
+    }
+
+    /**
+     * @param object $object
+     * @param mixed $input
+     * @throws ReflectionException
+     */
+    private function updateObject(object $object, $input) : void {
+        $reflect                                    = new ReflectionClass($object);
+        if (is_array($input)) {
+            foreach ($input as $inputKey => $inputValue) {
+                if (is_string($inputKey)) {
+                    $this->pushTraceKey($inputKey);
+                    $setMethod                      = "set".ucfirst($inputKey);
+                    if ($reflect->hasMethod($setMethod)) {
+                        $method                     = $reflect->getMethod($setMethod);
+                        $this->isAllowed($setMethod."() for ".$reflect->getName(),$method->isPublic(),$method->isProtected(),$method->isPrivate());
+                        $method->setAccessible(true);
+//var_dump("**** update", $inputValue);
+                        $values                     = $this->getValueForMethod($method, $inputValue);
+//var_dump("....response", $values);
+                        if (is_array($values)) {
+                            $method->invoke($object, ...$values);
+                        } else {
+                            $method->invoke($object, $values);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
      * @param ReflectionMethod $method
-     * @param mixed $inputValue
+     * @param mixed $input
+     * @return mixed
+     */
+    private function getValueForMethod(ReflectionMethod $method, $input) {
+        $parameters                                 = $method->getParameters();
+        if (count($parameters) === 1) {
+            $parameter                              = array_shift($parameters);
+            $parameterType                          = $this->getParameterTypeByAnnotation($method, $parameter);
+            $value                                  = $this->getValue($parameterType, $input);
+            if ($parameter->isArray()) {
+                return [$value];
+            }
+            return $value;
+        } else {
+            throw new InvalidArgumentException("multiple arguments for ".$method->getName()."() not implemented");
+        }
+    }
+
+    /**
+     * @param ReflectionMethod $method
+     * @param mixed $input
      * @return array
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */
-    private function getValuesForMethod(ReflectionMethod $method, $inputValue) : array {
+    private function getValuesForConstructor(ReflectionMethod $method, &$input) : array {
         $parameters                                 = $method->getParameters();
-        $this->isAllowed($method->getName(). "() for ".$method->getDeclaringClass()->getName(),$method->isPublic(),$method->isProtected(),$method->isPrivate());
-        if (count($parameters) === 1) {
-            $parameter                              = array_shift($parameters);
-            $value                                  = $this->getValue(
-                $this->getParameterTypeByAnnotation($method, $parameter),
-                $inputValue);
-            $values                                 = [$value];
-        } else {
-            throw new InvalidArgumentException("count of parameters for method ".$method->getName()." has to be 1, given ".count($parameters));
+        $values                                     = [];
+        if (is_array($input)) {
+            foreach ($parameters as $parameter) {
+                $parameterName                      = $parameter->getName();
+                $this->pushTraceKey($parameterName);
+                $parameterType                      = $this->getParameterTypeByAnnotation($method, $parameter);
+//var_dump($parameterName, $parameterType, $input);
+                if (array_key_exists($parameterName, $input)) {
+                    $inputValue                     = $input[$parameterName];
+                    unset($input[$parameterName]);
+                    $value                          = $this->getValue($parameterType, $inputValue);
+//var_dump($value);
+                    if ($parameter->isVariadic()) {
+                        $values                     += $value;
+                    } else {
+                        $values[]                   = $value;
+                    }
+                    /*
+                    if ($this->isBuiltIn($parameterType)) {
+                        var_dump($inputValue);
+                        if ($this->isBuiltIn(gettype($inputValue))) {
+                            var_dump("case *******************".__LINE__);
+                            $values[]               = $inputValue;
+                        }
+                        elseif (is_array($inputValue)) {
+                            var_dump("case *******************".__LINE__);
+                            var_dump($this->getValue($parameterType, $inputValue));
+                            $parameterValue         = [];
+                            foreach ($inputValue as $subInputValue) {
+                                $parameterValue[]   = $this->getValue($parameterType, $subInputValue);
+                            }
+                            var_dump($parameterValue);
+                            if ($parameter->isVariadic()) {
+                                $values             += $parameterValue;
+                            } else {
+                                $values[]           = $parameterValue;
+                            }
+                        } else {
+                            var_dump("case *******************".__LINE__);
+                            throw new InvalidArgumentException("parameterType isBuiltIn, inputValue (!builtIn, !array)");
+                        }
+                    } elseif ($parameterType === "array") {
+                        $values[]                   = $this->getValue($parameterType, $inputValue);
+                    } else {
+                        throw new InvalidArgumentException("not builtIn, not array");
+                    }*/
+                } else {
+                    if ($parameter->isOptional() && $parameter->isDefaultValueAvailable()) {
+                        $values[]                   = $parameter->getDefaultValue();
+                    } else {
+                        throw new InvalidArgumentException("not implemented...");
+                    }
+                }
+                $this->popTraceKey();
+            }
+        } elseif ($this->isBuiltIn(gettype($input))) {
+            $values[]                               = $input;
+            //throw new InvalidArgumentException("input is not an array, but builtIn...");
         }
+//var_dump($values);
         return $values;
     }
 
