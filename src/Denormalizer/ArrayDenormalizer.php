@@ -158,48 +158,101 @@ class ArrayDenormalizer implements DenormalizerInterface {
         $parameters 								= $method->getParameters();
         if ($method->isPublic()) {
             foreach ($parameters as $parameter) {
+                $methodParameter                    = null;
                 $aParameter                         = $this->annotationFactory->getAnnotationParameter($method, $parameter);
+                $logger->debug("input, aParameter",
+                    [
+                        "line"                      => __LINE__,
+                        "name"                      => $aParameter->getName(),
+                        "isArray"                   => $aParameter->isArray(),
+                        "isVariadic"                => $aParameter->isVariadic(),
+                        "isBuiltIn"                 => $aParameter->isBuiltIn(),
+                        "type"                      => $aParameter->getType(),
+                        "inputIsArray"              => is_array($input),
+                        "input"                     => $input,
+                    ]
+                );
                 if (is_array($input)) {
-                    $logger->debug("input is array");
+                    $logger->debug("input is an array",
+                        ["line" => __LINE__]);
                     if (array_key_exists($aParameter->getName(), $input)) {
-                        $logger->debug("key ".$aParameter->getName()." exists");
                         $inputValue                 = $input[$aParameter->getName()];
                         unset($input[$aParameter->getName()]);
-                    } else {
-                        $logger->debug("key ".$aParameter->getName()." does not exists");
+                        $methodParameter            = $aParameter;
+                        $logger->debug("key ".$aParameter->getName()." exists, new input",
+                            ["line" => __LINE__, "input" => $inputValue]);
+                    } elseif ($aParameter->isVariadic()) {
+                        $inputValue                 = $input;
+                        $methodParameter            = $aParameter;
+                        $logger->debug("key ".$aParameter->getName()." does not exists, parameter isVariadic",
+                            ["line" => __LINE__, "input" => $inputValue]);
                     }
                 } elseif ($aParameter->isBuiltIn()) {
                     $inputValue                     = $input;
+                    $methodParameter                = $aParameter;
+                    $logger->debug("input is not an array, parameter isBuiltIn",
+                        ["line" => __LINE__, "input" => $inputValue]);
                 }
-                if ($aParameter->isBuiltIn()) {
-                    $logger->debug("pushTraceKey ".$aParameter->getName(), ["line" => __LINE__]);
-                    $logger->debug("traceKey:".$this->getTraceKeys(), ["line" => __LINE__]);
-                    $this->pushTraceKey($aParameter->getName());
-                    $logger->debug("traceKey:".$this->getTraceKeys(), ["line" => __LINE__]);
-                    $methodValues[]                 = $this->getBuiltInValue($aParameter, $inputValue);
-                    $logger->debug("traceKey:".$this->getTraceKeys(), ["line" => __LINE__]);
+                if ($methodParameter) {
+                    $this->pushTraceKey($methodParameter->getName());
+                    if (is_array($inputValue)) {
+                        $logger->debug("input is an array",
+                            ["line" => __LINE__]);
+                        $arrMethodValues            = [];
+                        if ($methodParameter->isVariadic()) {
+                            $logger->debug("parameter variadic",
+                                ["line" => __LINE__]);
+                            foreach ($inputValue as $singleInputValue) {
+                                $arrMethodValues[]  = $this->getMethodValue($methodParameter, $singleInputValue);
+                            }
+                            $methodValues          += $arrMethodValues;
+                        } else {
+                            $logger->debug("parameter not variadic",
+                                ["line" => __LINE__]);
+                            $methodValues[]         = $this->getMethodValue($methodParameter, $inputValue);
+                        }
+                    } else {
+                        $logger->debug("input not an array",
+                            ["line" => __LINE__]);
+                        $methodValues[]             = $this->getMethodValue($methodParameter, $inputValue);
+                    }
                     $this->popTraceKey();
-                    $logger->debug("popTraceKey", ["line" => __LINE__]);
-                    $logger->debug("traceKey:".$this->getTraceKeys(), ["line" => __LINE__]);
-                } elseif ($parameterType = $aParameter->getType()) {
-                    $logger->debug("pushTraceKey ".$aParameter->getName(), ["line" => __LINE__]);
-                    $logger->debug("traceKey:".$this->getTraceKeys(), ["line" => __LINE__]);
-                    $this->pushTraceKey($aParameter->getName());
-                    $logger->debug("traceKey:".$this->getTraceKeys(), ["line" => __LINE__]);
-                    //try {
-                        $methodValues[]             = $this->denormalize($parameterType, $inputValue);
-                    //} catch (InvalidArgumentException $exception) {
-                    //    throw new InvalidArgumentException($this->getTraceKeys() . " " . $exception->getMessage());
-                    //}
-                    $logger->debug("traceKey:".$this->getTraceKeys(), ["line" => __LINE__]);
-                    $this->popTraceKey();
-                    $logger->debug("popTraceKey", ["line" => __LINE__]);
-                    $logger->debug("traceKey:".$this->getTraceKeys(), ["line" => __LINE__]);
+                } else {
+                    $logger->debug("no input for parameter found",
+                        ["line" => __LINE__]);
+                    if ($aParameter->isOptional()) {
+                        if ($aParameter->isDefaultValueAvailable()) {
+                            $methodValues[]         = $aParameter->getDefaultValue();
+                        } else {
+                            $methodValues[]         = null;
+                        }
+                    } else {
+                        throw new InvalidArgumentException($this->getTraceKeys() . " is required and missing");
+                    }
                 }
             }
             return $methodValues;
         } else {
             return null;
+        }
+    }
+
+    /**
+     * @param AnnotationParameter $parameter
+     * @param $inputValue
+     * @return mixed
+     * @throws ReflectionException
+     */
+    private function getMethodValue(AnnotationParameter $parameter, $inputValue) {
+        if (is_null($inputValue) && $parameter->isOptional()) {
+            return null;
+        }
+        if ($parameter->isBuiltIn()) {
+            return $this->getBuiltInValue($parameter, $inputValue);
+        } elseif ($parameterType = $parameter->getType()) {
+            return $this->denormalize($parameterType, $inputValue);
+        } else {
+            throw new InvalidArgumentException($this->getTraceKeys() . " could not be handled");
         }
     }
 

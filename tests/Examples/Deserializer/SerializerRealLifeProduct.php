@@ -7,6 +7,10 @@ class SerializerRealLifeProduct {
     private SerializerRealLifeUserUUID $user;
     private ?string $description=null;
     /**
+     * @var SerializerRealLifeProductLabel[]
+     */
+    private array $labels=[];
+    /**
      * @param SerializerRealLifeProductUUID $id
      */
     public function __construct(SerializerRealLifeProductUUID $id)
@@ -69,5 +73,21 @@ class SerializerRealLifeProduct {
     public function getDescription(): ?string
     {
         return $this->description;
+    }
+
+    /**
+     * @param SerializerRealLifeProductLabel[]|null $labels
+     */
+    public function setLabels(?SerializerRealLifeProductLabel ...$labels): void
+    {
+        $this->labels = $labels ?? [];
+    }
+
+    /**
+     * @return SerializerRealLifeProductLabel[]
+     */
+    public function getLabels(): array
+    {
+        return $this->labels;
     }
 }

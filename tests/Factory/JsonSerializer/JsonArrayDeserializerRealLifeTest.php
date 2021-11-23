@@ -13,6 +13,7 @@ use Terrazza\Component\Serializer\Factory\Json\JsonArraySerializer;
 use Terrazza\Component\Serializer\SerializerInterface;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProduct;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductAmount;
+use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductLabel;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductUUID;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeUserUUID;
 
@@ -43,6 +44,9 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
         $mProduct = new SerializerRealLifeProduct(
             new SerializerRealLifeProductUUID($id = "221"),
         );
+        $mProduct->setLabels(
+            new SerializerRealLifeProductLabel($mLabel1 = "mLabel1")
+        );
         $mProduct->setDescription($mDescription = "mDescription");
         $mProduct->setUser(
             new SerializerRealLifeUserUUID($mUser = 12)
@@ -55,15 +59,21 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
         //
         // create with serializer
         //
+        $sLabel1 = "sLabel1";
         $sProduct   = $serializer->deserialize(SerializerRealLifeProduct::class, json_encode([
             'id'            => $id,
             'user'          => $sUser = "sUser",
+            'labels'        => [
+                $sLabel1 = "sLabel1",
+                $sLabel2 = "sLabel2",
+            ],
             'description'   => $sDescription = "sDescription",
             'price' => [
                 'regular'   => $mPriceRegular,
                 'offer'     => $sPriceOffer = 12.0
             ]
         ]));
+        $serializer = $this->getSerializer();
         //
         // update with serializer
         //
@@ -85,12 +95,14 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             $mProduct->getPrice()->getOffer()->getValue(),
             $mProduct->getUser()->getValue(),
             $mProduct->getDescription(),
+            $mProduct->getLabels(),
 
             $sProduct->getId()->getValue(),
             $sProduct->getPrice()->getRegular()->getValue(),
             $sProduct->getPrice()->getOffer()->getValue(),
             $sProduct->getUser()->getValue(),
             $sProduct->getDescription(),
+            $sProduct->getLabels(),
 
             $uProduct->getId()->getValue(),
             $uProduct->getPrice()->getRegular()->getValue(),
@@ -105,12 +117,14 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             null,
             $mUser,
             $mDescription,
+            [new SerializerRealLifeProductLabel($mLabel1)],
 
             $id,
             $mPriceRegular,
             $sPriceOffer,
             $sUser,
             $sDescription,
+            [new SerializerRealLifeProductLabel($sLabel1), new SerializerRealLifeProductLabel($sLabel2)],
 
             $id,
             $mPriceRegular,
