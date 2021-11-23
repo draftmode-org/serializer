@@ -2,7 +2,7 @@
 namespace Terrazza\Component\Serializer\Tests\Factory\JsonSerializer;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Terrazza\Component\ReflectionClass\ClassName;
+use Terrazza\Component\ReflectionClass\ClassNameResolver;
 use Terrazza\Component\Serializer\Denormalizer\AnnotationFactory;
 use Terrazza\Component\Serializer\Denormalizer\ArrayDenormalizer;
 use Terrazza\Component\Serializer\Factory\Json\JsonArraySerializer;
@@ -33,7 +33,7 @@ class JsonArraySerializerExceptionTest extends TestCase {
     function testUnknownClass2() {
         $input                                      = json_encode([]);
         $serializer                                 = new ArrayDenormalizer(
-            new AnnotationFactory(new ClassName())
+            new AnnotationFactory(new ClassNameResolver())
         );
         $this->expectException(InvalidArgumentException::class);
         $serializer->denormalize(1, $input);

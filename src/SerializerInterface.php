@@ -14,10 +14,4 @@ interface SerializerInterface {
      * @throws InvalidArgumentException
      */
     public function deserialize($className, $input);
-
-    /**
-     * @param int $allowedAccess
-     * @return SerializerInterface
-     */
-    public function withAllowedAccess(int $allowedAccess) : SerializerInterface;
 }

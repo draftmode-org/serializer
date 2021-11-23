@@ -3,6 +3,7 @@
 namespace Terrazza\Component\Serializer\Tests\Factory\JsonSerializer;
 
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 use Terrazza\Component\Logger\Formatter\LineFormatter;
 use Terrazza\Component\Logger\Handler\NoHandler;
 use Terrazza\Component\Logger\Handler\StreamHandler;
@@ -10,6 +11,10 @@ use Terrazza\Component\Logger\Log;
 use Terrazza\Component\Logger\LogInterface;
 use Terrazza\Component\Serializer\Factory\Json\JsonArraySerializer;
 use Terrazza\Component\Serializer\SerializerInterface;
+use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProduct;
+use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductAmount;
+use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductUUID;
+use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeUserUUID;
 
 class JsonArrayDeserializerRealLifeTest extends TestCase {
     protected function getLogger(?bool $log=null) : LogInterface {
@@ -31,152 +36,89 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
         );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     function test() {
-        $product = new JsonArrayDeserializerRealLifeProduct(
-            new JsonArrayDeserializerRealLifeUUID($id = "221"),
+        $mProduct = new SerializerRealLifeProduct(
+            new SerializerRealLifeProductUUID($id = "221"),
         );
-        $update = clone $product;
-        $update->getPrice()->setRegular(
-            new JsonArrayDeserializerRealLifeAmount($updatePriceRegular = 13.12)
+        $mProduct->setDescription($mDescription = "mDescription");
+        $mProduct->setUser(
+            new SerializerRealLifeUserUUID($mUser = 12)
         );
-        //$product->setPrice(null);
+        $mProduct->getPrice()->setRegular(
+            new SerializerRealLifeProductAmount($mPriceRegular = 13.12)
+        );
+        //
+        $serializer = $this->getSerializer();
+        //
+        // create with serializer
+        //
+        $sProduct   = $serializer->deserialize(SerializerRealLifeProduct::class, json_encode([
+            'id'            => $id,
+            'user'          => $sUser = "sUser",
+            'description'   => $sDescription = "sDescription",
+            'price' => [
+                'regular'   => $mPriceRegular,
+                'offer'     => $sPriceOffer = 12.0
+            ]
+        ]));
+        //
+        // update with serializer
+        //
+        /** @var SerializerRealLifeProduct $uProduct */
+        $uProduct   = $serializer->deserialize($mProduct, json_encode([
+            'user'          => $uUser = "uUser",
+            'price' => [
+                'offer'     => $uPriceOffer = 12.1
+            ]
+        ]));
+        /** @var SerializerRealLifeProduct $u2Product */
+        $u2Product  = $serializer->deserialize($mProduct, json_encode([
+            'description'   => $u2Description = null
+        ]));
+
         $this->assertEquals([
-            $product->getId()->getValue(),
-            $product->getPrice()->getRegular()->getValue(),
-            $product->getPrice()->getOffer()->getValue(),
+            $mProduct->getId()->getValue(),
+            $mProduct->getPrice()->getRegular()->getValue(),
+            $mProduct->getPrice()->getOffer()->getValue(),
+            $mProduct->getUser()->getValue(),
+            $mProduct->getDescription(),
 
-            $update->getPrice()->getRegular()->getValue()
+            $sProduct->getId()->getValue(),
+            $sProduct->getPrice()->getRegular()->getValue(),
+            $sProduct->getPrice()->getOffer()->getValue(),
+            $sProduct->getUser()->getValue(),
+            $sProduct->getDescription(),
 
+            $uProduct->getId()->getValue(),
+            $uProduct->getPrice()->getRegular()->getValue(),
+            $uProduct->getPrice()->getOffer()->getValue(),
+            $uProduct->getUser()->getValue(),
+            $uProduct->getDescription(),
+
+            $u2Product->getDescription(),
         ],[
             $id,
-            $updatePriceRegular, //null,
+            $mPriceRegular,
             null,
+            $mUser,
+            $mDescription,
 
-            $updatePriceRegular
+            $id,
+            $mPriceRegular,
+            $sPriceOffer,
+            $sUser,
+            $sDescription,
+
+            $id,
+            $mPriceRegular,
+            $uPriceOffer,
+            $uUser,
+            $mDescription,
+
+            $u2Description
         ]);
     }
-}
-
-class JsonArrayDeserializerRealLifeProduct {
-    private JsonArrayDeserializerRealLifeUUID $id;
-    private JsonArrayDeserializerRealLifePrice $price;
-
-    /**
-     * @param JsonArrayDeserializerRealLifeUUID $id
-     */
-    public function __construct(JsonArrayDeserializerRealLifeUUID $id)
-    {
-        $this->id = $id;
-        $this->price = new JsonArrayDeserializerRealLifePrice;
-    }
-
-    /**
-     * @param JsonArrayDeserializerRealLifePrice|null $price
-     */
-    public function setPrice(?JsonArrayDeserializerRealLifePrice $price): void
-    {
-        $this->price = $price ?: new JsonArrayDeserializerRealLifePrice;
-    }
-
-    /**
-     * @return JsonArrayDeserializerRealLifeUUID
-     */
-    public function getId(): JsonArrayDeserializerRealLifeUUID
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return JsonArrayDeserializerRealLifePrice
-     */
-    public function getPrice(): JsonArrayDeserializerRealLifePrice
-    {
-        return $this->price;
-    }
-
-
-}
-class JsonArrayDeserializerRealLifeUUID {
-    private string $value;
-
-    /**
-     * @param string $value
-     */
-    public function __construct(string $value)
-    {
-        $this->value = $value;
-    }
-
-    /**
-     * @return string
-     */
-    public function getValue(): string
-    {
-        return $this->value;
-    }
-
-}
-class JsonArrayDeserializerRealLifeAmount {
-    private ?float $value;
-
-    /**
-     * @param float|null $value
-     */
-    public function __construct(float $value=null)
-    {
-        $this->value = $value;
-    }
-
-    /**
-     * @return float|null
-     */
-    public function getValue(): ?float
-    {
-        return $this->value;
-    }
-
-}
-class JsonArrayDeserializerRealLifePrice {
-    private ?JsonArrayDeserializerRealLifeAmount $regular;
-    private ?JsonArrayDeserializerRealLifeAmount $offer;
-
-    public function __construct() {
-        $this->regular = new JsonArrayDeserializerRealLifeAmount;
-        $this->offer = new JsonArrayDeserializerRealLifeAmount;
-    }
-
-    /**
-     * @return JsonArrayDeserializerRealLifeAmount|null
-     */
-    public function getRegular(): ?JsonArrayDeserializerRealLifeAmount
-    {
-        return $this->regular;
-    }
-
-    /**
-     * @param JsonArrayDeserializerRealLifeAmount|null $regular
-     * @return JsonArrayDeserializerRealLifePrice
-     */
-    public function setRegular(?JsonArrayDeserializerRealLifeAmount $regular): self {
-        $this->regular = $regular;
-        return $this;
-    }
-
-    /**
-     * @return JsonArrayDeserializerRealLifeAmount|null
-     */
-    public function getOffer(): ?JsonArrayDeserializerRealLifeAmount
-    {
-        return $this->offer;
-    }
-
-    /**
-     * @param JsonArrayDeserializerRealLifeAmount|null $offer
-     */
-    public function setOffer(?JsonArrayDeserializerRealLifeAmount $offer): void
-    {
-        $this->offer = $offer;
-    }
-
-
 }

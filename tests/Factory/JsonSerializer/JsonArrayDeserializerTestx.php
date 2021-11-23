@@ -20,7 +20,7 @@ use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleV
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleVariadicBuiltIn;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerExampleVariadicViaParam;
 
-class JsonArrayDeserializerTest extends TestCase {
+class JsonArrayDeserializerTestx extends TestCase {
 
     protected function getLogger(?bool $log=null) : LogInterface {
         $handler = $log ?

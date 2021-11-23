@@ -62,12 +62,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/terrazza/logger.git",
-                "reference": "0cf7f66ea05dc491155ff840736169b906c30739"
+                "reference": "5bba9b2de22810ac1b13e2db38e4c04127a702f9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/terrazza/logger/zipball/0cf7f66ea05dc491155ff840736169b906c30739",
-                "reference": "0cf7f66ea05dc491155ff840736169b906c30739",
+                "url": "https://api.github.com/repos/terrazza/logger/zipball/5bba9b2de22810ac1b13e2db38e4c04127a702f9",
+                "reference": "5bba9b2de22810ac1b13e2db38e4c04127a702f9",
                 "shasum": ""
             },
             "require": {
@@ -99,7 +99,7 @@
                 "issues": "https://github.com/terrazza/logger/issues",
                 "source": "https://github.com/terrazza/logger/tree/main"
             },
-            "time": "2021-11-18T23:00:35+00:00"
+            "time": "2021-11-23T08:47:26+00:00"
         },
         {
             "name": "terrazza/reflectionclass",
@@ -107,12 +107,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/terrazza/reflectionclass.git",
-                "reference": "80cdd403f1c7e9889f196d41a095d350a38e1429"
+                "reference": "1864dab9dd8c141772f56e1f481843052ef75122"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/terrazza/reflectionclass/zipball/80cdd403f1c7e9889f196d41a095d350a38e1429",
-                "reference": "80cdd403f1c7e9889f196d41a095d350a38e1429",
+                "url": "https://api.github.com/repos/terrazza/reflectionclass/zipball/1864dab9dd8c141772f56e1f481843052ef75122",
+                "reference": "1864dab9dd8c141772f56e1f481843052ef75122",
                 "shasum": ""
             },
             "require": {
@@ -143,7 +143,7 @@
                 "issues": "https://github.com/terrazza/reflectionclass/issues",
                 "source": "https://github.com/terrazza/reflectionclass/tree/main"
             },
-            "time": "2021-11-10T21:12:14+00:00"
+            "time": "2021-11-22T19:41:18+00:00"
         }
     ],
     "packages-dev": [
@@ -679,12 +679,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "9f37d464d6bc3cf1b379f785b66a2ce77bf523a6"
+                "reference": "f301eb1453c9e7a1bc912ee8b0ea9db22c60223b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/9f37d464d6bc3cf1b379f785b66a2ce77bf523a6",
-                "reference": "9f37d464d6bc3cf1b379f785b66a2ce77bf523a6",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/f301eb1453c9e7a1bc912ee8b0ea9db22c60223b",
+                "reference": "f301eb1453c9e7a1bc912ee8b0ea9db22c60223b",
                 "shasum": ""
             },
             "require": {
@@ -740,7 +740,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.9"
             },
             "funding": [
                 {
@@ -748,7 +748,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-11-06T06:50:45+00:00"
+            "time": "2021-11-19T15:21:02+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -1948,6 +1948,7 @@
                     "type": "github"
                 }
             ],
+            "abandoned": true,
             "time": "2020-09-28T06:45:17+00:00"
         },
         {
