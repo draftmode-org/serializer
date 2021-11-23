@@ -73,9 +73,6 @@ class AnnotationParameter {
         return $this->defaultValue;
     }
 
-    public function hasType() : bool {
-        return (bool)$this->type;
-    }
     public function setType(string $type) : void {
         $this->type = $type;
     }
