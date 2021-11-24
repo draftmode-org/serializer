@@ -172,10 +172,10 @@ class ArrayDenormalizer implements DenormalizerInterface {
                         $methodParameter            = $aParameter;
                         $logger->debug("key ".$aParameter->getName()." exists, new input",
                             ["line" => __LINE__, "input" => $inputValue]);
-                    } elseif ($aParameter->isVariadic()) {
+                    } elseif ($aParameter->isVariadic() || $aParameter->isArray()) {
                         $inputValue                 = $input;
                         $methodParameter            = $aParameter;
-                        $logger->debug("key ".$aParameter->getName()." does not exists, parameter isVariadic",
+                        $logger->debug("key ".$aParameter->getName()." does not exists, parameter isVariadic or isArray",
                             ["line" => __LINE__, "input" => $inputValue]);
                     }
                 } elseif ($aParameter->isBuiltIn()) {
@@ -190,15 +190,19 @@ class ArrayDenormalizer implements DenormalizerInterface {
                         $logger->debug("input is an array",
                             ["line" => __LINE__]);
                         $arrMethodValues            = [];
-                        if ($methodParameter->isVariadic()) {
-                            $logger->debug("parameter variadic",
+                        if ($methodParameter->isVariadic() || $methodParameter->isArray()) {
+                            $logger->debug("parameter isVariadic or isArray",
                                 ["line" => __LINE__]);
                             foreach ($inputValue as $singleInputValue) {
                                 $arrMethodValues[]  = $this->getMethodValue($methodParameter, $singleInputValue);
                             }
-                            $methodValues          += $arrMethodValues;
+                            if ($methodParameter->isVariadic()) {
+                                $methodValues       += $arrMethodValues;
+                            } else {
+                                $methodValues[]     = $arrMethodValues;
+                            }
                         } else {
-                            $logger->debug("parameter not variadic",
+                            $logger->debug("parameter not isVariadic, not isArray",
                                 ["line" => __LINE__]);
                             $methodValues[]         = $this->getMethodValue($methodParameter, $inputValue);
                         }

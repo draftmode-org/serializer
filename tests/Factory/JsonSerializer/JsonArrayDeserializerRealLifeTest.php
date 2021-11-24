@@ -45,7 +45,11 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             new SerializerRealLifeProductUUID($id = "221"),
         );
         $mProduct->setVLabels(
-            new SerializerRealLifeProductLabel($mVLabel1 = "mLabel1")
+            new SerializerRealLifeProductLabel($mLabel1 = "mLabel1")
+        );
+        $mProduct->setALabels([
+            new SerializerRealLifeProductLabel($mLabel1)
+            ]
         );
         $mProduct->setDescription($mDescription = "mDescription");
         $mProduct->setUser(
@@ -63,8 +67,12 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             'id'            => $id,
             'user'          => $sUser = "sUser",
             'vLabels'        => [
-                $sVLabel1 = "sVLabel1",
-                $sVLabel2 = "sVLabel2",
+                $sLabel1    = "sLabel1",
+                $sLabel2    = "sLabel2",
+            ],
+            'aLabels'        => [
+                $sLabel1,
+                $sLabel2,
             ],
             'description'   => $sDescription = "sDescription",
             'price' => [
@@ -95,6 +103,7 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             $mProduct->getUser()->getValue(),
             $mProduct->getDescription(),
             $mProduct->getVLabels(),
+            $mProduct->getALabels(),
 
             $sProduct->getId()->getValue(),
             $sProduct->getPrice()->getRegular()->getValue(),
@@ -102,6 +111,7 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             $sProduct->getUser()->getValue(),
             $sProduct->getDescription(),
             $sProduct->getVLabels(),
+            $sProduct->getALabels(),
 
             $uProduct->getId()->getValue(),
             $uProduct->getPrice()->getRegular()->getValue(),
@@ -116,14 +126,16 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             null,
             $mUser,
             $mDescription,
-            [new SerializerRealLifeProductLabel($mVLabel1)],
+            [new SerializerRealLifeProductLabel($mLabel1)],
+            [new SerializerRealLifeProductLabel($mLabel1)],
 
             $id,
             $mPriceRegular,
             $sPriceOffer,
             $sUser,
             $sDescription,
-            [new SerializerRealLifeProductLabel($sVLabel1), new SerializerRealLifeProductLabel($sVLabel2)],
+            [new SerializerRealLifeProductLabel($sLabel1), new SerializerRealLifeProductLabel($sLabel2)],
+            [new SerializerRealLifeProductLabel($sLabel1), new SerializerRealLifeProductLabel($sLabel2)],
 
             $id,
             $mPriceRegular,

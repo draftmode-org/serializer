@@ -11,6 +11,10 @@ class SerializerRealLifeProduct {
      */
     private array $vLabels=[];
     /**
+     * @var SerializerRealLifeProductLabel[]
+     */
+    private array $aLabels=[];
+    /**
      * @param SerializerRealLifeProductUUID $id
      */
     public function __construct(SerializerRealLifeProductUUID $id)
@@ -89,5 +93,21 @@ class SerializerRealLifeProduct {
     public function getVLabels(): array
     {
         return $this->vLabels;
+    }
+
+    /**
+     * @param SerializerRealLifeProductLabel[]|null $aLabels
+     */
+    public function setALabels(?array $aLabels): void
+    {
+        $this->aLabels = $aLabels ?? [];
+    }
+
+    /**
+     * @return SerializerRealLifeProductLabel[]
+     */
+    public function getALabels(): array
+    {
+        return $this->aLabels;
     }
 }
