@@ -23,13 +23,12 @@ class ArrayDenormalizer implements DenormalizerInterface {
     /**
      * @param class-string<T>|object $className
      * @param mixed $input
-     * @param bool $keepObject
      * @return T
      * @template T
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */
-    public function denormalize($className, $input, bool $keepObject=false) : object {
+    public function denormalize($className, $input) : object {
         $logger                                     = $this->logger->withMethod(__METHOD__);
         $logger->debug((is_object($className) ?
             "object: " .basename(get_class($className)) :
@@ -41,7 +40,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
                 $this->updateObject($object, $input, false);
             }
         } elseif (is_object($className)) {
-            $object                                 = $keepObject ? $className : $this->cloneClass($className);
+            $object                                 = $className;
             $this->removeConstructorArguments($object, $input);
             if (is_array($input) && count($input)) {
                 $this->updateObject($object, $input, true);
@@ -50,14 +49,6 @@ class ArrayDenormalizer implements DenormalizerInterface {
             throw new InvalidArgumentException("className is either an object nor a valid className");
         }
         return $object;
-    }
-
-    /**
-     * @param object $object
-     * @return object
-     */
-    private function cloneClass(object $object) : object {
-        return unserialize(serialize($object));
     }
 
     /**
@@ -123,7 +114,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
                     }
                     else {
                         $getObject                  = $method->invoke($object);
-                        $this->denormalize($getObject, $inputValue, true);
+                        $this->denormalize($getObject, $inputValue);
                         break;
                     }
                 }
