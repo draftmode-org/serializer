@@ -80,18 +80,21 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
                 'offer'     => $sPriceOffer = 12.0
             ]
         ]));
-        $serializer = $this->getSerializer();
         //
         // update with serializer
         //
         /** @var SerializerRealLifeProduct $uProduct */
+        $serializer = $this->getSerializer();
         $uProduct   = $serializer->deserialize($mProduct, json_encode([
             'user'          => $uUser = "uUser",
+            'vLabels'       => null,
+            'aLabels'       => null,
             'price' => [
                 'offer'     => $uPriceOffer = 12.1
-            ]
+            ],
         ]));
         /** @var SerializerRealLifeProduct $u2Product */
+        $serializer = $this->getSerializer();
         $u2Product  = $serializer->deserialize($mProduct, json_encode([
             'description'   => $u2Description = null
         ]));
@@ -118,6 +121,8 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             $uProduct->getPrice()->getOffer()->getValue(),
             $uProduct->getUser()->getValue(),
             $uProduct->getDescription(),
+            //$uProduct->getVLabels(),
+            $uProduct->getALabels(),
 
             $u2Product->getDescription(),
         ],[
@@ -142,6 +147,8 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             $uPriceOffer,
             $uUser,
             $mDescription,
+            //[],
+            [],
 
             $u2Description
         ]);

@@ -19,12 +19,13 @@ class Deserializer implements DeserializerInterface {
     /**
      * @param class-string<T>|object $className
      * @param mixed $input
+     * @param bool $isInitialized
      * @return T
      * @template T
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */
-    public function deserialize($className, $input) : object {
+    public function deserialize($className, $input, bool $isInitialized=true) : object {
         $data                                       = $this->decoder->decode($input);
         $className                                  = $this->cloneClass($className);
         return $this->denormalizer->denormalize($className, $data);

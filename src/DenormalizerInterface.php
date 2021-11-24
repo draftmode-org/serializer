@@ -9,10 +9,11 @@ interface DenormalizerInterface {
     /**
      * @param class-string<T>|object $className
      * @param mixed $input
+     * @param bool $isInitialized
      * @return T
      * @template T
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */
-    public function denormalize($className, $input) : object;
+    public function denormalize($className, $input, bool $isInitialized=true) : object;
 }

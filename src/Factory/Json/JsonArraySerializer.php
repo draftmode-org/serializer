@@ -32,13 +32,14 @@ class JsonArraySerializer implements SerializerInterface {
     /**
      * @param class-string<T>|object $className
      * @param mixed $input
+     * @param bool $isInitialized
      * @return T
      * @template T
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */
-    public function deserialize($className, $input): object {
+    public function deserialize($className, $input, bool $isInitialized=true): object {
         return (new Deserializer($this->decoder, $this->denormalizer))
-            ->deserialize($className, $input);
+            ->deserialize($className, $input, $isInitialized);
     }
 }

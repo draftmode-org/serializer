@@ -23,12 +23,13 @@ class ArrayDenormalizer implements DenormalizerInterface {
     /**
      * @param class-string<T>|object $className
      * @param mixed $input
+     * @param bool $isInitialized
      * @return T
      * @template T
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */
-    public function denormalize($className, $input) : object {
+    public function denormalize($className, $input, bool $isInitialized=true) : object {
         $logger                                     = $this->logger->withMethod(__METHOD__);
         $logger->debug((is_object($className) ?
             "object: " .basename(get_class($className)) :
@@ -47,6 +48,9 @@ class ArrayDenormalizer implements DenormalizerInterface {
             }
         } else {
             throw new InvalidArgumentException("className is either an object nor a valid className");
+        }
+        if ($isInitialized) {
+            $this->isInitializedObject($object);
         }
         return $object;
     }
@@ -97,6 +101,8 @@ class ArrayDenormalizer implements DenormalizerInterface {
             ["arguments" => $input, "line" => __LINE__]);
         $reflect                                    = new ReflectionClass($object);
         foreach ($input as $inputKey => $inputValue) {
+            $logger->debug("",
+                ["inputKey" => $inputKey, "inputValue" => $inputValue, "line" => __LINE__]);
             if (is_string($inputKey)) {
                 $getMethod                          = "get" . ucfirst($inputKey);
                 if ($updateObject && $reflect->hasMethod($getMethod)) {
@@ -106,11 +112,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
                     if (in_array(gettype($inputValue), self::BUILT_IN_TYPES)) {
                         $logger->debug("inputValue is a builtIn");
                     } elseif (is_null($inputValue)) {
-                        $returnType                 = $this->annotationFactory->getAnnotationReturnType($method);
-                        if (!$returnType->isOptional()) {
-                            $this->pushTraceKey($inputKey);
-                            throw new InvalidArgumentException($this->getTraceKeys()." is required, given null");
-                        }
+                        $logger->debug("inputValue is a null");
                     }
                     else {
                         $getObject                  = $method->invoke($object);
@@ -209,7 +211,8 @@ class ArrayDenormalizer implements DenormalizerInterface {
                     } else {
                         $logger->debug("input not an array",
                             ["line" => __LINE__]);
-                        $methodValues[]             = $this->getMethodValue($methodParameter, $inputValue);
+                        $methodValue                = $this->getMethodValue($methodParameter, $inputValue);
+                        $methodValues[]             = $methodValue;
                     }
                     $this->popTraceKey();
                 } else {
