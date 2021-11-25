@@ -17,6 +17,8 @@ class SerializerRealLifeProduct {
     /**
      * @param SerializerRealLifeProductUUID $id
      */
+    private ?SerializerRealLifePerson $person=null;
+
     public function __construct(SerializerRealLifeProductUUID $id)
     {
         $this->id       = $id;
@@ -110,4 +112,20 @@ class SerializerRealLifeProduct {
     {
         return $this->aLabels;
     }
+
+    /**
+     * @return SerializerRealLifePerson|null
+     */
+    public function getPerson(): ?SerializerRealLifePerson {
+        return $this->person;
+    }
+
+    /**
+     * @param SerializerRealLifePerson|null $person
+     */
+    public function setPerson(?SerializerRealLifePerson $person): void {
+        $this->person = $person;
+    }
+
+
 }

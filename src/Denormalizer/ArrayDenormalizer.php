@@ -3,6 +3,7 @@
 namespace Terrazza\Component\Serializer\Denormalizer;
 
 use InvalidArgumentException;
+use LogicException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -13,7 +14,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
     use DenormalizerTrait;
     private LogInterface $logger;
     private AnnotationFactoryInterface $annotationFactory;
-    CONST BUILT_IN_TYPES                            = ["int", "integer", "float", "double", "string", "DateTime"];
+    CONST BUILT_IN_TYPES                            = ["int", "integer", "float", "double", "string", "DateTime", "NULL"];
 
     public function __construct(LogInterface $logger, AnnotationFactoryInterface $annotationFactory) {
         $this->logger                               = $logger;
@@ -42,7 +43,6 @@ class ArrayDenormalizer implements DenormalizerInterface {
             }
         } elseif (is_object($className)) {
             $object                                 = $className;
-            $this->removeConstructorArguments($object, $input);
             if (is_array($input) && count($input)) {
                 $this->updateObject($object, $input, true);
             }
@@ -109,6 +109,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
                     $logger->debug("$getMethod",
                         ["arguments" => $inputValue, "line" => __LINE__]);
                     $method                         = $reflect->getMethod($getMethod);
+                    $methodReturnType               = $this->annotationFactory->getAnnotationReturnType($method);
                     if (in_array(gettype($inputValue), self::BUILT_IN_TYPES)) {
                         $logger->debug("inputValue is a builtIn");
                     } elseif (is_null($inputValue)) {
@@ -116,8 +117,33 @@ class ArrayDenormalizer implements DenormalizerInterface {
                     }
                     else {
                         $getObject                  = $method->invoke($object);
-                        $this->denormalize($getObject, $inputValue);
-                        break;
+                        $logger->debug($getMethod." returns", [
+                            "line" => __LINE__,
+                            "valueType"             => gettype($getObject),
+                            'methodName'            => $methodReturnType->getName(),
+                            'methodIsBuiltIn'       => $methodReturnType->isBuiltIn(),
+                            'methodIsOptional'      => $methodReturnType->isOptional(),
+                            'methodIsArray'         => $methodReturnType->isArray(),
+                            'methodType'            => $methodReturnType->getType(),
+                        ]);
+                        //
+                        // return is null
+                        // ... and returnType
+                        // ... and is not a builtIn
+                        // ... and a class
+                        // ... ... call denormalizer with classname and trigger create class
+                        //
+                        $this->pushTraceKey($inputKey);
+                        if (is_null($getObject) &&
+                            $methodReturnType->isBuiltIn() === false &&
+                            is_string($methodReturnType->getType())) {
+                            $this->denormalize($methodReturnType->getType(), $inputValue);
+                            $this->popTraceKey();
+                        } else {
+                            $this->denormalize($getObject, $inputValue);
+                            $this->popTraceKey();
+                            continue;
+                        }
                     }
                 }
                 $setMethod                          = "set" . ucfirst($inputKey);
@@ -143,6 +169,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
      * @param ReflectionMethod $method
      * @param $input
      * @return array|null
+     * @return LogicException
      * @throws ReflectionException
      */
     private function getMethodValues(ReflectionMethod $method, &$input) :?array {
@@ -186,8 +213,8 @@ class ArrayDenormalizer implements DenormalizerInterface {
                     $logger->debug("input is not an array, parameter isBuiltIn",
                         ["line" => __LINE__, "input" => $inputValue]);
                 }
+                $this->pushTraceKey($parameter->getName());
                 if ($methodParameter) {
-                    $this->pushTraceKey($methodParameter->getName());
                     if (is_array($inputValue)) {
                         $logger->debug("input is an array",
                             ["line" => __LINE__]);
@@ -212,9 +239,18 @@ class ArrayDenormalizer implements DenormalizerInterface {
                         $logger->debug("input not an array",
                             ["line" => __LINE__]);
                         $methodValue                = $this->getMethodValue($methodParameter, $inputValue);
-                        $methodValues[]             = $methodValue;
+                        if ($methodParameter->isVariadic() && is_null($methodValue)) {
+                            $logger->debug("position ".$parameter->getPosition().":count:".count($parameters));
+                            if (($parameter->getPosition()+1) !== count($parameters)) {
+                                throw new LogicException("parameter ".$aParameter->getName()." isVariadic and not the latest argument in ".$method->getName());
+                            }
+                            //
+                            // dont extend methodValues
+                            //
+                        } else {
+                            $methodValues[]         = $methodValue;
+                        }
                     }
-                    $this->popTraceKey();
                 } else {
                     $logger->debug("no input for parameter found",
                         ["line" => __LINE__]);
@@ -225,9 +261,10 @@ class ArrayDenormalizer implements DenormalizerInterface {
                             $methodValues[]         = null;
                         }
                     } else {
-                        throw new InvalidArgumentException($this->getTraceKeys() . " is required and missing");
+                        throw new InvalidArgumentException($this->getTraceKeys() . " is required");
                     }
                 }
+                $this->popTraceKey();
             }
             return $methodValues;
         } else {

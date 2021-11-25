@@ -11,6 +11,8 @@ use Terrazza\Component\Logger\Log;
 use Terrazza\Component\Logger\LogInterface;
 use Terrazza\Component\Serializer\Factory\Json\JsonArraySerializer;
 use Terrazza\Component\Serializer\SerializerInterface;
+use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifePerson;
+use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifePersonAddress;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProduct;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductAmount;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductLabel;
@@ -58,6 +60,16 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
         $mProduct->getPrice()->setRegular(
             new SerializerRealLifeProductAmount($mPriceRegular = 13.12)
         );
+        $mProduct->setPerson(
+            new SerializerRealLifePerson($mPersonName = "pPersonName")
+        );
+        $mProduct->getPerson()->setAddress(
+            new SerializerRealLifePersonAddress($mAddressStreet="mAddressStreet", $mAddressCity="mAddressCity")
+        );
+        /** @var SerializerRealLifeProduct $sProduct */
+        /** @var SerializerRealLifeProduct $uProduct */
+        /** @var SerializerRealLifeProduct $u2Product */
+        /** @var SerializerRealLifeProduct $u3Product */
         //
         $serializer = $this->getSerializer();
         //
@@ -65,7 +77,10 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
         //
         $sProduct   = $serializer->deserialize(SerializerRealLifeProduct::class, json_encode([
             'id'            => $id,
-            'user'          => $sUser = "sUser",
+            'price' => [
+                'regular'   => $mPriceRegular,
+                'offer'     => $sPriceOffer = 12.0
+            ],
             'vLabels'        => [
                 $sLabel1    = "sLabel1",
                 $sLabel2    = "sLabel2",
@@ -75,28 +90,49 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
                 $sLabel2,
             ],
             'description'   => $sDescription = "sDescription",
-            'price' => [
-                'regular'   => $mPriceRegular,
-                'offer'     => $sPriceOffer = 12.0
-            ]
+            'person'        => [
+                'name'          => $mPersonName,
+                'address'       => [
+                    'street'        => $mAddressStreet,
+                    'city'          => $mAddressCity,
+                ]
+            ],
+            'user'          => $sUser = "sUser",
         ]));
+
         //
         // update with serializer
         //
-        /** @var SerializerRealLifeProduct $uProduct */
         $serializer = $this->getSerializer();
         $uProduct   = $serializer->deserialize($mProduct, json_encode([
             'user'          => $uUser = "uUser",
             'vLabels'       => null,
             'aLabels'       => null,
-            'price' => [
-                'offer'     => $uPriceOffer = 12.1
+            'price'         => [
+                'offer'         => $uPriceOffer = 12.1
             ],
+            'person'        => [
+                'address'       => [
+                    'street'        => $uAddressStreet = "uAddressStreet"
+                ]
+            ]
         ]));
-        /** @var SerializerRealLifeProduct $u2Product */
+
         $serializer = $this->getSerializer();
         $u2Product  = $serializer->deserialize($mProduct, json_encode([
-            'description'   => $u2Description = null
+            'description'   => $u2Description = null,
+            'person'        => null
+        ]));
+
+        $serializer = $this->getSerializer();
+        $u3Product  = $serializer->deserialize($u2Product, json_encode([
+            'person'        => [
+                'name'      => $u3PersonName = "u3PersonName",
+                'address'       => [
+                    'street'        => $uAddressStreet,
+                    'city'          => $u3AddressCity = "u3AddressCity"
+                ]
+            ]
         ]));
 
         $this->assertEquals([
@@ -107,6 +143,9 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             $mProduct->getDescription(),
             $mProduct->getVLabels(),
             $mProduct->getALabels(),
+            $mProduct->getPerson()->getName(),
+            $mProduct->getPerson()->getAddress()->getStreet(),
+            $mProduct->getPerson()->getAddress()->getCity(),
 
             $sProduct->getId()->getValue(),
             $sProduct->getPrice()->getRegular()->getValue(),
@@ -115,16 +154,27 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             $sProduct->getDescription(),
             $sProduct->getVLabels(),
             $sProduct->getALabels(),
+            $sProduct->getPerson()->getName(),
+            $sProduct->getPerson()->getAddress()->getStreet(),
+            $sProduct->getPerson()->getAddress()->getCity(),
 
             $uProduct->getId()->getValue(),
             $uProduct->getPrice()->getRegular()->getValue(),
             $uProduct->getPrice()->getOffer()->getValue(),
             $uProduct->getUser()->getValue(),
             $uProduct->getDescription(),
-            //$uProduct->getVLabels(),
+            $uProduct->getVLabels(),
             $uProduct->getALabels(),
+            $uProduct->getPerson()->getName(),
+            $uProduct->getPerson()->getAddress()->getStreet(),
+            $uProduct->getPerson()->getAddress()->getCity(),
 
             $u2Product->getDescription(),
+            $u2Product->getPerson(),
+
+            $u3Product->getPerson()->getName(),
+            $u3Product->getPerson()->getAddress()->getStreet(),
+            $u3Product->getPerson()->getAddress()->getCity(),
         ],[
             $id,
             $mPriceRegular,
@@ -133,6 +183,9 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             $mDescription,
             [new SerializerRealLifeProductLabel($mLabel1)],
             [new SerializerRealLifeProductLabel($mLabel1)],
+            $mPersonName,
+            $mAddressStreet,
+            $mAddressCity,
 
             $id,
             $mPriceRegular,
@@ -141,16 +194,27 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             $sDescription,
             [new SerializerRealLifeProductLabel($sLabel1), new SerializerRealLifeProductLabel($sLabel2)],
             [new SerializerRealLifeProductLabel($sLabel1), new SerializerRealLifeProductLabel($sLabel2)],
+            $mPersonName,
+            $mAddressStreet,
+            $mAddressCity,
 
             $id,
             $mPriceRegular,
             $uPriceOffer,
             $uUser,
             $mDescription,
-            //[],
             [],
+            [],
+            $mPersonName,
+            $uAddressStreet,
+            $mAddressCity,
 
-            $u2Description
+            $u2Description,
+            null,
+
+            $u3PersonName,
+            $uAddressStreet,
+            $u3AddressCity,
         ]);
     }
 }
