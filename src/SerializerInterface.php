@@ -8,11 +8,12 @@ interface SerializerInterface {
     /**
      * @param class-string<T>|object $className
      * @param mixed $input
-     * @param bool $isInitialized
+     * @param bool $restrictUnInitialized
+     * @param bool $restrictArguments
      * @return T
      * @template T
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */
-    public function deserialize($className, $input, bool $isInitialized=true);
+    public function deserialize($className, $input, bool $restrictUnInitialized=false, bool $restrictArguments=false);
 }

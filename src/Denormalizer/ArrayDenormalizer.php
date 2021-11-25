@@ -24,33 +24,47 @@ class ArrayDenormalizer implements DenormalizerInterface {
     /**
      * @param class-string<T>|object $className
      * @param mixed $input
-     * @param bool $isInitialized
+     * @param bool $restrictUnInitialized
+     * @param bool $restrictArguments
      * @return T
      * @template T
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */
-    public function denormalize($className, $input, bool $isInitialized=true) : object {
+    private static bool $restrictUnInitialized=false;
+    private static bool $restrictArguments=false;
+    public function denormalize($className, $input, bool $restrictUnInitialized=false, bool $restrictArguments=false) : object {
+        if ($restrictUnInitialized)
+            self::$restrictUnInitialized            = true;
+        if ($restrictArguments)
+            self::$restrictArguments                = true;
         $logger                                     = $this->logger->withMethod(__METHOD__);
         $logger->debug((is_object($className) ?
             "object: " .basename(get_class($className)) :
             "class: " . $className),
             ["line" => __LINE__]);
+        $unmappedKeys                               = [];
         if (is_string($className)) {
             $object                                 = $this->createObject($className, $input);
             if (is_array($input) && count($input)) {
-                $this->updateObject($object, $input, false);
+                $unmappedKeys                       = $this->updateObject($object, $input, false);
             }
         } elseif (is_object($className)) {
             $object                                 = $className;
             if (is_array($input) && count($input)) {
-                $this->updateObject($object, $input, true);
+                $unmappedKeys                       = $this->updateObject($object, $input, true);
+                var_dump($unmappedKeys, self::$restrictArguments);
             }
         } else {
             throw new InvalidArgumentException("className is either an object nor a valid className");
         }
-        if ($isInitialized) {
+        if (self::$restrictUnInitialized) {
             $this->isInitializedObject($object);
+        }
+        if (self::$restrictArguments && count($unmappedKeys)) {
+            $traceKeys                              = $this->getTraceKeys();
+            $traceKeys                              .= (strlen($traceKeys)) ? "." : "";
+            throw new InvalidArgumentException($traceKeys."(".join(", ", $unmappedKeys).") are passed but unknown/not allowed");
         }
         return $object;
     }
@@ -93,13 +107,15 @@ class ArrayDenormalizer implements DenormalizerInterface {
      * @param object $object
      * @param $input
      * @param bool $updateObject
+     * @return array
      * @throws ReflectionException
      */
-    private function updateObject(object $object, $input, bool $updateObject) : void {
+    private function updateObject(object $object, &$input, bool $updateObject) : array {
         $logger                                     = $this->logger->withMethod(__METHOD__);
         $logger->debug(get_class($object),
             ["arguments" => $input, "line" => __LINE__]);
         $reflect                                    = new ReflectionClass($object);
+        $unmappedKeys                               = [];
         foreach ($input as $inputKey => $inputValue) {
             $logger->debug("",
                 ["inputKey" => $inputKey, "inputValue" => $inputValue, "line" => __LINE__]);
@@ -160,9 +176,12 @@ class ArrayDenormalizer implements DenormalizerInterface {
                     } else {
                         $method->invoke($object, $methodValues);
                     }
+                } else {
+                    $unmappedKeys[]                 = $inputKey;
                 }
             }
         }
+        return $unmappedKeys;
     }
 
     /**

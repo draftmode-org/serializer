@@ -122,7 +122,7 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
         $u2Product  = $serializer->deserialize($mProduct, json_encode([
             'description'   => $u2Description = null,
             'person'        => null
-        ]));
+        ]), false, true);
 
         $serializer = $this->getSerializer();
         $u3Product  = $serializer->deserialize($u2Product, json_encode([
