@@ -62,6 +62,7 @@ composer require terrazza/component-serializer
 - ext-json
 ### composer packages
 - terrazza/reflectionclass
+- terrazza/logger <i>a psr/log based logger implementation</i>
 
 <a id="examples" name="examples"/></a>
 <a id="user-content-examples" name="user-content-examples"/></a>
