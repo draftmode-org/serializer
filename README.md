@@ -3,6 +3,7 @@ This component is meant to be used to turn objects into a specific format (XML,J
 
 1. Methods
     1. [Deserialize](#deserialize)
+    2. [Serialize](#serialize)
 2. [Install](#install)
 3. [Requirements](#require)
 4. [Examples](#examples)
@@ -14,7 +15,7 @@ This component is meant to be used to turn objects into a specific format (XML,J
 1. decode (JSON,XML,CSV) into an array
 2. denormalize into an object
 
-Terrazza/Serializer supports two methods.<br>
+Terrazza/Deserializer supports two methods.<br>
 a) create a new object<br>
 b) update an existing object
 
@@ -35,6 +36,12 @@ only if the current value of an valueObject is null and you want to update the v
 in any case there are 2 options provided
 - restrictUnInitialized (default: false)
 - restrictArguments (default: false)
+
+<a id="serialize" name="serialize"></a>
+<a id="user-content-serialize" name="user-content-serialize"></a>
+## Method - Serialize
+1. normalize object to array
+2. encode array to (JSON,XML,CSV)
 
 ### How should the class be designed
 We suggest that all required arguments are handled by the __constructor<br>
@@ -70,7 +77,7 @@ composer require terrazza/component-serializer
 
 <a id="examples-json" name="examples-json"></a>
 <a id="user-content-examples-json" name="user-content-examples-json"></a>
-### deserialize JSON (create)
+### Deserialize + Serialize JSON (create)
 ```php
 $input = json_encode(
     [
@@ -78,11 +85,16 @@ $input = json_encode(
         'name' => 'Max'
     ]
 );
-$object = (new JsonArraySerializer)
+$object = (new JsonDeserializer(LogInterface $logger))
     ->deserialize(TargetObject::class, $input);
    
 echo $object->getId(); // 1
 echo $object->getName(); // Max 
+
+$json = (new JsonSerializer(LogInterface $logger))
+    ->serialize($object);
+    
+var_dump($input === $json); // true    
 
 class TargetObject {
     public int $id;
@@ -101,7 +113,7 @@ class TargetObject {
     }    
 }
 ```
-### deserialize JSON (update)
+### Deserialize + Serialize JSON (update)
 ```php
 $input = json_encode(
     [
@@ -110,7 +122,7 @@ $input = json_encode(
     ]
 );
 // create object
-$object = (new JsonArraySerializer)
+$object = (new JsonDeserializer(LogInterface $logger))
     ->deserialize(TargetObject::class, $input);
 
 // update object
@@ -120,11 +132,19 @@ $input = json_encode(
         'name' => 'Update'
     ]
 );    
-$update = (new JsonArraySerializer)
+$object = (new JsonDeserializer(LogInterface $logger))
     ->deserialize($object, $input);    
       
 echo $object->getId(); // 1, cause constructor will be ignored
 echo $object->getName(); // Update
+
+$json = (new JsonSerializer(LogInterface $logger))
+    ->serialize($object);
+    
+var_dump(json_encode([
+    'id' => 1,
+    'name' => "Update"
+]) === $json);
 
 class TargetObject {
     public int $id;
