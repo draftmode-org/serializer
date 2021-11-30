@@ -19,11 +19,11 @@ interface AnnotationFactoryInterface {
     public function isBuiltInType(string $type) : bool;
 
     /**
-     * @param ReflectionMethod $method
-     * @param ReflectionParameter $parameter
+     * @param ReflectionMethod $refMethod
+     * @param ReflectionParameter $refParameter
      * @return AnnotationParameter
      */
-    public function getAnnotationParameter(ReflectionMethod $method, ReflectionParameter $parameter) : AnnotationParameter;
+    public function getAnnotationParameter(ReflectionMethod $refMethod, ReflectionParameter $refParameter) : AnnotationParameter;
 
     /**
      * @param ReflectionMethod $method
@@ -32,8 +32,8 @@ interface AnnotationFactoryInterface {
     public function getAnnotationReturnType(ReflectionMethod $method) : AnnotationReturnType;
 
     /**
-     * @param ReflectionProperty $property
+     * @param ReflectionProperty $refProperty
      * @return AnnotationProperty
      */
-    public function getAnnotationProperty(ReflectionProperty $property) : AnnotationProperty;
+    public function getAnnotationProperty(ReflectionProperty $refProperty) : AnnotationProperty;
 }

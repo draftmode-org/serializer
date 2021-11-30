@@ -11,7 +11,7 @@ class JsonDecoder implements DecoderInterface {
     }
 
     /**
-     * @param $data
+     * @param mixed $data
      * @param bool $nullable
      * @return array|null
      */

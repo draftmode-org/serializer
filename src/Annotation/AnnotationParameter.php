@@ -11,6 +11,7 @@ class AnnotationParameter {
     private bool $variadic=false;
     private bool $optional=false;
     private bool $defaultValueAvailable=false;
+    /** @var mixed  */
     private $defaultValue=null;
     private ?string $type=null;
     private ?string $declaringClass=null;
@@ -66,9 +67,16 @@ class AnnotationParameter {
         return $this->defaultValueAvailable;
     }
 
+    /**
+     * @param mixed $value
+     */
     public function setDefaultValue($value): void {
         $this->defaultValue = $value;
     }
+
+    /**
+     * @return mixed
+     */
     public function getDefaultValue() {
         return $this->defaultValue;
     }

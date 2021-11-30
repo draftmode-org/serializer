@@ -34,7 +34,7 @@ class Deserializer implements DeserializerInterface {
 
     /**
      * @param class-string<T>|object $className
-     * @return T
+     * @return T|object
      * @template T
      */
     private function cloneClass($className) {

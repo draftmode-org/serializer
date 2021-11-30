@@ -94,9 +94,8 @@ class Normalizer implements NormalizerInterface {
     }
 
     /**
-     * @param string $attributeName
      * @param string $propertyType
-     * @param $attributeValue
+     * @param mixed $attributeValue
      * @return mixed
      * @throws ReflectionException
      */
@@ -146,9 +145,9 @@ class Normalizer implements NormalizerInterface {
     /**
      * @param string $haystack
      * @param string $needle
-     * @return string|null
+     * @return bool
      */
-    private function _str_starts_with(string $haystack, string $needle) :?string {
+    private function _str_starts_with(string $haystack, string $needle) : bool {
         return substr($haystack, 0, strlen($needle)) === $needle;
     }
 

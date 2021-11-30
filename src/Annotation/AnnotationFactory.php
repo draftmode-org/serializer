@@ -117,8 +117,9 @@ class AnnotationFactory implements AnnotationFactoryInterface {
      */
     public function getAnnotationProperty(ReflectionProperty $refProperty) : AnnotationProperty {
         $property                               = new AnnotationProperty($refProperty->getName());
-        $property->setDeclaringClass($refProperty->getDeclaringClass() ? $refProperty->getDeclaringClass()->getName() : null);
-        if ($refPropertyType = $refProperty->getType()) {
+        $property->setDeclaringClass($refProperty->getDeclaringClass());
+        if ($refProperty->hasType()) {
+            $refPropertyType                    = $refProperty->getType();
             if ($refPropertyType->isBuiltIn()) {
                 $property->setBuiltIn(true);
             } else {

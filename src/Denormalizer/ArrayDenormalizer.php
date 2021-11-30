@@ -72,12 +72,12 @@ class ArrayDenormalizer implements DenormalizerInterface {
     }
 
     /**
-     * @param $className
-     * @param $input
+     * @param string $className
+     * @param mixed $input
      * @return object
      * @throws ReflectionException
      */
-    private function createObject($className, &$input) : object {
+    private function createObject(string $className, &$input) : object {
         $reflect 									= new ReflectionClass($className);
         $method 									= $reflect->getConstructor();
         $methodValues								= $this->getMethodValues($method, $input);
@@ -90,24 +90,8 @@ class ArrayDenormalizer implements DenormalizerInterface {
     }
 
     /**
-     * @param object $className
-     * @param $input
-     */
-    private function removeConstructorArguments(object $className, &$input) {
-        $reflect 									= new ReflectionClass($className);
-        $method 									= $reflect->getConstructor();
-        if ($method && $method->isPublic() && is_array($input)) {
-            foreach ($method->getParameters() as $parameter) {
-                if (array_key_exists($parameter->getName(), $input)) {
-                    unset($input[$parameter->getName()]);
-                }
-            }
-        }
-    }
-
-    /**
      * @param object $object
-     * @param $input
+     * @param mixed $input
      * @param bool $updateObject
      * @return array
      * @throws ReflectionException
@@ -154,7 +138,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
                         $this->pushTraceKey($inputKey);
                         if (is_null($getObject) &&
                             $methodReturnType->isBuiltIn() === false &&
-                            is_string($methodReturnType->getType())) {
+                            $methodReturnType->getType() !== null) {
                             $this->denormalize($methodReturnType->getType(), $inputValue);
                             $this->popTraceKey();
                         } else {
@@ -188,9 +172,9 @@ class ArrayDenormalizer implements DenormalizerInterface {
 
     /**
      * @param ReflectionMethod $method
-     * @param $input
+     * @param mixed $input
      * @return array|null
-     * @return LogicException
+     * @throws LogicException
      * @throws ReflectionException
      */
     private function getMethodValues(ReflectionMethod $method, &$input) :?array {
@@ -295,7 +279,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
 
     /**
      * @param AnnotationParameter $parameter
-     * @param $inputValue
+     * @param mixed $inputValue
      * @return mixed
      * @throws ReflectionException
      */
