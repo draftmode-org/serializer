@@ -2,45 +2,38 @@
 
 namespace Terrazza\Component\Serializer\Factory\Json;
 
-use InvalidArgumentException;
 use ReflectionException;
 use Terrazza\Component\Logger\LogInterface;
 use Terrazza\Component\ReflectionClass\ClassNameResolver;
-use Terrazza\Component\Serializer\Decoder\JsonDecoder;
-use Terrazza\Component\Serializer\DecoderInterface;
-use Terrazza\Component\Serializer\Denormalizer\AnnotationFactory;
-use Terrazza\Component\Serializer\Denormalizer\ArrayDenormalizer;
-use Terrazza\Component\Serializer\DenormalizerInterface;
-use Terrazza\Component\Serializer\Deserializer;
+use Terrazza\Component\Serializer\Annotation\AnnotationFactory;
+use Terrazza\Component\Serializer\Encoder\JsonEncoder;
+use Terrazza\Component\Serializer\EncoderInterface;
+use Terrazza\Component\Serializer\Normalizer;
+use Terrazza\Component\Serializer\NormalizerInterface;
 use Terrazza\Component\Serializer\SerializerInterface;
 
 class JsonArraySerializer implements SerializerInterface {
-    private DecoderInterface $decoder;
-    private DenormalizerInterface $denormalizer;
-
-
-    public function __construct(LogInterface $logger) {
-        $this->decoder                              = new JsonDecoder();
-        $this->denormalizer                         = new ArrayDenormalizer(
+    private NormalizerInterface $normalizer;
+    private EncoderInterface $encoder;
+    public function __construct(LogInterface $logger, array $nameConverter=null) {
+        $this->encoder                              = new JsonEncoder();
+        $this->normalizer                           = new Normalizer(
             $logger,
             new AnnotationFactory(
                 new ClassNameResolver()
-            )
+            ),
+            $nameConverter
         );
     }
 
     /**
-     * @param class-string<T>|object $className
-     * @param mixed $input
-     * @param bool $restrictUnInitialized
-     * @param bool $restrictArguments
-     * @return T
-     * @template T
+     * @param object $object
+     * @return string
      * @throws ReflectionException
-     * @throws InvalidArgumentException
      */
-    public function deserialize($className, $input, bool $restrictUnInitialized=false, bool $restrictArguments=false): object {
-        return (new Deserializer($this->decoder, $this->denormalizer))
-            ->deserialize($className, $input, $restrictUnInitialized, $restrictArguments);
+    public function serialize(object $object) : string {
+        return $this->encoder->encode(
+            $this->normalizer->normalize($object)
+        );
     }
 }

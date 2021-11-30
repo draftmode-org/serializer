@@ -4,30 +4,10 @@ namespace Terrazza\Component\Serializer\Denormalizer;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
-use Terrazza\Component\Serializer\DenormalizerInterface;
+use Terrazza\Component\Serializer\TraceKeyTrait;
 
 trait DenormalizerTrait {
-    private array $traceKey                         = [];
-
-    /**
-     * @param string $traceKey
-     */
-    private function pushTraceKey(string $traceKey) : void {
-        array_push($this->traceKey, $traceKey);
-    }
-
-    private function popTraceKey() : void {
-        array_pop($this->traceKey);
-    }
-
-    /**
-     * @return string
-     */
-    private function getTraceKeys() : string {
-        $response                                   = join(".",$this->traceKey);
-        return strtr($response, [".[" => "["]);
-    }
-
+    use TraceKeyTrait;
     private function getApprovedBuiltInValue_DateTime(string $inputValue) : DateTime {
         try {
             $result                                 = new DateTime($inputValue);

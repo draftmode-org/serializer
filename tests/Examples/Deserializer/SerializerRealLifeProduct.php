@@ -15,7 +15,7 @@ class SerializerRealLifeProduct {
      */
     private array $aLabels=[];
     /**
-     * @param SerializerRealLifeProductUUID $id
+     * @param SerializerRealLifePerson $id
      */
     private ?SerializerRealLifePerson $person=null;
 

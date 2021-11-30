@@ -1,15 +1,19 @@
 <?php
-namespace Terrazza\Component\Serializer\Denormalizer;
+namespace Terrazza\Component\Serializer\Annotation;
 use InvalidArgumentException;
 use ReflectionMethod;
 use ReflectionParameter;
+use ReflectionProperty;
 use Terrazza\Component\ReflectionClass\ClassNameResolverInterface;
 
 class AnnotationFactory implements AnnotationFactoryInterface {
     private ClassNameResolverInterface $classNameResolver;
-    private array $builtInTypes=[];
-    public function __construct(ClassNameResolverInterface $classNameResolver) {
+    private array $builtInTypes;
+    CONST BUILT_IN_TYPES                            = ["int", "integer", "float", "double", "string", "DateTime", "NULL"];
+
+    public function __construct(ClassNameResolverInterface $classNameResolver, ?array $builtInTypes=null) {
         $this->classNameResolver                    = $classNameResolver;
+        $this->builtInTypes                         = $builtInTypes ?? self::BUILT_IN_TYPES;
     }
 
     /**
@@ -20,6 +24,14 @@ class AnnotationFactory implements AnnotationFactoryInterface {
         $annotationFactory                          = clone $this;
         $annotationFactory->builtInTypes            = $builtInTypes;
         return $annotationFactory;
+    }
+
+    /**
+     * @param string $type
+     * @return bool
+     */
+    public function isBuiltInType(string $type): bool {
+        return in_array($type, $this->builtInTypes);
     }
 
     /**
@@ -99,6 +111,49 @@ class AnnotationFactory implements AnnotationFactoryInterface {
         }
     }
 
+    /**
+     * @param ReflectionProperty $refProperty
+     * @return AnnotationProperty
+     */
+    public function getAnnotationProperty(ReflectionProperty $refProperty) : AnnotationProperty {
+        $property                               = new AnnotationProperty($refProperty->getName());
+        $property->setDeclaringClass($refProperty->getDeclaringClass() ? $refProperty->getDeclaringClass()->getName() : null);
+
+        if ($refPropertyType = $refProperty->getType()) {
+            $property->setType($refPropertyType->getName());
+            if ($refPropertyType->isBuiltIn()) {
+                $property->setBuiltIn(true);
+            }
+            if ($refPropertyType->allowsNull()) {
+                $property->setOptional(true);
+            }
+        }
+        $this->extendAnnotationProperty($refProperty, $property);
+        return $property;
+    }
+
+    /**
+     * @param ReflectionProperty $refProperty
+     * @param AnnotationProperty $property
+     */
+    private function extendAnnotationProperty(ReflectionProperty $refProperty, AnnotationProperty $property) : void {
+        if (preg_match('/@param\s+([^\s]+)/', $refProperty->getDocComment(), $matches)) {
+            $annotation                         = $matches[1];
+            $property->setBuiltIn($this->isBuiltInByAnnotation($annotation));
+            if ($this->isArrayByAnnotation($annotation)) {
+                $property->setArray(true);
+            }
+            if (strpos($annotation, "|null")!==false) {
+                $property->setOptional(true);
+            }
+            if (!$property->getType()) {
+                if ($annotationType = $this->getTypeByAnnotation($annotation, $property->getDeclaringClass())) {
+                    $property->setType($annotationType);
+                }
+            }
+        }
+    }
+
     private function getTypeByAnnotation(string $annotation, ?string $declaringClass) : string {
         $annotation                             	= strtr($annotation, [
             "[]" => "",
@@ -142,7 +197,7 @@ class AnnotationFactory implements AnnotationFactoryInterface {
         ]);
         $types                        				= explode("|", $annotation);
         foreach ($types as $type) {
-            if (in_array($type, $this->builtInTypes)) {
+            if ($this->isBuiltInType($type)) {
                 return true;
             }
         }

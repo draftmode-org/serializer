@@ -1,8 +1,9 @@
 <?php
 
-namespace Terrazza\Component\Serializer\Denormalizer;
+namespace Terrazza\Component\Serializer\Annotation;
 use ReflectionMethod;
 use ReflectionParameter;
+use ReflectionProperty;
 
 interface AnnotationFactoryInterface {
     /**
@@ -10,6 +11,12 @@ interface AnnotationFactoryInterface {
      * @return AnnotationFactoryInterface
      */
     public function withBuiltInTypes(array $builtInTypes) : AnnotationFactoryInterface;
+
+    /**
+     * @param string $type
+     * @return bool
+     */
+    public function isBuiltInType(string $type) : bool;
 
     /**
      * @param ReflectionMethod $method
@@ -23,6 +30,12 @@ interface AnnotationFactoryInterface {
      * @return AnnotationReturnType
      */
     public function getAnnotationReturnType(ReflectionMethod $method) : AnnotationReturnType;
+
+    /**
+     * @param ReflectionProperty $property
+     * @return AnnotationProperty
+     */
+    public function getAnnotationProperty(ReflectionProperty $property) : AnnotationProperty;
 
 /*
     public function extractTypeFromAnnotation(string $annotation) :?string;

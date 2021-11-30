@@ -7,18 +7,20 @@ use LogicException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use RuntimeException;
 use Terrazza\Component\Logger\LogInterface;
+use Terrazza\Component\Serializer\Annotation\AnnotationFactoryInterface;
+use Terrazza\Component\Serializer\Annotation\AnnotationParameter;
 use Terrazza\Component\Serializer\DenormalizerInterface;
 
 class ArrayDenormalizer implements DenormalizerInterface {
     use DenormalizerTrait;
     private LogInterface $logger;
     private AnnotationFactoryInterface $annotationFactory;
-    CONST BUILT_IN_TYPES                            = ["int", "integer", "float", "double", "string", "DateTime", "NULL"];
 
     public function __construct(LogInterface $logger, AnnotationFactoryInterface $annotationFactory) {
         $this->logger                               = $logger;
-        $this->annotationFactory                    = $annotationFactory->withBuiltInTypes(self::BUILT_IN_TYPES);
+        $this->annotationFactory                    = $annotationFactory;
     }
 
     /**
@@ -30,6 +32,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
      * @template T
      * @throws ReflectionException
      * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     private static bool $restrictUnInitialized=false;
     private static bool $restrictArguments=false;
@@ -53,10 +56,9 @@ class ArrayDenormalizer implements DenormalizerInterface {
             $object                                 = $className;
             if (is_array($input) && count($input)) {
                 $unmappedKeys                       = $this->updateObject($object, $input, true);
-                var_dump($unmappedKeys, self::$restrictArguments);
             }
         } else {
-            throw new InvalidArgumentException("className is either an object nor a valid className");
+            throw new RuntimeException("className is either an object nor a valid className");
         }
         if (self::$restrictUnInitialized) {
             $this->isInitializedObject($object);
@@ -126,7 +128,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
                         ["arguments" => $inputValue, "line" => __LINE__]);
                     $method                         = $reflect->getMethod($getMethod);
                     $methodReturnType               = $this->annotationFactory->getAnnotationReturnType($method);
-                    if (in_array(gettype($inputValue), self::BUILT_IN_TYPES)) {
+                    if ($this->annotationFactory->isBuiltInType(gettype($inputValue))) {
                         $logger->debug("inputValue is a builtIn");
                     } elseif (is_null($inputValue)) {
                         $logger->debug("inputValue is a null");

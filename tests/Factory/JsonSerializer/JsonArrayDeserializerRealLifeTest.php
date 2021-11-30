@@ -3,14 +3,6 @@
 namespace Terrazza\Component\Serializer\Tests\Factory\JsonSerializer;
 
 use PHPUnit\Framework\TestCase;
-use ReflectionException;
-use Terrazza\Component\Logger\Formatter\LineFormatter;
-use Terrazza\Component\Logger\Handler\NoHandler;
-use Terrazza\Component\Logger\Handler\StreamHandler;
-use Terrazza\Component\Logger\Log;
-use Terrazza\Component\Logger\LogInterface;
-use Terrazza\Component\Serializer\Factory\Json\JsonArraySerializer;
-use Terrazza\Component\Serializer\SerializerInterface;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifePerson;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifePersonAddress;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProduct;
@@ -18,30 +10,10 @@ use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLife
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductLabel;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductUUID;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeUserUUID;
+use Terrazza\Component\Serializer\Tests\Examples\JsonArrayUnit;
 
 class JsonArrayDeserializerRealLifeTest extends TestCase {
-    protected function getLogger(?bool $log=null) : LogInterface {
-        $handler = $log ?
-            new StreamHandler(
-                $logLevel ?? Log::DEBUG,
-                new LineFormatter(),
-                "php://stdout"
-            ) : new NoHandler();
-        if ($log) {
-            file_put_contents("php://stdout", PHP_EOL);
-        }
-        return new Log("Serializer", $handler);
-    }
 
-    private function getSerializer(int $logLevel=null) : SerializerInterface {
-        return new JsonArraySerializer(
-            $this->getLogger($logLevel)
-        );
-    }
-
-    /**
-     * @throws ReflectionException
-     */
     function test() {
         $mProduct = new SerializerRealLifeProduct(
             new SerializerRealLifeProductUUID($id = "221"),
@@ -71,7 +43,7 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
         /** @var SerializerRealLifeProduct $u2Product */
         /** @var SerializerRealLifeProduct $u3Product */
         //
-        $serializer = $this->getSerializer();
+        $serializer = JsonArrayUnit::getDeserializer();
         //
         // create with serializer
         //
@@ -103,7 +75,7 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
         //
         // update with serializer
         //
-        $serializer = $this->getSerializer();
+        $serializer = JsonArrayUnit::getDeserializer();
         $uProduct   = $serializer->deserialize($mProduct, json_encode([
             'user'          => $uUser = "uUser",
             'vLabels'       => null,
@@ -118,13 +90,13 @@ class JsonArrayDeserializerRealLifeTest extends TestCase {
             ]
         ]));
 
-        $serializer = $this->getSerializer();
+        $serializer = JsonArrayUnit::getDeserializer();
         $u2Product  = $serializer->deserialize($mProduct, json_encode([
             'description'   => $u2Description = null,
             'person'        => null
         ]), false, true);
 
-        $serializer = $this->getSerializer();
+        $serializer = JsonArrayUnit::getDeserializer();
         $u3Product  = $serializer->deserialize($u2Product, json_encode([
             'person'        => [
                 'name'      => $u3PersonName = "u3PersonName",

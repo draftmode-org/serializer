@@ -26,5 +26,8 @@
     <testsuite name="Terrazza Serializer Component Test">
       <directory>./tests/</directory>
     </testsuite>
+    <testsuite name="next">
+      <file >./tests/Factory/JsonSerializer/JsonArrayTest.php</file>
+    </testsuite>
   </testsuites>
 </phpunit>
