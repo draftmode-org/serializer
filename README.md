@@ -37,22 +37,20 @@ in any case there are 2 options provided
 - restrictUnInitialized (default: false)
 - restrictArguments (default: false)
 
+### How should a class be designed
+We suggest that all required arguments are handled by the __constructor<br>
+and all optional arguments are handled by the setter.
+
 <a id="serialize" name="serialize"></a>
 <a id="user-content-serialize" name="user-content-serialize"></a>
 ## Method - Serialize
 1. normalize object to array
 2. encode array to (JSON,XML,CSV)
 
-### How should the class be designed
-We suggest that all required arguments are handled by the __constructor<br>
-and all optional arguments are handled by the setter.<br>
-
 #### Actually provided decoding
 - JSON
 <a id="deserialize" name="deserialize"></a>
 <a id="user-content-deserialize" name="user-content-deserialize"></a>
-## Method - Serialize
-This method is currently not supported, will be, but isn´t 
 <a id="install" name="install"></a>
 <a id="user-content-install" name="user-content-install"></a>
 ## How to install
