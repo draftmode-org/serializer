@@ -14,7 +14,7 @@ use Terrazza\Component\Serializer\DenormalizerInterface;
 use Terrazza\Component\Serializer\Deserializer;
 use Terrazza\Component\Serializer\DeserializerInterface;
 
-class JsonArrayDeserializer implements DeserializerInterface {
+class JsonDeserializer implements DeserializerInterface {
     private DecoderInterface $decoder;
     private DenormalizerInterface $denormalizer;
 

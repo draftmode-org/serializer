@@ -10,10 +10,7 @@ use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLife
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductLabel;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductUUID;
 use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeUserUUID;
-use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeUUID;
 use Terrazza\Component\Serializer\Tests\Examples\JsonArrayUnit;
-use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentAmount;
-use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentUUID;
 
 class JsonArraySerializerTest extends TestCase {
 
@@ -42,11 +39,21 @@ class JsonArraySerializerTest extends TestCase {
             new SerializerRealLifePersonAddress($mAddressStreet="mAddressStreet", $mAddressCity="mAddressCity")
         );
 
-        $serializer = JsonArrayUnit::getSerializer(false, [
-            SerializerRealLifeUUID::class => SerializerRealLifePresentUUID::class,
-            SerializerRealLifeProductAmount::class => SerializerRealLifePresentAmount::class,
-        ]);
+        $serializer = JsonArrayUnit::getSerializer();
         $response = $serializer->serialize($mProduct);
-        $this->assertTrue(true);
+        $this->assertEquals(<<<JSON
+        {"id":"{$id}","price":{"regular":{$mPriceRegular},"offer":null},"user":"{$mUser}","description":"{$mDescription}","vLabels":["{$mLabel1}"],"aLabels":["{$mLabel1}"],"person":{"name":"{$mPersonName}","address":{"street":"{$mAddressStreet}","city":"{$mAddressCity}"}}}
+        JSON, $response);
+    }
+
+    function testWithNull() {
+        $mProduct = new SerializerRealLifeProduct(
+            new SerializerRealLifeProductUUID($id = "221"),
+        );
+        $serializer = JsonArrayUnit::getSerializer();
+        $response = $serializer->serialize($mProduct);
+        $this->assertEquals(<<<JSON
+        {"id":"221","price":{"regular":null,"offer":null},"user":null,"description":null,"vLabels":[],"aLabels":[],"person":null}
+        JSON, $response);
     }
 }

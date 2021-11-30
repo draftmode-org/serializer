@@ -12,7 +12,7 @@ use Terrazza\Component\Serializer\Normalizer;
 use Terrazza\Component\Serializer\NormalizerInterface;
 use Terrazza\Component\Serializer\SerializerInterface;
 
-class JsonArraySerializer implements SerializerInterface {
+class JsonSerializer implements SerializerInterface {
     private NormalizerInterface $normalizer;
     private EncoderInterface $encoder;
     public function __construct(LogInterface $logger, array $nameConverter=null) {

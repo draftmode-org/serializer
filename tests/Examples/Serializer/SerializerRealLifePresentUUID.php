@@ -10,7 +10,7 @@ class SerializerRealLifePresentUUID implements NameConverterInterface {
         $this->value = $value;
     }
 
-    public function getValue() : string {
+    public function getValue() :?string {
         return $this->value->getValue();
     }
 }

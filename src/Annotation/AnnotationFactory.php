@@ -118,11 +118,11 @@ class AnnotationFactory implements AnnotationFactoryInterface {
     public function getAnnotationProperty(ReflectionProperty $refProperty) : AnnotationProperty {
         $property                               = new AnnotationProperty($refProperty->getName());
         $property->setDeclaringClass($refProperty->getDeclaringClass() ? $refProperty->getDeclaringClass()->getName() : null);
-
         if ($refPropertyType = $refProperty->getType()) {
-            $property->setType($refPropertyType->getName());
             if ($refPropertyType->isBuiltIn()) {
                 $property->setBuiltIn(true);
+            } else {
+                $property->setType($refPropertyType->getName());
             }
             if ($refPropertyType->allowsNull()) {
                 $property->setOptional(true);
@@ -137,9 +137,11 @@ class AnnotationFactory implements AnnotationFactoryInterface {
      * @param AnnotationProperty $property
      */
     private function extendAnnotationProperty(ReflectionProperty $refProperty, AnnotationProperty $property) : void {
-        if (preg_match('/@param\s+([^\s]+)/', $refProperty->getDocComment(), $matches)) {
+        if (preg_match('/@var\s+([^\s]+)/', $refProperty->getDocComment(), $matches)) {
             $annotation                         = $matches[1];
-            $property->setBuiltIn($this->isBuiltInByAnnotation($annotation));
+            if ($this->isBuiltInByAnnotation($annotation)) {
+                $property->setBuiltIn(true);
+            }
             if ($this->isArrayByAnnotation($annotation)) {
                 $property->setArray(true);
             }
@@ -154,7 +156,12 @@ class AnnotationFactory implements AnnotationFactoryInterface {
         }
     }
 
-    private function getTypeByAnnotation(string $annotation, ?string $declaringClass) : string {
+    /**
+     * @param string $annotation
+     * @param string|null $declaringClass
+     * @return string|null
+     */
+    private function getTypeByAnnotation(string $annotation, ?string $declaringClass) :?string {
         $annotation                             	= strtr($annotation, [
             "[]" => "",
         ]);
@@ -172,12 +179,15 @@ class AnnotationFactory implements AnnotationFactoryInterface {
                 throw new InvalidArgumentException("unable to return a unique type from annotation, given $annotation");
             }
             $type                                   = array_shift($types);
+            if (!$type && $this->isArrayByAnnotation($annotation)) {
+                return null;
+            }
             if ($declaringClass) {
                 if ($typeClassName = $this->classNameResolver->getClassName($declaringClass, $type)) {
                     return $typeClassName;
                 }
             }
-            throw new InvalidArgumentException("unable to resolve an annotation type, given $annotation");
+            throw new InvalidArgumentException("unable to resolve annotation type, given $annotation");
         }
     }
 

@@ -40,7 +40,7 @@ class AnnotationReturnType {
         $this->optional = $optional;
     }
 
-    public function setType(string $type) : void {
+    public function setType(?string $type) : void {
         $this->type = $type;
     }
     public function getType() :?string {

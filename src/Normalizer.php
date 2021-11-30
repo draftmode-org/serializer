@@ -2,6 +2,7 @@
 
 namespace Terrazza\Component\Serializer;
 
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -9,6 +10,7 @@ use RuntimeException;
 use stdClass;
 use Terrazza\Component\Logger\LogInterface;
 use Terrazza\Component\Serializer\Annotation\AnnotationFactoryInterface;
+use Throwable;
 
 class Normalizer implements NormalizerInterface {
     use TraceKeyTrait;
@@ -55,25 +57,31 @@ class Normalizer implements NormalizerInterface {
             $refProperty->setAccessible(true);
             if ($refProperty->isInitialized($object)) {
                 $attributeValue                     = $refProperty->getValue($object);
+                if (is_null($attributeValue)) {
+                    if ($property->isOptional()) {
+                        return null;
+                    } else {
+                        throw new InvalidArgumentException($this->getTraceKeys()." expected value, given null");
+                    }
+                }
                 if ($property->isBuiltIn()) {
-                    $logger->debug("property $attributeName is builtIn", ["line" => __LINE__]);
-                    return $attributeValue;
-                } elseif ($propertyType = $property->getType()) {
-                    $logger->debug("property $attributeName withType ".$propertyType, ["line" => __LINE__]);
-                    if ($nameConverterClass = $this->getNameConverterClass($propertyType)) {
-                        $logger->debug("nameConverterClass for property $attributeName found", ["line" => __LINE__]);
-                        $converter                  = new ReflectionClass($nameConverterClass);
-                        if ($converter->implementsInterface(NameConverterInterface::class)) {
-                            /** @var NameConverterInterface $convertClass */
-                            $convertClass           = $converter->newInstance($attributeValue);
-                            return $convertClass->getValue();
+                    $logger->debug("property $attributeName is builtIn", ["line" => __LINE__, "isArray" => $property->isArray()]);
+                    if ($propertyType = $property->getType()) {
+                        if (is_array($attributeValue)) {
+                            $attributeValues        = [];
+                            foreach ($attributeValue as $singleAttributeValue) {
+                                $attributeValues[]  = $this->getAttributeValueByType($propertyType, $singleAttributeValue);
+                            }
+                            return $attributeValues;
                         } else {
-                            throw new RuntimeException("$nameConverterClass does not implement ".NameConverterInterface::class);
+                            throw new InvalidArgumentException($this->getTraceKeys()." expected array given ".gettype($attributeValue));
                         }
                     } else {
-                        $logger->debug("no nameConverterClass for property $attributeName found", ["line" => __LINE__]);
-                        return $this->normalize($attributeValue);
+                        return $attributeValue;
                     }
+                } elseif ($propertyType = $property->getType()) {
+                    $logger->debug("property $attributeName withType ".$propertyType, ["line" => __LINE__]);
+                    return $this->getAttributeValueByType($propertyType, $attributeValue);
                 } else {
                     throw new RuntimeException($this->getTraceKeys()." property could not be resolved");
                 }
@@ -82,6 +90,35 @@ class Normalizer implements NormalizerInterface {
             }
         } else {
             throw new RuntimeException($this->getTraceKeys()." property does not exists");
+        }
+    }
+
+    /**
+     * @param string $attributeName
+     * @param string $propertyType
+     * @param $attributeValue
+     * @return mixed
+     * @throws ReflectionException
+     */
+    private function getAttributeValueByType(string $propertyType, $attributeValue) {
+        $logger                                     = $this->logger->withMethod(__METHOD__);
+        if ($nameConverterClass = $this->getNameConverterClass($propertyType)) {
+            $logger->debug("nameConverterClass for property found", ["line" => __LINE__]);
+            $converter                  = new ReflectionClass($nameConverterClass);
+            if ($converter->implementsInterface(NameConverterInterface::class)) {
+                /** @var NameConverterInterface $convertClass */
+                $convertClass           = $converter->newInstance($attributeValue);
+                try {
+                    return $convertClass->getValue();
+                } catch (Throwable $exception) {
+                    throw new RuntimeException("getValue() for nameConvertClass $propertyType failure: ".$exception->getMessage(), $exception->getCode(), $exception);
+                }
+            } else {
+                throw new RuntimeException("$nameConverterClass does not implement ".NameConverterInterface::class);
+            }
+        } else {
+            $logger->debug("no nameConverterClass for property found", ["line" => __LINE__]);
+            return $this->normalize($attributeValue);
         }
     }
 
@@ -106,12 +143,13 @@ class Normalizer implements NormalizerInterface {
         }
     }
 
+    /**
+     * @param string $haystack
+     * @param string $needle
+     * @return string|null
+     */
     private function _str_starts_with(string $haystack, string $needle) :?string {
         return substr($haystack, 0, strlen($needle)) === $needle;
-    }
-
-    private function isAllowedAttribute() : bool {
-        return true;
     }
 
     /**
@@ -120,10 +158,11 @@ class Normalizer implements NormalizerInterface {
      */
     private function getAttributes(object $object) : array {
         $logger                                     = $this->logger->withMethod(__METHOD__);
+        /*
         if (stdClass::class === get_class($object)) {
             return array_keys((array) $object);
         }
-
+        */
         $attributes                                 = [];
         $refClass                                   = new ReflectionClass($object);
         foreach ($refClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
@@ -147,22 +186,26 @@ class Normalizer implements NormalizerInterface {
                 $attributeName                      = substr($methodName, 2);
                 $logger->debug("method $methodName starts with $needle", ["line" => __LINE__]);
             }
-            if ($attributeName && !$refClass->hasProperty($attributeName)) {
+            if ($attributeName !== null) {
                 $attributeName                      = lcfirst($attributeName);
-            }
-            if ($attributeName !== null && $this->isAllowedAttribute()) {
-                $attributes[$attributeName]         = true;
+                if ($refClass->hasProperty($attributeName)) {
+                    $attributes[$attributeName]     = true;
+                }
             }
         }
 
         foreach ($refClass->getProperties() as $property) {
             $propertyName                           = $property->getName();
-            if (!$property->isPublic()) {
-                $logger->debug("skip property $propertyName", ["line" => __LINE__]);
+            if (array_key_exists($propertyName, $attributes)) {
+                $logger->debug("skip property $propertyName, already found as method", ["line" => __LINE__]);
                 continue;
             }
-            if ($property->isStatic() || !$this->isAllowedAttribute()) {
-                $logger->debug("skip property $propertyName", ["line" => __LINE__]);
+            if (!$property->isPublic()) {
+                $logger->debug("skip property $propertyName, is not public", ["line" => __LINE__]);
+                continue;
+            }
+            if ($property->isStatic()) {
+                $logger->debug("skip property $propertyName, is static", ["line" => __LINE__]);
                 continue;
             }
             $attributeName                          = $property->getName();

@@ -16,6 +16,8 @@ class JsonArrayTest extends TestCase {
                 'regular'   => 95.40,
                 'offer'     => 90.0
             ],
+            'user'          => "sUser",
+            'description'   => "sDescription",
             'vLabels'        => [
                 "sLabel1",
                 "sLabel2",
@@ -24,7 +26,6 @@ class JsonArrayTest extends TestCase {
                 "aLabel1",
                 "aLabel1",
             ],
-            'description'   => "sDescription",
             'person'        => [
                 'name'          => "mPersonName",
                 'address'       => [
@@ -32,15 +33,11 @@ class JsonArrayTest extends TestCase {
                     'city'          => "mAddressCity",
                 ]
             ],
-            'user'          => "sUser",
         ]);
         $deserializer = JsonArrayUnit::getDeserializer();
         $sProduct   = $deserializer->deserialize(SerializerRealLifeProduct::class, $input);
 
-        $serializer = JsonArrayUnit::getSerializer(false, [
-            SerializerRealLifeUUID::class => SerializerRealLifePresentUUID::class,
-            SerializerRealLifeProductAmount::class => SerializerRealLifePresentAmount::class,
-        ]);
+        $serializer = JsonArrayUnit::getSerializer();
         $output     = $serializer->serialize($sProduct);
 
         $this->assertEquals($input, $output);
