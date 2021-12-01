@@ -1,17 +1,20 @@
 <?php
 namespace Terrazza\Component\Serializer\Annotation;
-use InvalidArgumentException;
 use ReflectionMethod;
+use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionProperty;
+use Terrazza\Component\Logger\LogInterface;
 use Terrazza\Component\ReflectionClass\ClassNameResolverInterface;
 
 class AnnotationFactory implements AnnotationFactoryInterface {
+    private LogInterface $logger;
     private ClassNameResolverInterface $classNameResolver;
     private array $builtInTypes;
-    CONST BUILT_IN_TYPES                            = ["int", "integer", "float", "double", "string", "DateTime", "NULL"];
+    CONST BUILT_IN_TYPES                            = ["int", "integer", "float", "double", "string", "array", "NULL"];
 
-    public function __construct(ClassNameResolverInterface $classNameResolver, ?array $builtInTypes=null) {
+    public function __construct(LogInterface $logger, ClassNameResolverInterface $classNameResolver, ?array $builtInTypes=null) {
+        $this->logger                               = $logger;
         $this->classNameResolver                    = $classNameResolver;
         $this->builtInTypes                         = $builtInTypes ?? self::BUILT_IN_TYPES;
     }
@@ -39,34 +42,56 @@ class AnnotationFactory implements AnnotationFactoryInterface {
      * @return AnnotationReturnType
      */
     public function getAnnotationReturnType(ReflectionMethod $method): AnnotationReturnType {
-        $returnType                          = new AnnotationReturnType($method->getName());
+        $logger                                     = $this->logger->withMethod(__METHOD__);
+        $returnType                                 = new AnnotationReturnType($method->getName());
         $returnType->setDeclaringClass($method->getDeclaringClass()->getName());
-        if ($returnTypeType = $method->getReturnType()) {
-            $returnType->setBuiltIn($returnTypeType->isBuiltin());
-            $returnType->setOptional($returnTypeType->allowsNull());
+
+        if ($method->hasReturnType()) {
+            /** @var ReflectionNamedType $type */
+            $type                                   = $method->getReturnType();
+            $logger->debug("type",
+                ["line" => __LINE__, "type" => $type->getName(), "isBuiltIn" => $type->isBuiltIn(), "isOptional" => $type->allowsNull()]);
+            $returnType->setBuiltIn($type->isBuiltin());
+            $returnType->setOptional($type->allowsNull());
+            $returnType->setType($type->getName());
+            if ($returnType->getType()==="array") {
+                $returnType->setArray(true);
+                $returnType->setBuiltIn(true);
+            }
         }
-        $this->extendAnnotationReturnType($method, $returnType);
+        if ($annotation = $this->getReturnTypeAnnotation($method)) {
+            $logger->debug("hasAnnotation $annotation");
+            $this->extendTypeWithAnnotation($returnType, $annotation);
+        }
         return $returnType;
     }
 
     /**
-     * @param ReflectionMethod $method
-     * @param AnnotationReturnType $returnType
+     * @param ReflectionProperty $refProperty
+     * @return AnnotationProperty
      */
-    private function extendAnnotationReturnType(ReflectionMethod $method, AnnotationReturnType $returnType) : void {
-        if (preg_match('/@return\s+([^\s]+)/', $method->getDocComment(), $matches)) {
-            $annotation 						= $matches[1];
-            $returnType->setBuiltIn($this->isBuiltInByAnnotation($annotation));
-            if ($this->isArrayByAnnotation($annotation)) {
-                $returnType->setArray(true);
+    public function getAnnotationProperty(ReflectionProperty $refProperty): AnnotationProperty {
+        $logger                                     = $this->logger->withMethod(__METHOD__);
+        $property                                   = new AnnotationProperty($refProperty->getName());
+        $property->setDeclaringClass($refProperty->getDeclaringClass()->getName());
+        if ($refProperty->hasType()) {
+            /** @var ReflectionNamedType $type */
+            $type                                   = $refProperty->getType();
+            $logger->debug("type",
+                ["line" => __LINE__, "type" => $type->getName(), "isBuiltIn" => $type->isBuiltIn(), "isOptional" => $type->allowsNull()]);
+            $property->setBuiltIn($type->isBuiltin());
+            $property->setOptional($type->allowsNull());
+            $property->setType($type->getName());
+            if ($property->getType()==="array") {
+                $property->setArray(true);
+                $property->setBuiltIn(true);
             }
-            if (strpos($annotation, "|null")!==false) {
-                $returnType->setOptional(true);
-            }
-            $returnType->setType(
-                $this->getTypeByAnnotation($annotation, $returnType->getDeclaringClass())
-            );
         }
+        if ($annotation = $this->getPropertyVarAnnotation($refProperty)) {
+            $logger->debug("hasAnnotation $annotation");
+            $this->extendTypeWithAnnotation($property, $annotation);
+        }
+        return $property;
     }
 
     /**
@@ -75,85 +100,61 @@ class AnnotationFactory implements AnnotationFactoryInterface {
      * @return AnnotationParameter
      */
     public function getAnnotationParameter(ReflectionMethod $refMethod, ReflectionParameter $refParameter) : AnnotationParameter {
+        $logger                                     = $this->logger->withMethod(__METHOD__);
         $parameter                                  = new AnnotationParameter($refParameter->getName());
         $parameter->setArray($refParameter->isArray());
-        $parameter->setVariadic($refParameter->isVariadic());
         $parameter->setOptional($refParameter->isOptional());
         $parameter->setDeclaringClass($refParameter->getDeclaringClass() ? $refParameter->getDeclaringClass()->getName() : null);
-
+        if ($refParameter->isVariadic()) {
+            $parameter->setArray(true);
+            $parameter->setVariadic(true);
+            $parameter->setOptional(true);
+        }
         if ($refParameter->isDefaultValueAvailable()) {
-            $parameter->setDefaultValueAvailable(true);
+            $parameter->setDefaultValueAvailable($refParameter->isDefaultValueAvailable());
             $parameter->setDefaultValue($refParameter->getDefaultValue());
         }
-        if ($parameterType = $refParameter->getType()) {
-            $parameter->setType($parameterType->getName());
-            if ($parameterType->isBuiltIn()) {
+        if ($refParameter->hasType()) {
+            /** @var ReflectionNamedType $type */
+            $type                                   = $refParameter->getType();
+            $logger->debug("type",
+                ["line" => __LINE__, "type" => $type->getName(), "isBuiltIn" => $type->isBuiltIn(), "isOptional" => $type->allowsNull()]);
+            $parameter->setBuiltIn($type->isBuiltin());
+            $parameter->setOptional($type->allowsNull());
+            $parameter->setType($type->getName());
+            if ($parameter->getType()==="array") {
+                $parameter->setArray(true);
                 $parameter->setBuiltIn(true);
             }
+        } else {
+            $logger->debug("has no type");
         }
-        $this->extendAnnotationParameter($refMethod, $parameter);
+        if ($annotation = $this->getParameterAnnotation($refMethod, $refParameter)) {
+            $logger->debug("hasAnnotation $annotation");
+            $this->extendTypeWithAnnotation($parameter, $annotation);
+        }
         return $parameter;
     }
 
-    private function extendAnnotationParameter(ReflectionMethod $method, AnnotationParameter $parameter) : void {
-        if (preg_match('/@param\\s+(\\S+)\\s+\\$' . $parameter->getName() . '/', $method->getDocComment(), $matches)) {
-            $annotation 						= $matches[1];
-            $parameter->setBuiltIn($this->isBuiltInByAnnotation($annotation));
-            if ($this->isArrayByAnnotation($annotation)) {
-                $parameter->setArray(true);
-            }
-            if (strpos($annotation, "|null")!==false) {
-                $parameter->setOptional(true);
-            }
-            $parameter->setType(
-                $this->getTypeByAnnotation($annotation, $parameter->getDeclaringClass())
-            );
-        }
-    }
-
     /**
-     * @param ReflectionProperty $refProperty
-     * @return AnnotationProperty
+     * @param AnnotationTypeInterface $annotationType
+     * @param string $annotation
      */
-    public function getAnnotationProperty(ReflectionProperty $refProperty) : AnnotationProperty {
-        $property                               = new AnnotationProperty($refProperty->getName());
-        $property->setDeclaringClass($refProperty->getDeclaringClass());
-        if ($refProperty->hasType()) {
-            $refPropertyType                    = $refProperty->getType();
-            if ($refPropertyType->isBuiltIn()) {
-                $property->setBuiltIn(true);
-            } else {
-                $property->setType($refPropertyType->getName());
-            }
-            if ($refPropertyType->allowsNull()) {
-                $property->setOptional(true);
-            }
+    private function extendTypeWithAnnotation(AnnotationTypeInterface $annotationType, string $annotation) : void {
+        if ($type = $this->getBuildInByAnnotation($annotation)) {
+            $annotationType->setBuiltIn(true);
+            $annotationType->setType($type);
         }
-        $this->extendAnnotationProperty($refProperty, $property);
-        return $property;
-    }
-
-    /**
-     * @param ReflectionProperty $refProperty
-     * @param AnnotationProperty $property
-     */
-    private function extendAnnotationProperty(ReflectionProperty $refProperty, AnnotationProperty $property) : void {
-        if (preg_match('/@var\s+([^\s]+)/', $refProperty->getDocComment(), $matches)) {
-            $annotation                         = $matches[1];
-            if ($this->isBuiltInByAnnotation($annotation)) {
-                $property->setBuiltIn(true);
-            }
-            if ($this->isArrayByAnnotation($annotation)) {
-                $property->setArray(true);
-            }
-            if (strpos($annotation, "|null")!==false) {
-                $property->setOptional(true);
-            }
-            if (!$property->getType()) {
-                if ($annotationType = $this->getTypeByAnnotation($annotation, $property->getDeclaringClass())) {
-                    $property->setType($annotationType);
-                }
-            }
+        if ($this->isArrayByAnnotation($annotation)) {
+            $annotationType->setArray(true);
+            $annotationType->setBuiltIn(true);
+        }
+        if ($this->isOptionalByAnnotation($annotation)) {
+            $annotationType->setOptional(true);
+        }
+        if ($typeClass = $this->getTypeClassByAnnotation($annotation, $annotationType->getDeclaringClass())) {
+            $annotationType->setType($typeClass);
+            $annotationType->setBuiltIn(false);
         }
     }
 
@@ -162,36 +163,75 @@ class AnnotationFactory implements AnnotationFactoryInterface {
      * @param string|null $declaringClass
      * @return string|null
      */
-    private function getTypeByAnnotation(string $annotation, ?string $declaringClass) :?string {
+    private function getTypeClassByAnnotation(string $annotation, ?string $declaringClass) :?string {
+        $logger                                     = $this->logger->withMethod(__METHOD__);
+        if ($this->isBuiltInByAnnotation($annotation)) {
+            $logger->debug("annotation $annotation isBuiltInAnnotation");
+            return null;
+        }
         $annotation                             	= strtr($annotation, [
             "[]" => "",
         ]);
         $types                        				= explode("|", $annotation);
-        if ($this->isBuiltInByAnnotation($annotation)) {
-            $types                        			= array_diff($types, ['null']);
-            if (count($types) > 1) {
-                throw new InvalidArgumentException("unable to return a unique type from annotation, given $annotation");
+        $types                        			    = array_diff($types, ['array', 'null']);
+        $type                                       = array_shift($types);
+        if ($type && $declaringClass) {
+            if ($typeClassName = $this->classNameResolver->getClassName($declaringClass, $type)) {
+                return $typeClassName;
             }
-            return array_shift($types);
         }
-        else {
-            $types                        			= array_diff($types, ['array', 'null']);
-            if (count($types) > 1) {
-                throw new InvalidArgumentException("unable to return a unique type from annotation, given $annotation");
-            }
-            $type                                   = array_shift($types);
-            if (!$type && $this->isArrayByAnnotation($annotation)) {
-                return null;
-            }
-            if ($declaringClass) {
-                if ($typeClassName = $this->classNameResolver->getClassName($declaringClass, $type)) {
-                    return $typeClassName;
-                }
-            }
-            throw new InvalidArgumentException("unable to resolve annotation type, given $annotation");
+        return null;
+    }
+
+    /**
+     * @param ReflectionMethod $method
+     * @return string|null
+     */
+    private function getReturnTypeAnnotation(ReflectionMethod $method) :?string {
+        if (preg_match('/@return\s+([^\s]+)/', $method->getDocComment(), $matches)) {
+            return $matches[1];
+        } else {
+            return null;
         }
     }
 
+    /**
+     * @param ReflectionMethod $method
+     * @param ReflectionParameter $parameter
+     * @return string|null
+     */
+    private function getParameterAnnotation(ReflectionMethod $method, ReflectionParameter $parameter) :?string {
+        if (preg_match('/@param\\s+(\\S+)\\s+\\$' . $parameter->getName() . '/', $method->getDocComment(), $matches)) {
+            return $matches[1];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @param ReflectionProperty $property
+     * @return string|null
+     */
+    private function getPropertyVarAnnotation(ReflectionProperty $property) :?string {
+        if (preg_match('/@var\s+([^\s]+)/', $property->getDocComment(), $matches)) {
+            return $matches[1];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @param string $annotation
+     * @return bool
+     */
+    private function isOptionalByAnnotation(string $annotation) : bool {
+        return (strpos($annotation, "|null")!==false);
+    }
+
+    /**
+     * @param string $annotation
+     * @return bool
+     */
     private function isArrayByAnnotation(string $annotation) : bool {
         $types                        		    = explode("|", $annotation);
         foreach ($types as $type) {
@@ -202,6 +242,27 @@ class AnnotationFactory implements AnnotationFactoryInterface {
         return false;
     }
 
+    /**
+     * @param string $annotation
+     * @return string|null
+     */
+    private function getBuildInByAnnotation(string $annotation) :?string {
+        $annotation                                 = strtr($annotation, [
+            "[]" => ""
+        ]);
+        $types                        				= explode("|", $annotation);
+        foreach ($types as $type) {
+            if ($this->isBuiltInType($type)) {
+                return $type;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param string $annotation
+     * @return bool
+     */
     private function isBuiltInByAnnotation(string $annotation) : bool {
         $annotation                                 = strtr($annotation, [
             "[]" => ""

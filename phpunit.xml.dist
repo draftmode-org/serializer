@@ -24,9 +24,13 @@
   </php>
   <testsuites>
     <testsuite name="Terrazza Serializer Component Test">
-      <directory>./tests/</directory>
+      <directory>./tests/Annotation</directory>
+      <directory>./tests/Decoder</directory>
+      <directory>./tests/Encoder</directory>
+      <file>./tests/Factory/Json/JsonDeserializerExceptionTest.php</file>
+      <file>./tests/Factory/Json/JsonSerializerTest.php</file>
     </testsuite>
-    <testsuite name="next">
+    <testsuite name="single">
       <directory>./tests/Annotation</directory>
     </testsuite>
   </testsuites>

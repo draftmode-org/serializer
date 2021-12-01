@@ -7,4 +7,10 @@ interface NormalizerInterface {
      * @return array
      */
     public function normalize(object $object) : array;
+
+    /**
+     * @param array $nameConverter
+     * @return NormalizerInterface
+     */
+    public function withNameConverter(array $nameConverter) : NormalizerInterface;
 }

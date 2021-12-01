@@ -17,7 +17,7 @@ class Deserializer implements DeserializerInterface {
     }
 
     /**
-     * @param class-string<T>|object $className
+     * @param string|class-string<T>|object $className
      * @param mixed $input
      * @param bool $restrictUnInitialized
      * @param bool $restrictArguments
@@ -34,7 +34,7 @@ class Deserializer implements DeserializerInterface {
 
     /**
      * @param class-string<T>|object $className
-     * @return T|object
+     * @return T|object|mixed
      * @template T
      */
     private function cloneClass($className) {

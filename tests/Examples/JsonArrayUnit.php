@@ -2,14 +2,16 @@
 
 namespace Terrazza\Component\Serializer\Tests\Examples;
 
+use DateTime;
 use Terrazza\Component\Serializer\DeserializerInterface;
 use Terrazza\Component\Serializer\Factory\Json\JsonDeserializer;
 use Terrazza\Component\Serializer\Factory\Json\JsonSerializer;
 use Terrazza\Component\Serializer\SerializerInterface;
-use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductAmount;
-use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductLabel;
-use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeUUID;
+use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductAmount;
+use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductLabel;
+use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeUUID;
 use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentAmount;
+use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentDateTime;
 use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentLabel;
 use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentUUID;
 
@@ -21,13 +23,14 @@ class JsonArrayUnit {
         );
     }
 
-    public static function getSerializer(bool $logLevel=false, ?array $nameConverter=null) : SerializerInterface {
+    public static function getSerializer(bool $logLevel=false) : SerializerInterface {
         return new JsonSerializer(
-            LoggerUnit::getLogger("Deserializer", $logLevel),
-            $nameConverter ?? [
+            LoggerUnit::getLogger("Serializer", $logLevel),
+            [
                 SerializerRealLifeUUID::class => SerializerRealLifePresentUUID::class,
                 SerializerRealLifeProductAmount::class => SerializerRealLifePresentAmount::class,
-                SerializerRealLifeProductLabel::class => SerializerRealLifePresentLabel::class
+                SerializerRealLifeProductLabel::class => SerializerRealLifePresentLabel::class,
+                DateTime::class => SerializerRealLifePresentDateTime::class
             ]
         );
     }

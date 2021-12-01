@@ -7,7 +7,7 @@ use ReflectionException;
 
 interface DenormalizerInterface {
     /**
-     * @param class-string<T>|object $className
+     * @param string|class-string<T>|object $className
      * @param mixed $input
      * @param bool $restrictUnInitialized
      * @param bool $restrictArguments

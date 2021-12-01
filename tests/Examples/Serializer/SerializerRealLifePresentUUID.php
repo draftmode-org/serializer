@@ -1,7 +1,7 @@
 <?php
 namespace Terrazza\Component\Serializer\Tests\Examples\Serializer;
 use Terrazza\Component\Serializer\NameConverterInterface;
-use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeUUID;
+use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeUUID;
 
 class SerializerRealLifePresentUUID implements NameConverterInterface {
     private SerializerRealLifeUUID $value;

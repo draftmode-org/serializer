@@ -1,7 +1,7 @@
 <?php
 namespace Terrazza\Component\Serializer\Tests\Examples\Serializer;
 use Terrazza\Component\Serializer\NameConverterInterface;
-use Terrazza\Component\Serializer\Tests\Examples\Deserializer\SerializerRealLifeProductLabel;
+use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductLabel;
 
 class SerializerRealLifePresentLabel implements NameConverterInterface {
     private SerializerRealLifeProductLabel $value;

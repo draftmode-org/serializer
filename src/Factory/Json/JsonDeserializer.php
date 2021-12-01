@@ -23,6 +23,7 @@ class JsonDeserializer implements DeserializerInterface {
         $this->denormalizer                         = new ArrayDenormalizer(
             $logger,
             new AnnotationFactory(
+                $logger,
                 new ClassNameResolver()
             )
         );

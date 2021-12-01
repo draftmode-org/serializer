@@ -40,17 +40,16 @@ in any case there are 2 options provided
 ### How should a class be designed
 We suggest that all required arguments are handled by the __constructor<br>
 and all optional arguments are handled by the setter.
-
+#### Actually provided decoding
+- JSON
 <a id="serialize" name="serialize"></a>
 <a id="user-content-serialize" name="user-content-serialize"></a>
 ## Method - Serialize
 1. normalize object to array
 2. encode array to (JSON,XML,CSV)
 
-#### Actually provided decoding
+#### Actually provided encoding
 - JSON
-<a id="deserialize" name="deserialize"></a>
-<a id="user-content-deserialize" name="user-content-deserialize"></a>
 <a id="install" name="install"></a>
 <a id="user-content-install" name="user-content-install"></a>
 ## How to install

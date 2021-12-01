@@ -3,8 +3,9 @@ namespace Terrazza\Component\Serializer;
 
 interface SerializerInterface {
     /**
-     * @param object $object
+     * @param mixed $object
+     * @param array|null $nameConverter
      * @return mixed
      */
-    public function serialize(object $object);
+    public function serialize($object, ?array $nameConverter=null);
 }
