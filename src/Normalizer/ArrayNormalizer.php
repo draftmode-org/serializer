@@ -65,42 +65,38 @@ class ArrayNormalizer implements NormalizerInterface {
         $refClass                                   = new ReflectionClass($object);
         $logger->debug("$attributeName in class ".$refClass->getName(),
             ["line" => __LINE__]);
-        if ($refClass->hasProperty($attributeName)) {
-            $refProperty                            = $refClass->getProperty($attributeName);
-            $property                               = $this->annotationFactory->getAnnotationProperty($refProperty);
-            $refProperty->setAccessible(true);
-            if ($refProperty->isInitialized($object)) {
-                $logger->debug("property", [
-                    "line"              => __LINE__,
-                    "name"              => $property->getName(),
-                    "isArray"           => $property->isArray(),
-                    "isBuiltIn"         => $property->isBuiltIn(),
-                    "type"              => $property->getType(),
-                ]);
-                $attributeValue                     = $refProperty->getValue($object);
-                if (is_null($attributeValue)) {
-                    return null;
-                }
-                elseif ($property->isBuiltIn()) {
-                    return $attributeValue;
-                } elseif ($propertyTypeClass = $property->getType()) {
-                    if ($property->isArray()) {
-                        $attributeValues        = [];
-                        foreach ($attributeValue as $singleAttributeValue) {
-                            $attributeValues[]  = $this->getAttributeValueByTypeClass($propertyTypeClass, $singleAttributeValue);
-                        }
-                        return $attributeValues;
-                    } else {
-                        return $this->getAttributeValueByTypeClass($propertyTypeClass, $attributeValue);
+        $refProperty                                = $refClass->getProperty($attributeName);
+        $property                                   = $this->annotationFactory->getAnnotationProperty($refProperty);
+        $refProperty->setAccessible(true);
+        if ($refProperty->isInitialized($object)) {
+            $logger->debug("property", [
+                "line"              => __LINE__,
+                "name"              => $property->getName(),
+                "isArray"           => $property->isArray(),
+                "isBuiltIn"         => $property->isBuiltIn(),
+                "type"              => $property->getType(),
+            ]);
+            $attributeValue                         = $refProperty->getValue($object);
+            if (is_null($attributeValue)) {
+                return null;
+            }
+            if ($property->isBuiltIn()) {
+                return $attributeValue;
+            } elseif ($propertyTypeClass = $property->getType()) {
+                if ($property->isArray()) {
+                    $attributeValues                = [];
+                    foreach ($attributeValue as $singleAttributeValue) {
+                        $attributeValues[]          = $this->getAttributeValueByTypeClass($propertyTypeClass, $singleAttributeValue);
                     }
+                    return $attributeValues;
                 } else {
-                    throw new RuntimeException($this->getTraceKeys()." propertyValue for propertyType cannot be resolved");
+                    return $this->getAttributeValueByTypeClass($propertyTypeClass, $attributeValue);
                 }
             } else {
-                throw new RuntimeException($this->getTraceKeys()." property is not initialized");
+                throw new RuntimeException($this->getTraceKeys()." propertyValue for propertyType cannot be resolved");
             }
         } else {
-            throw new RuntimeException($this->getTraceKeys()." property could not be resolved/does not exists");
+            throw new RuntimeException($this->getTraceKeys()." property is not initialized");
         }
     }
 
@@ -115,18 +111,22 @@ class ArrayNormalizer implements NormalizerInterface {
         if ($nameConverterClass = $this->getNameConverterClass($propertyTypeClass)) {
             $logger->debug("nameConverterClass for property found",
                 ["line" => __LINE__, 'className' => $propertyTypeClass]);
-            $converter                              = new ReflectionClass($nameConverterClass);
-            if ($converter->implementsInterface(NameConverterInterface::class)) {
-                /** @var NameConverterInterface $convertClass */
-                $convertClass                       = $converter->newInstance($attributeValue);
-                try {
-                    return $convertClass->getValue();
-                } catch (Throwable $exception) {
-                    $errorCode                      = (int)$exception->getCode();
-                    throw new RuntimeException("getValue() for nameConvertClass $propertyTypeClass failure: ".$exception->getMessage(), $errorCode, $exception);
+            if (class_exists($nameConverterClass)) {
+                $converter                          = new ReflectionClass($nameConverterClass);
+                if ($converter->implementsInterface(NameConverterInterface::class)) {
+                    /** @var NameConverterInterface $convertClass */
+                    $convertClass                   = $converter->newInstance($attributeValue);
+                    try {
+                        return $convertClass->getValue();
+                    } catch (Throwable $exception) {
+                        $errorCode                  = (int)$exception->getCode();
+                        throw new RuntimeException("getValue() for nameConvertClass $propertyTypeClass failure: " . $exception->getMessage(), $errorCode, $exception);
+                    }
+                } else {
+                    throw new RuntimeException("$nameConverterClass does not implement " . NameConverterInterface::class);
                 }
             } else {
-                throw new RuntimeException("$nameConverterClass does not implement ".NameConverterInterface::class);
+                throw new RuntimeException("$nameConverterClass does not exists");
             }
         } else {
             $logger->debug("nameConverterClass for property not found",

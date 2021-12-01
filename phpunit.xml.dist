@@ -27,6 +27,7 @@
       <directory>./tests/Annotation</directory>
       <directory>./tests/Decoder</directory>
       <directory>./tests/Encoder</directory>
+      <directory>./tests/Normalizer</directory>
       <file>./tests/Factory/Json/JsonDeserializerExceptionTest.php</file>
       <file>./tests/Factory/Json/JsonSerializerTest.php</file>
     </testsuite>
