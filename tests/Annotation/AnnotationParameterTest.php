@@ -75,6 +75,33 @@ class AnnotationParameterTest extends TestCase {
     }
 
     /**
+     * @param string $date (yes)
+     */
+    function simpleParamWithContent($date) : void {}
+    function testAnnotationParameterWithContent() {
+        $method         = $this->getMethod($methodName = "simpleParamWithContent");
+        $parameter      = $this->getParameter($method, $parameterName="date");
+        $property       = $this->get()->getAnnotationParameter($method, $parameter);
+        $this->assertEquals([
+            false,
+            false,
+            true,
+            false,
+            false,
+            null,
+            "string"
+        ], [
+            $property->isArray(),
+            $property->isVariadic(),
+            $property->isBuiltIn(),
+            $property->isOptional(),
+            $property->isDefaultValueAvailable(),
+            $property->getDefaultValue(),
+            $property->getType(),
+        ], $methodName.":".$parameterName);
+    }
+
+    /**
      * @param array $arrayRequired
      * @param int[] $arrayInt
      * @param SerializerRealLifeUUID[] $arrayClass

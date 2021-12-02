@@ -23,15 +23,19 @@ class JsonArrayUnit {
         );
     }
 
+    public static function getNameConverter() : array {
+        return [
+            SerializerRealLifeUUID::class => SerializerRealLifePresentUUID::class,
+            SerializerRealLifeProductAmount::class => SerializerRealLifePresentAmount::class,
+            SerializerRealLifeProductLabel::class => SerializerRealLifePresentLabel::class,
+            DateTime::class => SerializerRealLifePresentDateTime::class
+        ];
+    }
+
     public static function getSerializer(bool $logLevel=false) : SerializerInterface {
         return new JsonSerializer(
             LoggerUnit::getLogger("Serializer", $logLevel),
-            [
-                SerializerRealLifeUUID::class => SerializerRealLifePresentUUID::class,
-                SerializerRealLifeProductAmount::class => SerializerRealLifePresentAmount::class,
-                SerializerRealLifeProductLabel::class => SerializerRealLifePresentLabel::class,
-                DateTime::class => SerializerRealLifePresentDateTime::class
-            ]
+            self::getNameConverter()
         );
     }
 }

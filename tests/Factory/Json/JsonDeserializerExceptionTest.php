@@ -1,11 +1,15 @@
 <?php
 namespace Terrazza\Component\Serializer\Tests\Factory\Json;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 use RuntimeException;
 use Terrazza\Component\Serializer\Tests\Examples\JsonArrayUnit;
 
 class JsonDeserializerExceptionTest extends TestCase {
 
+    /**
+     * @throws ReflectionException
+     */
     function testUnknownClass() {
         $input                                      = json_encode([]);
         $deserializer                               = JsonArrayUnit::getDeserializer();

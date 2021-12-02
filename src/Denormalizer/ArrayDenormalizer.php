@@ -11,6 +11,7 @@ use RuntimeException;
 use Terrazza\Component\Logger\LogInterface;
 use Terrazza\Component\Serializer\Annotation\AnnotationFactoryInterface;
 use Terrazza\Component\Serializer\Annotation\AnnotationParameter;
+use Terrazza\Component\Serializer\Annotation\AnnotationTypeInterface;
 use Terrazza\Component\Serializer\DenormalizerInterface;
 use Terrazza\Component\Serializer\TraceKeyTrait;
 
@@ -59,7 +60,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
                 $unmappedKeys                       = $this->updateObject($object, $input, true);
             }
         } else {
-            throw new RuntimeException("className is either an object nor a valid className");
+            throw new RuntimeException("className $className is either an object nor a valid className");
         }
         if (self::$restrictUnInitialized) {
             $this->isInitializedObject($object);
@@ -81,7 +82,8 @@ class ArrayDenormalizer implements DenormalizerInterface {
      */
     private function createObject(string $className, &$input) : object {
         $logger                                     = $this->logger->withMethod(__METHOD__);
-        $logger->debug("createObject for $className", ["line" => __LINE__, "context" => $input]);
+        $logger->debug("createObject $className",
+            ["line" => __LINE__, "context" => $input]);
         if (class_exists($className)) {
             $reflect 						        = new ReflectionClass($className);
             if ($method = $reflect->getConstructor()) {
@@ -110,72 +112,30 @@ class ArrayDenormalizer implements DenormalizerInterface {
      */
     private function updateObject(object $object, &$input, bool $updateObject) : array {
         $logger                                     = $this->logger->withMethod(__METHOD__);
-        $logger->debug(get_class($object),
-            ["arguments" => $input, "line" => __LINE__]);
+        $logger->debug("updateObject ".get_class($object),
+            ["line" => __LINE__, "arguments" => $input]);
         $reflect                                    = new ReflectionClass($object);
         $unmappedKeys                               = [];
         foreach ($input as $inputKey => $inputValue) {
-            $logger->debug("",
-                ["inputKey" => $inputKey, "inputValue" => $inputValue, "line" => __LINE__]);
             if (is_string($inputKey)) {
-                $getMethod                          = "get" . ucfirst($inputKey);
-                if ($updateObject && $reflect->hasMethod($getMethod)) {
-                    $logger->debug("$getMethod",
-                        ["arguments" => $inputValue, "line" => __LINE__]);
-                    $method                         = $reflect->getMethod($getMethod);
-                    $methodReturnType               = $this->annotationFactory->getAnnotationReturnType($method);
-                    if ($this->annotationFactory->isBuiltInType(gettype($inputValue))) {
-                        $logger->debug("inputValue is a builtIn");
-                    } elseif (is_null($inputValue)) {
-                        $logger->debug("inputValue is a null");
-                    }
-                    else {
-                        $getObject                  = $method->invoke($object);
-                        $logger->debug($getMethod." returns", [
-                            "line" => __LINE__,
-                            "valueType"             => gettype($getObject),
-                            'methodName'            => $methodReturnType->getName(),
-                            'methodIsBuiltIn'       => $methodReturnType->isBuiltIn(),
-                            'methodIsOptional'      => $methodReturnType->isOptional(),
-                            'methodIsArray'         => $methodReturnType->isArray(),
-                            'methodType'            => $methodReturnType->getType(),
-                        ]);
-                        //
-                        // return is null
-                        // ... and returnType
-                        // ... and is not a builtIn
-                        // ... and a class
-                        // ... ... call denormalizer with classname and trigger create class
-                        //
-                        $this->pushTraceKey($inputKey);
-                        $methodReturnTypeName       = $methodReturnType->getType();
-                        if (is_null($getObject) &&
-                            !$methodReturnType->isBuiltIn() &&
-                            $methodReturnTypeName) {
-                                $this->denormalize($methodReturnTypeName, $inputValue);
-                                $this->popTraceKey();
-                        } else {
-                            $this->denormalize($getObject, $inputValue);
-                            $this->popTraceKey();
-                            continue;
-                        }
-                    }
-                }
+                $logger->debug("updateObject inputKey: $inputKey",
+                    ["line" => __LINE__, "inputValue" => $inputValue]);
                 $setMethod                          = "set" . ucfirst($inputKey);
                 if ($reflect->hasMethod($setMethod)) {
-                    $logger->debug("$setMethod",
-                        ["arguments" => $inputValue, "line" => __LINE__]);
+                    $logger->debug("updateObject use method: $setMethod",
+                        ["line" => __LINE__]);
                     $method                         = $reflect->getMethod($setMethod);
-                    $methodValue                    = [$inputKey => $inputValue];
-                    $methodValues					= $this->getMethodValues($method, $methodValue);
-                    $logger->debug("invoke $setMethod",
-                        ["arguments" => print_r($methodValues,true), "line" => __LINE__]);
+                    $methodValues                   = $this->getMethodValues($method, $inputValue);
+                    $logger->debug($this->getTraceKeys()." methodValues",
+                        ["line" => __LINE__, "methodValues" => $methodValues]);
                     if (is_array($methodValues)) {
                         $method->invoke($object, ...$methodValues);
                     } else {
                         $method->invoke($object, $methodValues);
                     }
                 } else {
+                    $logger->debug("updateObject method $setMethod not found",
+                        ["line" => __LINE__]);
                     $unmappedKeys[]                 = $inputKey;
                 }
             }
@@ -194,12 +154,9 @@ class ArrayDenormalizer implements DenormalizerInterface {
         $logger                                     = $this->logger->withMethod(__METHOD__);
         $methodValues								= [];
         $parameters 								= $method->getParameters();
-        $requiredParameters                         = $method->getNumberOfRequiredParameters();
-        $firstUnknownParameterSet                   = false;
         if ($method->isPublic()) {
             foreach ($parameters as $parameter) {
-                $methodParameter                    = null;
-                $inputValue                         = null;
+                $inputValue                         = $input;
                 $aParameter                         = $this->annotationFactory->getAnnotationParameter($method, $parameter);
                 $logger->debug("input, aParameter",
                     [
@@ -209,115 +166,77 @@ class ArrayDenormalizer implements DenormalizerInterface {
                         "isVariadic"                => $aParameter->isVariadic(),
                         "isBuiltIn"                 => $aParameter->isBuiltIn(),
                         "type"                      => $aParameter->getType(),
-                        "inputIsArray"              => is_array($input),
-                        "input"                     => $input,
+                        "declaringClass"            => $aParameter->getDeclaringClass(),
                     ]
                 );
+                $pKey                               = $aParameter->getName();
+                $this->pushTraceKey($pKey);
                 if (is_array($input)) {
-                    $logger->debug("input is an array",
-                        ["line" => __LINE__]);
-                    if (array_key_exists($aParameter->getName(), $input)) {
-                        $inputValue                 = $input[$aParameter->getName()];
-                        unset($input[$aParameter->getName()]);
-                        $methodParameter            = $aParameter;
-                        $logger->debug("key ".$aParameter->getName()." exists, new input",
-                            ["line" => __LINE__, "input" => $inputValue]);
-                    } elseif ($aParameter->isVariadic() || $aParameter->isArray()) {
-                        $inputValue                 = $input;
-                        $methodParameter            = $aParameter;
-                        $logger->debug("key ".$aParameter->getName()." does not exists, parameter isVariadic or isArray",
-                            ["line" => __LINE__, "input" => $inputValue]);
-                    }
-                } elseif ($aParameter->isBuiltIn()) {
-                    $inputValue                     = $input;
-                    $methodParameter                = $aParameter;
-                    $logger->debug("input is not an array, parameter isBuiltIn",
-                        ["line" => __LINE__, "input" => $inputValue]);
-                }
-                $this->pushTraceKey($parameter->getName());
-                if ($methodParameter) {
-                    if (is_array($inputValue)) {
-                        $logger->debug("input is an array",
+                    if  (array_key_exists($pKey, $input)) {
+                        $logger->debug($this->getTraceKeys()." found in input",
                             ["line" => __LINE__]);
-                        $arrMethodValues            = [];
-                        if ($methodParameter->isVariadic() || $methodParameter->isArray()) {
-                            $logger->debug("parameter isVariadic or isArray",
-                                ["line" => __LINE__, 'isBuiltIn' => $methodParameter->isBuiltIn(), 'type' => $methodParameter->getType()]);
-                            if ($methodParameter->getType() === "array") {
-                                $arrMethodValues    = $inputValue;
-                            } else {
-                                foreach ($inputValue as $singleInputValue) {
-                                    $arrMethodValues[]  = $this->getMethodValue($methodParameter, $singleInputValue);
-                                }
-                            }
-                            if ($methodParameter->isVariadic()) {
-                                $methodValues       += $arrMethodValues;
-                            } else {
-                                $methodValues[]     = $arrMethodValues;
-                            }
-                        } else {
-                            $logger->debug("parameter not isVariadic, not isArray",
-                                ["line" => __LINE__]);
-                            $methodValues[]         = $this->getMethodValue($methodParameter, $inputValue);
-                        }
+                        $inputValue                 = $input[$pKey];
+                        unset($input[$pKey]);
                     } else {
-                        $logger->debug("input not an array",
-                            ["line" => __LINE__]);
-                        $methodValue                = $this->getMethodValue($methodParameter, $inputValue);
-                        if ($methodParameter->isVariadic() && is_null($methodValue)) {
-                            $logger->debug("position ".$parameter->getPosition().":count:".count($parameters));
-                            if (($parameter->getPosition()+1) !== count($parameters)) {
-                                throw new LogicException("parameter ".$aParameter->getName()." isVariadic and not the latest argument in ".$method->getName());
-                            }
-                            //
-                            // dont extend methodValues
-                            //
+                        $logger->debug($this->getTraceKeys()." not found in input",
+                            ["line" => __LINE__, 'input' => $input]);
+                        if ($aParameter->isArray()) {
+                            $logger->debug("parameter $pKey isArray");
+                            // use input for parameter (should be the first one)
+                            // ...unset input to prevent multiple usage
+                            $input                  = null;
                         } else {
-                            $methodValues[]         = $methodValue;
+                            $inputValue             = null;
                         }
+                    }
+                }
+                if (is_null($inputValue)) {
+                    if ($aParameter->isDefaultValueAvailable()) {
+                        $methodValue                = $aParameter->getDefaultValue();
+                        $logger->debug($this->getTraceKeys()." use defaultValue",
+                            ["line" => __LINE__]);
+                    } elseif ($aParameter->isOptional()) {
+                        $methodValue                = null;
+                        $logger->debug($this->getTraceKeys(). " isOptional",
+                            ["line" => __LINE__]);
+                    } else {
+                        throw new InvalidArgumentException($this->getTraceKeys() . " is required");
                     }
                 } else {
-                    $logger->debug("no input for parameter found",
-                        ["line" => __LINE__, 'requiredArguments' => $requiredParameters]);
-                    if (!$firstUnknownParameterSet) {
-                        $methodValues[]             = $this->getMethodValue($aParameter, $input);
-                        $firstUnknownParameterSet   = true;
-                    }
-                    else {
-                        if (!$aParameter->isOptional()) {
-                            throw new InvalidArgumentException($this->getTraceKeys() . " is required");
+                    if ($aParameter->isBuiltIn()) {
+                        $methodValue                = $this->getBuiltInInputValue($aParameter, $inputValue);
+                    } else {
+                        if ($typeClassName = $aParameter->getType()) {
+                            if (is_array($inputValue)) {
+                                $inValues           = [];
+                                foreach ($inputValue as $inValue) {
+                                    $inValues[]     = $this->denormalize($typeClassName, $inValue);
+                                }
+                                $methodValue        = $inValues;
+                            } else {
+                                $methodValue        = $this->denormalize($typeClassName, $inputValue);
+                            }
+                        }
+                        else {
+                            // use input for parameter (should be the first one)
+                            // ...unset input to prevent multiple usage
+                            $methodValue            = $inputValue;
+                            $input                  = null;
                         }
                     }
                 }
+                if ($aParameter->isVariadic() && is_array($methodValue)) {
+                    $methodValues                   += $methodValue;
+                } else {
+                    $methodValues[]                 = $methodValue;
+                }
+                $logger->debug("methodValues after render parameter $pKey",
+                    ["line" => __LINE__, "methodValues" => $methodValues]);
                 $this->popTraceKey();
-                $logger->debug("context",
-                    ["line" => __LINE__, "context" => $methodValues]);
             }
             return $methodValues;
         } else {
             return null;
-        }
-    }
-
-    /**
-     * @param AnnotationParameter $parameter
-     * @param mixed $inputValue
-     * @return mixed
-     * @throws ReflectionException
-     */
-    private function getMethodValue(AnnotationParameter $parameter, $inputValue) {
-        $logger                                     = $this->logger->withMethod(__METHOD__);
-        $logger->debug("", ["inputValue" => $inputValue, 'isBuiltIn' => $parameter->isBuiltIn()]);
-        if ((is_null($inputValue) || (is_array($inputValue) && count($inputValue)===0)) &&
-            $parameter->isOptional()) {
-            return null;
-        }
-        if ($parameter->isBuiltIn()) {
-            return $this->getBuiltInValue($parameter, $inputValue);
-        } elseif ($parameterType = $parameter->getType()) {
-            return $this->denormalize($parameterType, $inputValue);
-        } else {
-            throw new InvalidArgumentException($this->getTraceKeys() . " could not be handled");
         }
     }
 
@@ -338,40 +257,13 @@ class ArrayDenormalizer implements DenormalizerInterface {
     }
 
     /**
-     * @param AnnotationParameter $parameter
+     * @param AnnotationTypeInterface $parameter
      * @param mixed $input
      * @return mixed
      */
-    private function getBuiltInValue(AnnotationParameter $parameter, $input) {
-        $inputType 									= $this->getInputType($input);
-        if ($parameter->isArray()) {
-            if ($inputType === "array") {
-                $inputValues						= [];
-                foreach ($input as $inputValue) {
-                    $inputValues[] 					= $this->getBuiltInInputValue($parameter, $inputValue);
-                }
-                return $inputValues;
-            }
-            else {
-                throw new InvalidArgumentException("expected array, given $inputType");
-            }
-        } else {
-            return $this->getBuiltInInputValue($parameter, $input);
-        }
-    }
-
-    /**
-     * @param AnnotationParameter $parameter
-     * @param mixed $input
-     * @return mixed
-     */
-    private function getBuiltInInputValue(AnnotationParameter $parameter, $input) {
+    private function getBuiltInInputValue(AnnotationTypeInterface $parameter, $input) {
         $inputType 									= $this->getInputType($input);
         $parameterType 								= $parameter->getType();
-        if ((is_null($input) || (is_array($input) && count($input)===0)) &&
-            $parameter->isOptional()) {
-            return null;
-        }
         if ($parameterType !== $inputType) {
             if ($parameterType === "string" && $inputType === "int") {
                 return (string)$input;
@@ -381,6 +273,9 @@ class ArrayDenormalizer implements DenormalizerInterface {
             }
             if ($parameterType === "float" && $inputType === "int") {
                 return floatval($input);
+            }
+            if ($inputType === "array") {
+                return $input;
             }
             $traceKey                               = $this->getTraceKeys();
             $this->popTraceKey();

@@ -11,6 +11,11 @@ use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProduct
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductUUID;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeUserUUID;
 use Terrazza\Component\Serializer\Tests\Examples\JsonArrayUnit;
+use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeUUID;
+use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentAmount;
+use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentDateTime;
+use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentLabel;
+use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentUUID;
 
 class JsonSerializerTest extends TestCase {
 
@@ -41,7 +46,7 @@ class JsonSerializerTest extends TestCase {
         $mProduct->setCreatedAt(new \DateTime($dateTime = "2021-01-31"));
 
         $serializer = JsonArrayUnit::getSerializer();
-        $response = $serializer->serialize($mProduct);
+        $response = $serializer->serialize($mProduct, JsonArrayUnit::getNameConverter());
         $this->assertEquals(<<<JSON
         {"id":"{$id}","price":{"regular":{$mPriceRegular},"offer":null},"user":"{$mUser}","description":"{$mDescription}","vLabels":["{$mLabel1}"],"aLabels":["{$mLabel1}"],"person":{"name":"{$mPersonName}","address":{"street":"{$mAddressStreet}","city":"{$mAddressCity}"}},"createdAt":"{$dateTime}"}
         JSON, $response);

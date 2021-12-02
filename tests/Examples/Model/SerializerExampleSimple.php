@@ -12,13 +12,13 @@ class SerializerExampleSimple {
     /**
      * @param int $number
      */
-    public function __construct($number, float $float, string $string, array $array, int $number2=null, int $dInt=2) {
-        $this->number = $number;
-        $this->number2 = $number2;
-        $this->float = $float;
-        $this->string = $string;
-        $this->array = $array;
-        $this->dInt = $dInt;
+    public function __construct($number, float $float, string $string, array $array, ?int $number2=null, int $dInt=2) {
+        $this->number                               = $number;
+        $this->number2                              = $number2;
+        $this->float                                = $float;
+        $this->string                               = $string;
+        $this->array                                = $array;
+        $this->dInt                                 = $dInt;
     }
 
     /**

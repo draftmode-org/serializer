@@ -12,8 +12,7 @@ class SerializerExampleArray {
     /**
      * @param array $array
      */
-    public function setArray(array $array): void
-    {
+    public function setArray(array $array): void {
         $this->array = $array;
     }
 }

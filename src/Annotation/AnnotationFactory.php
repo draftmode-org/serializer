@@ -49,7 +49,7 @@ class AnnotationFactory implements AnnotationFactoryInterface {
         if ($method->hasReturnType()) {
             /** @var ReflectionNamedType $type */
             $type                                   = $method->getReturnType();
-            $logger->debug("type",
+            $logger->debug("ReflectionMethod ".$method->getName()." as Type",
                 ["line" => __LINE__, "type" => $type->getName(), "isBuiltIn" => $type->isBuiltIn(), "isOptional" => $type->allowsNull()]);
             $returnType->setBuiltIn($type->isBuiltin());
             $returnType->setOptional($type->allowsNull());
@@ -60,7 +60,7 @@ class AnnotationFactory implements AnnotationFactoryInterface {
             }
         }
         if ($annotation = $this->getReturnTypeAnnotation($method)) {
-            $logger->debug("hasAnnotation $annotation");
+            $logger->debug("ReflectionMethod ".$method->getName()." hasAnnotation $annotation");
             $this->extendTypeWithAnnotation($returnType, $annotation);
         }
         return $returnType;
@@ -77,7 +77,7 @@ class AnnotationFactory implements AnnotationFactoryInterface {
         if ($refProperty->hasType()) {
             /** @var ReflectionNamedType $type */
             $type                                   = $refProperty->getType();
-            $logger->debug("type",
+            $logger->debug("ReflectionProperty ".$refProperty->getName()." has Type",
                 ["line" => __LINE__, "type" => $type->getName(), "isBuiltIn" => $type->isBuiltIn(), "isOptional" => $type->allowsNull()]);
             $property->setBuiltIn($type->isBuiltin());
             $property->setOptional($type->allowsNull());
@@ -88,7 +88,7 @@ class AnnotationFactory implements AnnotationFactoryInterface {
             }
         }
         if ($annotation = $this->getPropertyVarAnnotation($refProperty)) {
-            $logger->debug("hasAnnotation $annotation");
+            $logger->debug("ReflectionProperty ".$refProperty->getName()." hasAnnotation $annotation");
             $this->extendTypeWithAnnotation($property, $annotation);
         }
         return $property;
@@ -117,7 +117,7 @@ class AnnotationFactory implements AnnotationFactoryInterface {
         if ($refParameter->hasType()) {
             /** @var ReflectionNamedType $type */
             $type                                   = $refParameter->getType();
-            $logger->debug("type",
+            $logger->debug("ReflectionParameter ".$refParameter->getName()." has Type",
                 ["line" => __LINE__, "type" => $type->getName(), "isBuiltIn" => $type->isBuiltIn(), "isOptional" => $type->allowsNull()]);
             $parameter->setBuiltIn($type->isBuiltin());
             $parameter->setOptional($type->allowsNull());
@@ -126,12 +126,12 @@ class AnnotationFactory implements AnnotationFactoryInterface {
                 $parameter->setArray(true);
                 $parameter->setBuiltIn(true);
             }
-        } else {
-            $logger->debug("has no type");
         }
         if ($annotation = $this->getParameterAnnotation($refMethod, $refParameter)) {
-            $logger->debug("hasAnnotation $annotation");
+            $logger->debug("ReflectionParameter ".$refParameter->getName()." hasAnnotation $annotation");
             $this->extendTypeWithAnnotation($parameter, $annotation);
+        } else {
+            //$logger->debug("ReflectionParameter ".$refParameter->getName()." has no annotation");
         }
         return $parameter;
     }
@@ -264,15 +264,24 @@ class AnnotationFactory implements AnnotationFactoryInterface {
      * @return bool
      */
     private function isBuiltInByAnnotation(string $annotation) : bool {
+        $logger                                      = $this->logger->withMethod(__METHOD__);
         $annotation                                 = strtr($annotation, [
             "[]" => ""
         ]);
         $types                        				= explode("|", $annotation);
+        $isBuiltIn                                  = null;
         foreach ($types as $type) {
-            if ($this->isBuiltInType($type)) {
-                return true;
+            $typeIsBuiltIn                          = $this->isBuiltInType($type);
+            if ($typeIsBuiltIn) {
+                $logger->debug("type $type isBuiltIn", ["line" => __LINE__]);
+            } else {
+                $logger->debug("type $type is not BuiltIn", ["line" => __LINE__]);
+            }
+            $isBuiltIn                              = ($isBuiltIn === null) ? $typeIsBuiltIn : ($isBuiltIn && $typeIsBuiltIn);
+            if (!$isBuiltIn) {
+                return false;
             }
         }
-        return false;
+        return $isBuiltIn;
     }
 }
