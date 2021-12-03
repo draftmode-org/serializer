@@ -14,4 +14,12 @@ class SerializerExampleTypeFloat {
     {
         $this->float = $float;
     }
+
+    /**
+     * @return float
+     */
+    public function getFloat(): float
+    {
+        return $this->float;
+    }
 }

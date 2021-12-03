@@ -83,6 +83,7 @@ class ArrayNormalizer implements NormalizerInterface {
             if ($property->isBuiltIn()) {
                 return $attributeValue;
             } elseif ($propertyTypeClass = $property->getType()) {
+                /** @var class-string $propertyTypeClass */
                 if ($property->isArray()) {
                     $attributeValues                = [];
                     foreach ($attributeValue as $singleAttributeValue) {
@@ -101,7 +102,8 @@ class ArrayNormalizer implements NormalizerInterface {
     }
 
     /**
-     * @param string $propertyTypeClass
+     * @psalm-suppress RedundantConditionGivenDocblockType
+     * @param class-string $propertyTypeClass
      * @param mixed $attributeValue
      * @return mixed
      * @throws ReflectionException
@@ -136,8 +138,8 @@ class ArrayNormalizer implements NormalizerInterface {
     }
 
     /**
-     * @param string $fromType
-     * @return string|null
+     * @param class-string $fromType
+     * @return class-string|null
      * @throws ReflectionException
      */
     private function getNameConverterClass(string $fromType) :?string {

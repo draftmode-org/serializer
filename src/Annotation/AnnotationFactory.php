@@ -269,7 +269,7 @@ class AnnotationFactory implements AnnotationFactoryInterface {
             "[]" => ""
         ]);
         $types                        				= explode("|", $annotation);
-        $isBuiltIn                                  = null;
+        $typeIsBuiltIn                              = false;
         foreach ($types as $type) {
             $typeIsBuiltIn                          = $this->isBuiltInType($type);
             if ($typeIsBuiltIn) {
@@ -277,11 +277,10 @@ class AnnotationFactory implements AnnotationFactoryInterface {
             } else {
                 $logger->debug("type $type is not BuiltIn", ["line" => __LINE__]);
             }
-            $isBuiltIn                              = ($isBuiltIn === null) ? $typeIsBuiltIn : ($isBuiltIn && $typeIsBuiltIn);
-            if (!$isBuiltIn) {
+            if (!$typeIsBuiltIn) {
                 return false;
             }
         }
-        return $isBuiltIn;
+        return $typeIsBuiltIn;
     }
 }

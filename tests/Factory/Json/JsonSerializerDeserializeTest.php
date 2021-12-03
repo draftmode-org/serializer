@@ -32,7 +32,7 @@ class JsonSerializerDeserializeTest extends TestCase {
             ],
             'createdAt'     => "2021-01-31"
         ]);
-        $deserializer   = JsonArrayUnit::getDeserializer(true);
+        $deserializer   = JsonArrayUnit::getDeserializer();
         $sProduct       = $deserializer->deserialize(SerializerRealLifeProduct::class, $input, true, true);
 
         $serializer     = JsonArrayUnit::getSerializer();

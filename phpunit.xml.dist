@@ -23,15 +23,23 @@
     <ini name="error_reporting" value="-1"/>
   </php>
   <testsuites>
-    <testsuite name="Terrazza Serializer Component Test">
+    <testsuite name="Annotation">
       <directory>./tests/Annotation</directory>
-      <directory>./tests/Decoder</directory>
-      <directory>./tests/Encoder</directory>
-      <directory>./tests/Normalizer</directory>
-      <directory>./tests/Factory/Json</directory>
     </testsuite>
-    <testsuite name="single">
-      <directory>./tests/Annotation</directory>
+    <testsuite name="Decoder">
+      <directory>./tests/Decoder</directory>
+    </testsuite>
+    <testsuite name="Denormalizer">
+      <directory>./tests/Denormalizer</directory>
+    </testsuite>
+    <testsuite name="Encoder">
+      <directory>./tests/Encoder</directory>
+    </testsuite>
+    <testsuite name="Factory">
+      <directory>./tests/Factory</directory>
+    </testsuite>
+    <testsuite name="Normalizer">
+      <directory>./tests/Normalizer</directory>
     </testsuite>
   </testsuites>
 </phpunit>

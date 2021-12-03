@@ -33,9 +33,9 @@ class SerializerRealLifeProduct {
     /**
      * @param SerializerRealLifeProductPrice|null $price
      */
-    public function setPrice(?SerializerRealLifeProductPrice $price): void
+    public function setPrice(SerializerRealLifeProductPrice $price=null): void
     {
-        $this->price = $price ?: new SerializerRealLifeProductPrice;
+        $this->price = $price ?? new SerializerRealLifeProductPrice;
     }
 
     /**
@@ -57,8 +57,8 @@ class SerializerRealLifeProduct {
     /**
      * @param SerializerRealLifeUserUUID|null $user
      */
-    public function setUser(?SerializerRealLifeUserUUID $user) : void {
-        $this->user = $user ?: new SerializerRealLifeUserUUID();
+    public function setUser(SerializerRealLifeUserUUID $user=null) : void {
+        $this->user = $user ?? new SerializerRealLifeUserUUID();
     }
 
     /**
@@ -72,7 +72,7 @@ class SerializerRealLifeProduct {
     /**
      * @param string|null $description
      */
-    public function setDescription(?string $description): void
+    public function setDescription(string $description=null): void
     {
         $this->description = $description;
     }
@@ -88,23 +88,25 @@ class SerializerRealLifeProduct {
     /**
      * @param SerializerRealLifeProductLabel[]|null $vLabels
      */
-    public function setVLabels(?SerializerRealLifeProductLabel ...$vLabels): void
-    {
-        $this->vLabels = $vLabels ?? [];
+    public function setVLabels(?SerializerRealLifeProductLabel ...$vLabels): void {
+        //
+        // variadic hack to clean null
+        //
+        if (is_null($vLabels) || (count($vLabels) && is_null($vLabels[0]))) { $vLabels = [];}
+        $this->vLabels = $vLabels;
     }
 
     /**
      * @return SerializerRealLifeProductLabel[]
      */
-    public function getVLabels(): array
-    {
+    public function getVLabels() : array {
         return $this->vLabels;
     }
 
     /**
      * @param SerializerRealLifeProductLabel[]|null $aLabels
      */
-    public function setALabels(?array $aLabels): void
+    public function setALabels(array $aLabels=null): void
     {
         $this->aLabels = $aLabels ?? [];
     }
@@ -127,14 +129,14 @@ class SerializerRealLifeProduct {
     /**
      * @param SerializerRealLifePerson|null $person
      */
-    public function setPerson(?SerializerRealLifePerson $person): void {
+    public function setPerson(SerializerRealLifePerson $person=null): void {
         $this->person = $person;
     }
 
     /**
      * @param DateTime|null $createdAt
      */
-    public function setCreatedAt(?DateTime $createdAt): void {
+    public function setCreatedAt(DateTime $createdAt=null): void {
         $this->createdAt = $createdAt;
     }
 
