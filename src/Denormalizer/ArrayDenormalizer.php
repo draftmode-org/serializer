@@ -12,6 +12,7 @@ use Terrazza\Component\Logger\LogInterface;
 use Terrazza\Component\Serializer\Annotation\AnnotationFactoryInterface;
 use Terrazza\Component\Serializer\Annotation\AnnotationTypeInterface;
 use Terrazza\Component\Serializer\DenormalizerInterface;
+use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerExampleTypeFloat;
 use Terrazza\Component\Serializer\TraceKeyTrait;
 
 class ArrayDenormalizer implements DenormalizerInterface {
@@ -56,7 +57,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
             }
         } elseif (is_object($className)) {
             /** @var T $object */
-            $object                                 = $className;
+            $object                                 = $this->cloneClass($className);
             if (is_array($input) && count($input)) {
                 $unmappedKeys                       = $this->updateObject($object, $input, true);
             }
@@ -104,6 +105,15 @@ class ArrayDenormalizer implements DenormalizerInterface {
             $logger->error($message = "class $className does not exists");
             throw new RuntimeException($message);
         }
+    }
+
+    /**
+     * @param T $className
+     * @return T
+     * @template T of object
+     */
+    private function cloneClass(object $className) : object {
+        return unserialize(serialize($className));
     }
 
     /**
@@ -194,6 +204,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
                         $setMethod->invoke($object, null);
                     }
                     elseif (is_array($methodValues)) {
+                        $logger->debug("...set", $methodValues);
                         $setMethod->invoke($object, ...$methodValues);
                     } else {
                         $setMethod->invoke($object, $methodValues);
@@ -290,12 +301,16 @@ class ArrayDenormalizer implements DenormalizerInterface {
                     throw new InvalidArgumentException($this->getTraceKeys() . " is required");
                 }
             } else {
+                //$this->getBuiltInInputValue();
                 if ($aParameter->isBuiltIn()) {
                     $methodValue                    = $this->getBuiltInInputValue($aParameter, $inputValue);
                 } else {
                     if ($typeClassName = $aParameter->getType()) {
                         /** @var class-string $typeClassName */
                         if ($aParameter->isArray()) {
+                            if (!is_array($inputValue)) {
+                                throw new InvalidArgumentException($this->getTraceKeys()." expected type array, given ".gettype($inputValue));
+                            }
                             $inValues               = [];
                             foreach ($inputValue as $inValue) {
                                 $inValues[]         = $this->denormalize($typeClassName, $inValue);
@@ -361,7 +376,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
             if ($parameterType === "float" && $inputType === "int") {
                 return floatval($input);
             }
-            if ($inputType === "array") {
+            if ($inputType === "array" && $parameter->isArray()) {
                 return $input;
             }
             $traceKey                               = $this->getTraceKeys();

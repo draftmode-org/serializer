@@ -4,33 +4,18 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use RuntimeException;
-use Terrazza\Component\ReflectionClass\ClassNameResolver;
-use Terrazza\Component\Serializer\Annotation\AnnotationFactory;
-use Terrazza\Component\Serializer\Denormalizer\ArrayDenormalizer;
-use Terrazza\Component\Serializer\DenormalizerInterface;
-use Terrazza\Component\Serializer\Tests\Examples\LoggerUnit;
+use Terrazza\Component\Serializer\Tests\Examples\DenormalizerUnit;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerExampleTypeDateTime;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerExampleTypeFloat;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerExampleTypeString;
 use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentAmount;
 
 class ArrayDenormalizerTest extends TestCase {
-    function get(bool $log=false) : DenormalizerInterface {
-        $logger = LoggerUnit::getLogger("ArrayDenormalizer", $log);
-        return new ArrayDenormalizer(
-            $logger,
-            new AnnotationFactory(
-                $logger,
-                new ClassNameResolver()
-            )
-        );
-    }
-
     /**
      * @throws ReflectionException
      */
     function testInvalidClassName() {
-        $denormalizer = $this->get();
+        $denormalizer = DenormalizerUnit::get();
         $this->expectException(RuntimeException::class);
         $denormalizer->denormalize("unknownClassName", [], true, true);
     }
@@ -39,7 +24,7 @@ class ArrayDenormalizerTest extends TestCase {
      * @throws ReflectionException
      */
     function testClassIsInt() {
-        $denormalizer = $this->get();
+        $denormalizer = DenormalizerUnit::get();
         $this->expectException(RuntimeException::class);
         $denormalizer->denormalize(12, [], true, true);
     }
@@ -48,7 +33,7 @@ class ArrayDenormalizerTest extends TestCase {
      * @throws ReflectionException
      */
     function testRestrictArguments() {
-        $denormalizer = $this->get();
+        $denormalizer = DenormalizerUnit::get();
         $this->expectException(InvalidArgumentException::class);
         $denormalizer->denormalize(SerializerRealLifePresentAmount::class, ["value" => 12, "currency" => "Euro"], false, true);
     }
@@ -57,7 +42,7 @@ class ArrayDenormalizerTest extends TestCase {
      * @throws ReflectionException
      */
     function testMultipleParamsAsBuiltIn() {
-        $denormalizer = $this->get();
+        $denormalizer = DenormalizerUnit::get();
         $object = $denormalizer->denormalize(ArrayDenormalizerTestMultipleParams::class,
             ["name" => ["firstName" => $firstName = "f", "lastName" => $lastName = "l"]]
         );
@@ -74,7 +59,7 @@ class ArrayDenormalizerTest extends TestCase {
      * @throws ReflectionException
      */
     function testTypeSwitch() {
-        $denormalizer = $this->get();
+        $denormalizer = DenormalizerUnit::get();
         $objectStringInt                            = $denormalizer->denormalize(SerializerExampleTypeString::class,
             ["string" => $valueInt = 1]);
         $objectStringFloat                          = $denormalizer->denormalize(SerializerExampleTypeString::class,
@@ -96,7 +81,7 @@ class ArrayDenormalizerTest extends TestCase {
      * @throws ReflectionException
      */
     function testTypeFailure() {
-        $denormalizer = $this->get();
+        $denormalizer = DenormalizerUnit::get();
         $this->expectException(InvalidArgumentException::class);
         $denormalizer->denormalize(SerializerExampleTypeFloat::class,
             ["float" => "string"]);
@@ -106,10 +91,17 @@ class ArrayDenormalizerTest extends TestCase {
      * @throws ReflectionException
      */
     function testSetValueDirectly() {
-        $denormalizer = $this->get();
+        $denormalizer = DenormalizerUnit::get();
         $object = $denormalizer->denormalize(SerializerExampleTypeFloat::class,
-            $float = 12);
+            $float = 12, true, true);
         $this->assertEquals($float, $object->getFloat());
+    }
+
+    function testSetValueDirectlyWrongType() {
+        $denormalizer = DenormalizerUnit::get();
+        $this->expectException(InvalidArgumentException::class);
+        $object = $denormalizer->denormalize(SerializerExampleTypeFloat::class,
+            [$float = 12]);
     }
 
     // open: [$float = 12] => cause an error!!
@@ -119,7 +111,7 @@ class ArrayDenormalizerTest extends TestCase {
      * @throws ReflectionException
      */
     function testDateTime() {
-        $denormalizer = $this->get();
+        $denormalizer = DenormalizerUnit::get();
         $objectDate                                 = $denormalizer->denormalize(SerializerExampleTypeDateTime::class,
             ["date" => $date = "31.01.2021"]);
         $this->assertEquals($date, $objectDate->date->format("d.m.Y"));
@@ -129,7 +121,7 @@ class ArrayDenormalizerTest extends TestCase {
      * @throws ReflectionException
      */
     public function testProtectedConstructor() {
-        $denormalizer = $this->get();
+        $denormalizer = DenormalizerUnit::get();
         $denormalizer->denormalize(ArrayDenormalizerTestProtectedConstructor::class, []);
         $this->assertTrue(true);
     }
@@ -138,7 +130,7 @@ class ArrayDenormalizerTest extends TestCase {
      * @throws ReflectionException
      */
     public function testRestrictUninitialized() {
-        $denormalizer = $this->get();
+        $denormalizer = DenormalizerUnit::get();
         $this->expectException(RuntimeException::class);
         $denormalizer->denormalize(ArrayDenormalizerTestProtectedConstructor::class, [], true);
     }

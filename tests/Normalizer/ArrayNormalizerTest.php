@@ -24,7 +24,7 @@ class ArrayNormalizerTest extends TestCase {
     function testSuccess() {
         $normalizer     = $this->get();
         $response       = $normalizer->normalize(new ArrayNormalizerTestSuccessful($number=12, $optional=true, $default=12));
-        $this->assertEquals(["number" => $number, 'optional' => $optional, 'default' => $default], $response);
+        $this->assertEquals(["number" => $number, 'optional' => $optional, 'default' => $default, "pNull" => null], $response);
     }
 
     function testPropertyNotInitialized() {
@@ -72,6 +72,7 @@ class ArrayNormalizerTestSuccessful {
     public bool $optional;
     public bool $default;
     private int $private=12;
+    private ?int $pNull=null;
     public static int $static=12;
     public function __construct(int $number, bool $optional, bool $default) {
         $this->number = $number;
@@ -83,6 +84,9 @@ class ArrayNormalizerTestSuccessful {
     }
     public function hasDefault() : bool {
         return $this->default;
+    }
+    public function getPNull():?int {
+        return $this->pNull;
     }
 }
 

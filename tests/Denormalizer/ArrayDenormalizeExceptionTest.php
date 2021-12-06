@@ -1,21 +1,33 @@
 <?php
-namespace Terrazza\Component\Serializer\Tests\Factory\Json;
+namespace Terrazza\Component\Serializer\Tests\Denormalizer;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use RuntimeException;
-use Terrazza\Component\Serializer\Tests\Examples\JsonArrayUnit;
+use Terrazza\Component\Serializer\Tests\Examples\DenormalizerUnit;
+use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerExampleVariadicViaParam;
 
-class JsonDeserializerExceptionTest extends TestCase {
+class ArrayDenormalizeExceptionTest extends TestCase {
 
     /**
      * @throws ReflectionException
      */
     function testUnknownClass() {
-        $input                                      = json_encode([]);
-        $deserializer                               = JsonArrayUnit::getDeserializer();
+        $input                                      = [];
+        $deserializer                               = DenormalizerUnit::get();
         $this->expectException(RuntimeException::class);
-        $deserializer->deserialize("SerializerExampleConstructorSimple::class", $input);
+        $deserializer->denormalize("SerializerExampleConstructorSimple::class", $input);
     }
+
+    function testInvalidArgumentIsArrayExpectArray() {
+        $input                                      = json_encode(['int' => [$i1 = 2,$i2 = 3]]);
+        $deserializer                               = DenormalizerUnit::get();
+        $this->expectException(InvalidArgumentException::class);
+        $deserializer->denormalize(SerializerExampleVariadicViaParam::class, $input);
+    }
+
+
+
 /*
     function testRequiredArgument() {
         $input                                      = json_encode([]);

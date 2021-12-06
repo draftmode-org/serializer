@@ -48,7 +48,14 @@ and all optional arguments are handled by the setter.
 1. normalize object to array
 2. encode array to (JSON,XML,CSV)
 
-#### Actually provided encoding
+#### Normalize object
+the order to get the properties of an object is:
+1. try to find for all properties there "getter" (get{}, is{}, has{})
+<br><i>found: retrieve his related property</i><br><br>
+2. for all properties, public accessible mandatory
+<br><i>found: retrieve property</i>
+
+#### Encode normalized object
 - JSON
 <a id="install" name="install"></a>
 <a id="user-content-install" name="user-content-install"></a>

@@ -57,7 +57,7 @@ class JsonSerializerTest extends TestCase {
             new SerializerRealLifeProductUUID($id = "221"),
         );
         $serializer = JsonArrayUnit::getSerializer();
-        $response = $serializer->serialize($mProduct);
+        $response   = $serializer->serialize($mProduct);
         $this->assertEquals(<<<JSON
         {"id":"221","price":{"regular":null,"offer":null},"user":null,"description":null,"vLabels":[],"aLabels":[],"person":null,"createdAt":null}
         JSON, $response);

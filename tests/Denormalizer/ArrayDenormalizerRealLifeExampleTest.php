@@ -1,8 +1,7 @@
 <?php
-
-namespace Terrazza\Component\Serializer\Tests\Factory\Json;
-
+namespace Terrazza\Component\Serializer\Tests\Denormalizer;
 use PHPUnit\Framework\TestCase;
+use Terrazza\Component\Serializer\Tests\Examples\DenormalizerUnit;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifePerson;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifePersonAddress;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProduct;
@@ -10,10 +9,12 @@ use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProduct
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductLabel;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductUUID;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeUserUUID;
-use Terrazza\Component\Serializer\Tests\Examples\JsonArrayUnit;
 
 class JsonDeserializerRealLifeExampleTest extends TestCase {
 
+    /**
+     * @throws \ReflectionException
+     */
     function test() {
         $mProduct = new SerializerRealLifeProduct(
             new SerializerRealLifeProductUUID($id = "221"),
@@ -71,8 +72,8 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
         //
         // create with serializer
         //
-        $serializer = JsonArrayUnit::getDeserializer();
-        $sProduct   = $serializer->deserialize(SerializerRealLifeProduct::class, json_encode([
+        $denormalize= DenormalizerUnit::get();
+        $sProduct   = $denormalize->denormalize(SerializerRealLifeProduct::class, [
             'id'            => $id,
             'price' => [
                 'regular'   => $mPriceRegular,
@@ -95,7 +96,7 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
                 ]
             ],
             'user'          => $sUser = "sUser",
-        ]));
+        ]);
 
         $this->assertEquals([
             $sProduct->getId()->getValue(),
@@ -124,8 +125,8 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
         //
         // update with serializer
         //
-        $serializer = JsonArrayUnit::getDeserializer();
-        $uProduct   = $serializer->deserialize($mProduct, json_encode([
+        $denormalize= DenormalizerUnit::get();
+        $uProduct   = $denormalize->denormalize($mProduct, [
             'vLabels'       => null,
             'price'         => [
                 'offer'         => $uPriceOffer = 12.1
@@ -137,7 +138,7 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
                     'street'        => $uAddressStreet = "uAddressStreet"
                 ]
             ]
-        ]));
+        ]);
 
         $this->assertEquals([
             $uProduct->getId()->getValue(),
@@ -166,11 +167,11 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
         //
         // update with serializer
         //
-        $serializer = JsonArrayUnit::getDeserializer();
-        $u2Product  = $serializer->deserialize($mProduct, json_encode([
+        $denormalize= DenormalizerUnit::get();
+        $u2Product  = $denormalize->denormalize($mProduct, [
             'description'   => $u2Description = null,
             'person'        => null
-        ]), false, true);
+        ], false, true);
 
         $this->assertEquals([
             $u2Product->getDescription(),
@@ -183,8 +184,8 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
         //
         // update with serializer
         //
-        $serializer = JsonArrayUnit::getDeserializer();
-        $u3Product  = $serializer->deserialize($u2Product, json_encode([
+        $denormalize= DenormalizerUnit::get();
+        $u3Product  = $denormalize->denormalize($u2Product, [
             'person'        => [
                 'name'      => $u3PersonName = "u3PersonName",
                 'address'       => [
@@ -192,7 +193,7 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
                     'city'          => $u3AddressCity = "u3AddressCity"
                 ]
             ]
-        ]));
+        ]);
 
         $this->assertEquals([
             $u3Product->getPerson()->getName(),

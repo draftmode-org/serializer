@@ -1,17 +1,16 @@
 <?php
-
-namespace Terrazza\Component\Serializer\Tests\Factory\Json;
+namespace Terrazza\Component\Serializer\Tests\Denormalizer;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
-use Terrazza\Component\Serializer\Tests\Examples\JsonArrayUnit;
+use Terrazza\Component\Serializer\Tests\Examples\DenormalizerUnit;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifePerson;
 
-class JsonDeserializerExampleClassInClassTest extends TestCase {
+class ArrayDenormalizeExampleClassInClassTest extends TestCase {
     /**
      * @throws ReflectionException
      */
     function testBuildCompletelyAndUpdate() {
-        $input                                      = json_encode([
+        $input                                      = [
             'person'        => [
                 'name'          => $mPersonName         = "mPersonName",
                 'address'       => [
@@ -19,18 +18,18 @@ class JsonDeserializerExampleClassInClassTest extends TestCase {
                     'city'          => $mAddressCity    = "mAddressCity",
                 ]
             ]
-        ]);
-        $deserializer                               = JsonArrayUnit::getDeserializer();
-        $object                                     = $deserializer->deserialize(JsonDeserializerExampleClassInClass::class, $input);
-        $deserializer                               = JsonArrayUnit::getDeserializer();
-        $objectUpdate                               = $deserializer->deserialize($object, json_encode([
+        ];
+        $deserializer                               = DenormalizerUnit::get();
+        $object                                     = $deserializer->denormalize(JsonDeserializerExampleClassInClass::class, $input);
+        $deserializer                               = DenormalizerUnit::get();
+        $objectUpdate                               = $deserializer->denormalize($object, [
             'person'        => [
                 'name'      => $uPersonName = "uPersonName",
                 'address'   => [
                     'street'        => $uAddressStreet = "uAddressStreet"
                 ]
             ]
-        ]));
+        ]);
         $this->assertEquals([
             $mPersonName,
             $mAddressStreet,
@@ -52,22 +51,22 @@ class JsonDeserializerExampleClassInClassTest extends TestCase {
      * @throws ReflectionException
      */
     function testBuildPartialCreateAndUpdate() {
-        $input                                      = json_encode([
+        $input                                      = [
             'person'        => [
                 'name'          => $mPersonName = "mPersonName"
             ]
-        ]);
-        $deserializer                               = JsonArrayUnit::getDeserializer();
-        $object                                     = $deserializer->deserialize(JsonDeserializerExampleClassInClass::class, $input);
-        $deserializer                               = JsonArrayUnit::getDeserializer();
-        $objectUpdate                               = $deserializer->deserialize($object, json_encode([
+        ];
+        $deserializer                               = DenormalizerUnit::get();
+        $object                                     = $deserializer->denormalize(JsonDeserializerExampleClassInClass::class, $input);
+        $deserializer                               = DenormalizerUnit::get();
+        $objectUpdate                               = $deserializer->denormalize($object, [
             'person'        => [
                 'address'       => [
                     'street'        => $uAddressStreet = "uAddressStreet",
                     'city'          => $uAddressCity = "uAddressCity",
                 ]
             ]
-        ]));
+        ]);
         $this->assertEquals([
             $mPersonName,
             null,
