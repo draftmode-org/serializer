@@ -35,9 +35,9 @@
     <testsuite name="Encoder">
       <directory>./tests/Encoder</directory>
     </testsuite>
-    <!--<testsuite name="Factory">
+    <testsuite name="Factory">
       <directory>./tests/Factory</directory>
-    </testsuite>-->
+    </testsuite>
     <testsuite name="Normalizer">
       <directory>./tests/Normalizer</directory>
     </testsuite>

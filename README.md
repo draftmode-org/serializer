@@ -2,8 +2,12 @@
 This component is meant to be used to turn objects into a specific format (XML,JSON,YAML,...) and the other way around.
 
 1. Methods
-    1. [Deserialize](#deserialize)
-    2. [Serialize](#serialize)
+    1. [Deserialize](#method---deserialize)
+       1. [Decode](#decode)
+       2. [Denormalize](#denormalize)
+    2. [Serialize](#method---serialize)
+       1. [Normalize](#normalize)
+       2. [Encode](#encode)
 2. [Install](#install)
 3. [Requirements](#require)
 4. [Examples](#examples)
@@ -12,51 +16,66 @@ This component is meant to be used to turn objects into a specific format (XML,J
 <a id="deserialize" name="deserialize"></a>
 <a id="user-content-deserialize" name="user-content-deserialize"></a>
 ## Method - Deserialize
+Deserialize is a combination of 
 1. decode (JSON,XML,CSV) into an array
 2. denormalize into an object
 
-Terrazza/Deserializer supports two methods.<br>
+<a id="deserialize" name="decode"></a>
+<a id="user-content-decode" name="user-content-decode"></a>
+### Decode
+The decoder converts an input object to an array.
+Actually Terrazza/Serializer supports
+- JSON
+- XML
+<a id="denormalize" name="denormalize"></a>
+<a id="user-content-denormalize" name="user-content-denormalize"></a>
+### Denormalize
+The Denormalizer supports two methods.<br>
 a) create a new object<br>
-b) update an existing object
+<i>input: class-method</i><br>
+b) update an existing object<br>
+<i>input: existing class</i>
 
-The difference: call deserialize with a className or an existing object.
-
-In case of create an object:
-1. try to handle __constructor (if he is public)
-2. handled unused arguments with "setter"-methods (if they are public)
-
-In case of update an object:<br>
-<i>notice:<br>
-the constructor will not be used!<br>
-only if the current value of an valueObject is null and you want to update the valueObject.
-</i>
-1. clone input object (unserialize(serialize($object)))
-2. handle all arguments with "setter"-methods (if they are public)
-
-in any case there are 2 options provided
+in any case 2 options are provided
 - restrictUnInitialized (default: false)
 - restrictArguments (default: false)
 
-### How should a class be designed
+#### Logic: create an object
+1. try to handle __constructor (if he is public)
+2. handled unused arguments with "setter"-methods (if they are public)
+
+#### Logic: update an object<br>
+<i>notice:<br>
+The common way is, to ignore the __constructor and just update based on setter methods.
+</i>
+1. clone input object ```unserialize(serialize($object))```
+2. handle all arguments with "setter"-methods (if they are public)
+
+#### How should a class be designed
 We suggest that all required arguments are handled by the __constructor<br>
 and all optional arguments are handled by the setter.
-#### Actually provided decoding
-- JSON
+
 <a id="serialize" name="serialize"></a>
 <a id="user-content-serialize" name="user-content-serialize"></a>
 ## Method - Serialize
+Serialize is a combination of
 1. normalize object to array
-2. encode array to (JSON,XML,CSV)
+2. encode array to (JSON,XML,CSV,..)
 
-#### Normalize object
+<a id="normalize" name="normalize"></a>
+<a id="user-content-normalize" name="user-content-normalize"></a>
+### Normalize
 the order to get the properties of an object is:
 1. try to find for all properties there "getter" (get{}, is{}, has{})
 <br><i>found: retrieve his related property</i><br><br>
 2. for all properties, public accessible mandatory
 <br><i>found: retrieve property</i>
 
-#### Encode normalized object
-- JSON
+<a id="encode" name="encode"></a>
+<a id="user-content-encode" name="user-content-encode"></a>
+### Encode
+Teh Encoder converts an array to an output format (e.g. JSON)
+
 <a id="install" name="install"></a>
 <a id="user-content-install" name="user-content-install"></a>
 ## How to install
