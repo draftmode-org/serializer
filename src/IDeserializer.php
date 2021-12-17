@@ -5,7 +5,7 @@ namespace Terrazza\Component\Serializer;
 use InvalidArgumentException;
 use ReflectionException;
 
-interface DeserializerInterface {
+interface IDeserializer {
     /**
      * @param class-string<T>|T $className
      * @param mixed $input

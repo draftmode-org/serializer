@@ -4,25 +4,24 @@ namespace Terrazza\Component\Serializer\Denormalizer;
 
 use InvalidArgumentException;
 use LogicException;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use RuntimeException;
-use Terrazza\Component\Logger\LogInterface;
-use Terrazza\Component\Serializer\Annotation\AnnotationFactoryInterface;
-use Terrazza\Component\Serializer\Annotation\AnnotationTypeInterface;
-use Terrazza\Component\Serializer\DenormalizerInterface;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerExampleTypeFloat;
+use Terrazza\Component\Serializer\Annotation\IAnnotationFactory;
+use Terrazza\Component\Serializer\Annotation\IAnnotationType;
+use Terrazza\Component\Serializer\IDenormalizer;
 use Terrazza\Component\Serializer\TraceKeyTrait;
 
-class ArrayDenormalizer implements DenormalizerInterface {
+class ArrayDenormalizer implements IDenormalizer {
     use TraceKeyTrait;
-    private LogInterface $logger;
-    private AnnotationFactoryInterface $annotationFactory;
+    private LoggerInterface $logger;
+    private IAnnotationFactory $annotationFactory;
     private bool $restrictUnInitialized=false;
     private bool $restrictArguments=false;
 
-    public function __construct(LogInterface $logger, AnnotationFactoryInterface $annotationFactory) {
+    public function __construct(LoggerInterface $logger, IAnnotationFactory $annotationFactory) {
         $this->logger                               = $logger;
         $this->annotationFactory                    = $annotationFactory;
     }
@@ -40,12 +39,12 @@ class ArrayDenormalizer implements DenormalizerInterface {
      * @throws RuntimeException
      */
     public function denormalize($className, $input, bool $restrictUnInitialized=false, bool $restrictArguments=false) : object {
+        $logMethod                                  = __METHOD__."()";
         if ($restrictUnInitialized)
             $this->restrictUnInitialized            = true;
         if ($restrictArguments)
             $this->restrictArguments                = true;
-        $logger                                     = $this->logger->withMethod(__METHOD__);
-        $logger->debug((is_object($className) ?
+        $this->logger->debug($logMethod." ".(is_object($className) ?
             "object: " .basename(get_class($className)) :
             "class: " . $className),
             ["line" => __LINE__]);
@@ -84,8 +83,8 @@ class ArrayDenormalizer implements DenormalizerInterface {
      * @throws RuntimeException
      */
     private function createObject(string $className, &$input) : object {
-        $logger                                     = $this->logger->withMethod(__METHOD__);
-        $logger->debug("createObject $className",
+        $logMethod                                  = __METHOD__."()";
+        $this->logger->debug("$logMethod createObject $className",
             ["line" => __LINE__, "arguments" => $input]);
         if (class_exists($className)) {
             $reflect 						        = new ReflectionClass($className);
@@ -102,7 +101,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
             }
             return $object;
         } else {
-            $logger->error($message = "class $className does not exists");
+            $this->logger->error($logMethod." ".$message = "class $className does not exists");
             throw new RuntimeException($message);
         }
     }
@@ -124,18 +123,18 @@ class ArrayDenormalizer implements DenormalizerInterface {
      * @throws ReflectionException
      */
     private function updateObject(object $object, array &$input, bool $updateObject) :?array {
-        $logger                                     = $this->logger->withMethod(__METHOD__);
-        $logger->debug("updateObject ".get_class($object),
+        $logMethod                                  = __METHOD__."()";
+        $this->logger->debug("$logMethod updateObject ".get_class($object),
             ["line" => __LINE__, "arguments" => $input]);
         $reflect                                    = new ReflectionClass($object);
         $unmappedKeys                               = [];
         foreach ($input as $inputKey => $inputValue) {
             if (is_string($inputKey)) {
-                $logger->debug("updateObject inputKey: $inputKey",
+                $this->logger->debug("$logMethod updateObject inputKey: $inputKey",
                     ["line" => __LINE__, "inputValue" => $inputValue]);
                 $setMethodName                      = "set" . ucfirst($inputKey);
                 if ($reflect->hasMethod($setMethodName)) {
-                    $logger->debug("updateObject use method: $setMethodName",
+                    $this->logger->debug("$logMethod updateObject use method: $setMethodName",
                         ["line" => __LINE__]);
                     //
                     // getMethod for inputKey exists
@@ -148,7 +147,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
                         if ($reflect->hasMethod($getMethodName)) {
                             $getMethod              = $reflect->getMethod($getMethodName);
                             $getMethodReturnType    = $this->annotationFactory->getAnnotationReturnType($getMethod);
-                            $logger->debug("$getMethodName returnType", [
+                            $this->logger->debug("$logMethod $getMethodName returnType", [
                                 "line"              => __LINE__,
                                 "isBuiltIn"         => $getMethodReturnType->isBuiltIn(),
                                 "isArray"           => $getMethodReturnType->isArray(),
@@ -158,7 +157,7 @@ class ArrayDenormalizer implements DenormalizerInterface {
                             if (!$getMethodReturnType->isBuiltIn() &&
                                 !$getMethodReturnType->isArray() &&
                                 $getMethodReturnType->getType() !== null) {
-                                $logger->debug("fetch object via $getMethodName");
+                                $this->logger->debug("$logMethod fetch object via $getMethodName");
                                 $getObject          = $getMethod->invoke($object);
                             }
                         }
@@ -204,13 +203,13 @@ class ArrayDenormalizer implements DenormalizerInterface {
                         $setMethod->invoke($object, null);
                     }
                     elseif (is_array($methodValues)) {
-                        $logger->debug("...set", $methodValues);
+                        $this->logger->debug("$logMethod ...set", $methodValues);
                         $setMethod->invoke($object, ...$methodValues);
                     } else {
                         $setMethod->invoke($object, $methodValues);
                     }
                 } else {
-                    $logger->debug("updateObject method $setMethodName not found",
+                    $this->logger->debug("$logMethod updateObject method $setMethodName not found",
                         ["line" => __LINE__]);
                     $unmappedKeys[]                 = $inputKey;
                 }
@@ -262,15 +261,15 @@ class ArrayDenormalizer implements DenormalizerInterface {
      * @throws ReflectionException
      */
     private function getMethodValues(ReflectionMethod $method, &$input) {
-        $logger                                     = $this->logger->withMethod(__METHOD__);
+        $logMethod                                  = __METHOD__."()";
         $methodValues								= [];
-        $logger->debug("original input", ["arguments" => $input]);
+        $this->logger->debug("$logMethod original input", ["arguments" => $input]);
         $inputValues                                = $this->mapMethodValues($method, $input);
-        $logger->debug("mapped input", ["arguments" => $inputValues]);
+        $this->logger->debug("$logMethod mapped input", ["arguments" => $inputValues]);
         $parameters 							    = $method->getParameters();
         foreach ($parameters as $parameter) {
             $aParameter                             = $this->annotationFactory->getAnnotationParameter($method, $parameter);
-            $logger->debug("input, aParameter",
+            $this->logger->debug("$logMethod input, aParameter",
                 [
                     "line"                          => __LINE__,
                     "name"                          => $aParameter->getName(),
@@ -291,11 +290,11 @@ class ArrayDenormalizer implements DenormalizerInterface {
             if (is_null($inputValue)) {
                 if ($aParameter->isDefaultValueAvailable()) {
                     $methodValue                    = $aParameter->getDefaultValue();
-                    $logger->debug($this->getTraceKeys()." use defaultValue",
+                    $this->logger->debug($logMethod." ".$this->getTraceKeys()." use defaultValue",
                         ["line" => __LINE__, 'methodValue' => $methodValue]);
                 } elseif ($aParameter->isOptional()) {
                     $methodValue                    = null;
-                    $logger->debug($this->getTraceKeys(). " isOptional",
+                    $this->logger->debug($logMethod." ".$this->getTraceKeys(). " isOptional",
                         ["line" => __LINE__, 'methodValue' => $methodValue]);
                 } else {
                     throw new InvalidArgumentException($this->getTraceKeys() . " is required");
@@ -359,11 +358,11 @@ class ArrayDenormalizer implements DenormalizerInterface {
     }
 
     /**
-     * @param AnnotationTypeInterface $parameter
+     * @param IAnnotationType $parameter
      * @param mixed $input
      * @return mixed
      */
-    private function getBuiltInInputValue(AnnotationTypeInterface $parameter, $input) {
+    private function getBuiltInInputValue(IAnnotationType $parameter, $input) {
         $inputType 									= $this->getInputType($input);
         $parameterType 								= $parameter->getType();
         if ($parameterType !== $inputType) {

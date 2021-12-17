@@ -2,7 +2,7 @@
 
 namespace Terrazza\Component\Serializer\Annotation;
 
-interface AnnotationTypeInterface {
+interface IAnnotationType {
     public function isArray() : bool;
     public function setArray(bool $array) : void;
     public function getName() : string;

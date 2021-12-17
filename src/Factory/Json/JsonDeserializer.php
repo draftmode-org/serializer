@@ -3,22 +3,22 @@
 namespace Terrazza\Component\Serializer\Factory\Json;
 
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use ReflectionException;
-use Terrazza\Component\Logger\LogInterface;
 use Terrazza\Component\ReflectionClass\ClassNameResolver;
 use Terrazza\Component\Serializer\Annotation\AnnotationFactory;
 use Terrazza\Component\Serializer\Decoder\JsonDecoder;
-use Terrazza\Component\Serializer\DecoderInterface;
+use Terrazza\Component\Serializer\IDecoder;
 use Terrazza\Component\Serializer\Denormalizer\ArrayDenormalizer;
-use Terrazza\Component\Serializer\DenormalizerInterface;
+use Terrazza\Component\Serializer\IDenormalizer;
 use Terrazza\Component\Serializer\Deserializer;
-use Terrazza\Component\Serializer\DeserializerInterface;
+use Terrazza\Component\Serializer\IDeserializer;
 
-class JsonDeserializer implements DeserializerInterface {
-    private DecoderInterface $decoder;
-    private DenormalizerInterface $denormalizer;
+class JsonDeserializer implements IDeserializer {
+    private IDecoder $decoder;
+    private IDenormalizer $denormalizer;
 
-    public function __construct(LogInterface $logger) {
+    public function __construct(LoggerInterface $logger) {
         $this->decoder                              = new JsonDecoder();
         $this->denormalizer                         = new ArrayDenormalizer(
             $logger,

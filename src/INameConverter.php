@@ -2,7 +2,7 @@
 
 namespace Terrazza\Component\Serializer;
 
-interface NameConverterInterface {
+interface INameConverter {
     /**
      * @return mixed
      */

@@ -1,7 +1,7 @@
 <?php
 namespace Terrazza\Component\Serializer;
 
-interface NormalizerInterface {
+interface INormalizer {
     /**
      * @param object $object
      * @return array
@@ -10,7 +10,7 @@ interface NormalizerInterface {
 
     /**
      * @param array $nameConverter
-     * @return NormalizerInterface
+     * @return INormalizer
      */
-    public function withNameConverter(array $nameConverter) : NormalizerInterface;
+    public function withNameConverter(array $nameConverter) : INormalizer;
 }

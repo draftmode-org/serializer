@@ -3,15 +3,15 @@ namespace Terrazza\Component\Serializer;
 use InvalidArgumentException;
 use ReflectionException;
 
-class Deserializer implements DeserializerInterface {
-    private DenormalizerInterface $denormalizer;
-    private DecoderInterface $decoder;
+class Deserializer implements IDeserializer {
+    private IDenormalizer $denormalizer;
+    private IDecoder $decoder;
 
     /**
-     * @param DecoderInterface $decoder
-     * @param DenormalizerInterface $denormalizer
+     * @param IDecoder $decoder
+     * @param IDenormalizer $denormalizer
      */
-    public function __construct(DecoderInterface $decoder, DenormalizerInterface $denormalizer) {
+    public function __construct(IDecoder $decoder, IDenormalizer $denormalizer) {
         $this->decoder                              = $decoder;
         $this->denormalizer                         = $denormalizer;
     }

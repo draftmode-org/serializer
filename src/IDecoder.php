@@ -2,7 +2,7 @@
 
 namespace Terrazza\Component\Serializer;
 
-interface DecoderInterface {
+interface IDecoder {
     /**
      * @param mixed $data
      * @param bool $nullable

@@ -5,12 +5,12 @@ use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
 
-interface AnnotationFactoryInterface {
+interface IAnnotationFactory {
     /**
      * @param array $builtInTypes
-     * @return AnnotationFactoryInterface
+     * @return IAnnotationFactory
      */
-    public function withBuiltInTypes(array $builtInTypes) : AnnotationFactoryInterface;
+    public function withBuiltInTypes(array $builtInTypes) : IAnnotationFactory;
 
     /**
      * @param string $type

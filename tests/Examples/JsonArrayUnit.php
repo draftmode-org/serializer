@@ -3,10 +3,10 @@
 namespace Terrazza\Component\Serializer\Tests\Examples;
 
 use DateTime;
-use Terrazza\Component\Serializer\DeserializerInterface;
+use Terrazza\Component\Serializer\IDeserializer;
 use Terrazza\Component\Serializer\Factory\Json\JsonDeserializer;
-use Terrazza\Component\Serializer\Factory\Json\JsonSerializer;
-use Terrazza\Component\Serializer\SerializerInterface;
+use Terrazza\Component\Serializer\Factory\Json\JsonISerializer;
+use Terrazza\Component\Serializer\ISerializer;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductAmount;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductLabel;
 use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeUUID;
@@ -17,7 +17,7 @@ use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePr
 
 class JsonArrayUnit {
 
-    public static function getDeserializer(bool $logLevel=false) : DeserializerInterface {
+    public static function getDeserializer(bool $logLevel=false) : IDeserializer {
         return new JsonDeserializer(
             LoggerUnit::getLogger("Deserializer", $logLevel)
         );
@@ -32,8 +32,8 @@ class JsonArrayUnit {
         ];
     }
 
-    public static function getSerializer(bool $logLevel=false) : SerializerInterface {
-        return new JsonSerializer(
+    public static function getSerializer(bool $logLevel=false) : ISerializer {
+        return new JsonISerializer(
             LoggerUnit::getLogger("Serializer", $logLevel),
             self::getNameConverter()
         );

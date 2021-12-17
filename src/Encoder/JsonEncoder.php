@@ -1,9 +1,9 @@
 <?php
 
 namespace Terrazza\Component\Serializer\Encoder;
-use Terrazza\Component\Serializer\EncoderInterface;
+use Terrazza\Component\Serializer\IEncoder;
 
-class JsonEncoder implements EncoderInterface {
+class JsonEncoder implements IEncoder {
     /**
      * @param array $data
      * @return string

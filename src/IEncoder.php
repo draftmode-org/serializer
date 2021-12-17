@@ -2,7 +2,7 @@
 
 namespace Terrazza\Component\Serializer;
 
-interface EncoderInterface {
+interface IEncoder {
     /**
      * @param array $data
      * @return mixed

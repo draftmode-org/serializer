@@ -2,7 +2,7 @@
 
 namespace Terrazza\Component\Serializer\Annotation;
 
-class AnnotationParameter implements AnnotationTypeInterface {
+class AnnotationParameter implements IAnnotationType {
     use AnnotationTypeTrait;
     private bool $variadic=false;
     private bool $defaultValueAvailable=false;

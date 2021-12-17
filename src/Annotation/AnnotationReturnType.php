@@ -2,6 +2,6 @@
 
 namespace Terrazza\Component\Serializer\Annotation;
 
-class AnnotationReturnType implements AnnotationTypeInterface {
+class AnnotationReturnType implements IAnnotationType {
     use AnnotationTypeTrait;
 }

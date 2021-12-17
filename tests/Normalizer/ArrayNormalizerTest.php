@@ -4,13 +4,13 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Terrazza\Component\ReflectionClass\ClassNameResolver;
 use Terrazza\Component\Serializer\Annotation\AnnotationFactory;
-use Terrazza\Component\Serializer\NameConverterInterface;
+use Terrazza\Component\Serializer\INameConverter;
 use Terrazza\Component\Serializer\Normalizer\ArrayNormalizer;
-use Terrazza\Component\Serializer\NormalizerInterface;
+use Terrazza\Component\Serializer\INormalizer;
 use Terrazza\Component\Serializer\Tests\Examples\LoggerUnit;
 
 class ArrayNormalizerTest extends TestCase {
-    function get(bool $log=false) : NormalizerInterface {
+    function get(bool $log=false) : INormalizer {
         $logger = LoggerUnit::getLogger("ArrayNormalizer", $log);
         return new ArrayNormalizer(
             $logger,
@@ -100,7 +100,7 @@ class ArrayNormalizerTestUndefinedType {
         $this->number = $number;
     }
 }
-class ArrayNormalizerTestEmbeddedClassPresenter implements NameConverterInterface {
+class ArrayNormalizerTestEmbeddedClassPresenter implements INameConverter {
     private ArrayNormalizerTestEmbeddedClass $number;
     public function __construct(ArrayNormalizerTestEmbeddedClass $number) {
         $this->number = $number;

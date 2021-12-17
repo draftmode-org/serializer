@@ -1,9 +1,9 @@
 <?php
 namespace Terrazza\Component\Serializer\Tests\Examples\Serializer;
 use DateTime;
-use Terrazza\Component\Serializer\NameConverterInterface;
+use Terrazza\Component\Serializer\INameConverter;
 
-class SerializerRealLifePresentDateTime implements NameConverterInterface {
+class SerializerRealLifePresentDateTime implements INameConverter {
     private ?DateTime $value;
 
     public function __construct(?DateTime $value) {

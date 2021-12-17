@@ -2,16 +2,16 @@
 
 namespace Terrazza\Component\Serializer;
 
-class Serializer implements SerializerInterface {
+class Serializer implements ISerializer {
     use TraceKeyTrait;
-    private EncoderInterface $encoder;
-    private NormalizerInterface $normalizer;
+    private IEncoder $encoder;
+    private INormalizer $normalizer;
 
     /**
-     * @param EncoderInterface $encoder
-     * @param NormalizerInterface $normalizer
+     * @param IEncoder $encoder
+     * @param INormalizer $normalizer
      */
-    public function __construct(EncoderInterface $encoder, NormalizerInterface $normalizer) {
+    public function __construct(IEncoder $encoder, INormalizer $normalizer) {
         $this->encoder                              = $encoder;
         $this->normalizer                           = $normalizer;
     }

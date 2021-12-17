@@ -2,20 +2,20 @@
 
 namespace Terrazza\Component\Serializer\Factory\Json;
 
-use Terrazza\Component\Logger\LogInterface;
+use Psr\Log\LoggerInterface;
 use Terrazza\Component\ReflectionClass\ClassNameResolver;
 use Terrazza\Component\Serializer\Annotation\AnnotationFactory;
 use Terrazza\Component\Serializer\Encoder\JsonEncoder;
-use Terrazza\Component\Serializer\EncoderInterface;
+use Terrazza\Component\Serializer\IEncoder;
 use Terrazza\Component\Serializer\Normalizer\ArrayNormalizer;
-use Terrazza\Component\Serializer\NormalizerInterface;
+use Terrazza\Component\Serializer\INormalizer;
 use Terrazza\Component\Serializer\Serializer;
-use Terrazza\Component\Serializer\SerializerInterface;
+use Terrazza\Component\Serializer\ISerializer;
 
-class JsonSerializer implements SerializerInterface {
-    private NormalizerInterface $normalizer;
-    private EncoderInterface $encoder;
-    public function __construct(LogInterface $logger, array $nameConverter=null) {
+class JsonISerializer implements ISerializer {
+    private INormalizer $normalizer;
+    private IEncoder $encoder;
+    public function __construct(LoggerInterface $logger, array $nameConverter=null) {
         $this->encoder                              = new JsonEncoder();
         $this->normalizer                           = new ArrayNormalizer(
             $logger,

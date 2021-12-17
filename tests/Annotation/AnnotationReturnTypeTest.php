@@ -5,16 +5,16 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Terrazza\Component\ReflectionClass\ClassNameResolver;
 use Terrazza\Component\Serializer\Annotation\AnnotationFactory;
-use Terrazza\Component\Serializer\Annotation\AnnotationFactoryInterface;
+use Terrazza\Component\Serializer\Annotation\IAnnotationFactory;
 use Terrazza\Component\Serializer\Annotation\AnnotationReturnType;
 use Terrazza\Component\Serializer\Tests\Examples\LoggerUnit;
 
 class AnnotationReturnTypeTest extends TestCase {
     /**
      * @param bool $log
-     * @return AnnotationFactoryInterface
+     * @return IAnnotationFactory
      */
-    private function get(bool $log=false) : AnnotationFactoryInterface {
+    private function get(bool $log=false) : IAnnotationFactory {
         return new AnnotationFactory(
             LoggerUnit::getLogger("AnnotationReturnType", $log),
             new ClassNameResolver()

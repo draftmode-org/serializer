@@ -1,8 +1,8 @@
 <?php
 namespace Terrazza\Component\Serializer\Decoder;
-use Terrazza\Component\Serializer\DecoderInterface;
+use Terrazza\Component\Serializer\IDecoder;
 
-class XMLDecoder implements DecoderInterface {
+class XMLDecoder implements IDecoder {
     private JsonDecoder $jsonDecoder;
     public function __construct() {
         $this->jsonDecoder                          = new JsonDecoder();
