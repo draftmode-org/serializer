@@ -81,7 +81,7 @@ Teh Encoder converts an array to an output format (e.g. JSON)
 ## How to install
 ### Install via composer
 ```
-composer require terrazza/component-serializer
+composer require terrazza/serializer
 ```
 <a id="require" name="require"></a>
 <a id="user-content-require" name="user-content-require"></a>
@@ -90,9 +90,12 @@ composer require terrazza/component-serializer
 - \>= 7.4
 ### php extension 
 - ext-json
+- ext-libxml 
 ### composer packages
+- psr/log
 - terrazza/reflectionclass
-- terrazza/logger <i>a psr/log based logger implementation</i>
+### composer packages (require-dev)
+- terrazza/logger
 
 <a id="examples" name="examples"/></a>
 <a id="user-content-examples" name="user-content-examples"/></a>
@@ -108,13 +111,16 @@ $input = json_encode(
         'name' => 'Max'
     ]
 );
-$object = (new JsonDeserializer(LogInterface $logger))
+//
+// $logger has to be a psr/log/LoggerInterface implementation
+//
+$object = (new JsonDeserializer($logger))
     ->deserialize(TargetObject::class, $input);
    
 echo $object->getId(); // 1
 echo $object->getName(); // Max 
 
-$json = (new JsonSerializer(LogInterface $logger))
+$json = (new JsonSerializer($logger))
     ->serialize($object);
     
 var_dump($input === $json); // true    
@@ -144,8 +150,12 @@ $input = json_encode(
         'name' => 'Max'
     ]
 );
+//
+// $logger has to be a psr/log/LoggerInterface implementation
+//
+
 // create object
-$object = (new JsonDeserializer(LogInterface $logger))
+$object = (new JsonDeserializer($logger))
     ->deserialize(TargetObject::class, $input);
 
 // update object
@@ -155,13 +165,13 @@ $input = json_encode(
         'name' => 'Update'
     ]
 );    
-$object = (new JsonDeserializer(LogInterface $logger))
+$object = (new JsonDeserializer($logger))
     ->deserialize($object, $input);    
       
 echo $object->getId(); // 1, cause constructor will be ignored
 echo $object->getName(); // Update
 
-$json = (new JsonSerializer(LogInterface $logger))
+$json = (new JsonSerializer($logger))
     ->serialize($object);
     
 var_dump(json_encode([
