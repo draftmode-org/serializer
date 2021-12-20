@@ -1,14 +1,14 @@
 <?php
 namespace Terrazza\Component\Serializer\Tests\Denormalizer;
 use PHPUnit\Framework\TestCase;
-use Terrazza\Component\Serializer\Tests\Examples\DenormalizerUnit;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifePerson;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifePersonAddress;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProduct;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductAmount;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductLabel;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductUUID;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeUserUUID;
+use Terrazza\Component\Serializer\Tests\_Mocks\DenormalizerMock;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifePerson;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifePersonAddress;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProduct;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductAmount;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductLabel;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductUUID;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeUserUUID;
 
 class JsonDeserializerRealLifeExampleTest extends TestCase {
 
@@ -72,7 +72,7 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
         //
         // create with serializer
         //
-        $denormalize= DenormalizerUnit::get();
+        $denormalize= DenormalizerMock::get();
         $sProduct   = $denormalize->denormalize(SerializerRealLifeProduct::class, [
             'id'            => $id,
             'price' => [
@@ -125,7 +125,7 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
         //
         // update with serializer
         //
-        $denormalize= DenormalizerUnit::get();
+        $denormalize= DenormalizerMock::get();
         $uProduct   = $denormalize->denormalize($mProduct, [
             'vLabels'       => null,
             'price'         => [
@@ -167,7 +167,7 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
         //
         // update with serializer
         //
-        $denormalize= DenormalizerUnit::get();
+        $denormalize= DenormalizerMock::get();
         $u2Product  = $denormalize->denormalize($mProduct, [
             'description'   => $u2Description = null,
             'person'        => null
@@ -184,7 +184,7 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
         //
         // update with serializer
         //
-        $denormalize= DenormalizerUnit::get();
+        $denormalize= DenormalizerMock::get();
         $u3Product  = $denormalize->denormalize($u2Product, [
             'person'        => [
                 'name'      => $u3PersonName = "u3PersonName",

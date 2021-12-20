@@ -1,8 +1,8 @@
 <?php
 namespace Terrazza\Component\Serializer\Tests\Factory\Json;
 use PHPUnit\Framework\TestCase;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProduct;
-use Terrazza\Component\Serializer\Tests\Examples\JsonArrayUnit;
+use Terrazza\Component\Serializer\Tests\_Mocks\JsonArrayMock;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProduct;
 
 class JsonSerializerDeserializeTest extends TestCase {
 
@@ -32,10 +32,10 @@ class JsonSerializerDeserializeTest extends TestCase {
             ],
             'createdAt'     => "2021-01-31"
         ]);
-        $deserializer   = JsonArrayUnit::getDeserializer();
+        $deserializer   = JsonArrayMock::getDeserializer();
         $sProduct       = $deserializer->deserialize(SerializerRealLifeProduct::class, $input, true, true);
 
-        $serializer     = JsonArrayUnit::getSerializer();
+        $serializer     = JsonArrayMock::getSerializer();
         $output         = $serializer->serialize($sProduct);
 
         $this->assertEquals($input, $output);

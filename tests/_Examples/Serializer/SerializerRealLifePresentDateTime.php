@@ -1,5 +1,5 @@
 <?php
-namespace Terrazza\Component\Serializer\Tests\Examples\Serializer;
+namespace Terrazza\Component\Serializer\Tests\_Examples\Serializer;
 use DateTime;
 use Terrazza\Component\Serializer\INameConverter;
 

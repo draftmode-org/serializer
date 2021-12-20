@@ -6,8 +6,9 @@ use ReflectionClass;
 use Terrazza\Component\ReflectionClass\ClassNameResolver;
 use Terrazza\Component\Serializer\Annotation\AnnotationFactory;
 use Terrazza\Component\Serializer\Annotation\IAnnotationFactory;
+use Terrazza\Component\Serializer\Tests\_Mocks\LoggerMock;
 use Terrazza\Component\Serializer\Tests\Examples\LoggerUnit;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeUUID;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeUUID;
 
 class AnnotationPropertyTest extends TestCase {
     /**
@@ -16,7 +17,7 @@ class AnnotationPropertyTest extends TestCase {
      */
     private function get(bool $log=false) : IAnnotationFactory {
         return new AnnotationFactory(
-            LoggerUnit::getLogger("AnnotationProperty", $log),
+            LoggerMock::get($log),
             new ClassNameResolver()
         );
     }

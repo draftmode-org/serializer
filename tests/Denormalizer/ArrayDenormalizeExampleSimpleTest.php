@@ -2,8 +2,8 @@
 namespace Terrazza\Component\Serializer\Tests\Denormalizer;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
-use Terrazza\Component\Serializer\Tests\Examples\DenormalizerUnit;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerExampleSimple;
+use Terrazza\Component\Serializer\Tests\_Mocks\DenormalizerMock;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerExampleSimple;
 
 class ArrayDenormalizeExampleSimpleTest extends TestCase {
 
@@ -17,9 +17,9 @@ class ArrayDenormalizeExampleSimpleTest extends TestCase {
             'string' => $string = "string",
             'array' => $array = [1,2]
         ];
-        $deserializer                               = DenormalizerUnit::get();
+        $deserializer                               = DenormalizerMock::get();
         $object                                     = $deserializer->denormalize(SerializerExampleSimple::class, $input);
-        $deserializer                               = DenormalizerUnit::get();
+        $deserializer                               = DenormalizerMock::get();
         $objectUpdate                               = $deserializer->denormalize($object, [
             "number" => $numberUpdate = 3,
             "float" => $floatUpdate = 3.1,

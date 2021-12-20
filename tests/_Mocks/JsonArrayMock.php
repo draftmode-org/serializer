@@ -1,25 +1,25 @@
 <?php
 
-namespace Terrazza\Component\Serializer\Tests\Examples;
+namespace Terrazza\Component\Serializer\Tests\_Mocks;
 
 use DateTime;
 use Terrazza\Component\Serializer\IDeserializer;
 use Terrazza\Component\Serializer\Factory\Json\JsonDeserializer;
 use Terrazza\Component\Serializer\Factory\Json\JsonISerializer;
 use Terrazza\Component\Serializer\ISerializer;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductAmount;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductLabel;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeUUID;
-use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentAmount;
-use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentDateTime;
-use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentLabel;
-use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentUUID;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductAmount;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductLabel;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeUUID;
+use Terrazza\Component\Serializer\Tests\_Examples\Serializer\SerializerRealLifePresentAmount;
+use Terrazza\Component\Serializer\Tests\_Examples\Serializer\SerializerRealLifePresentDateTime;
+use Terrazza\Component\Serializer\Tests\_Examples\Serializer\SerializerRealLifePresentLabel;
+use Terrazza\Component\Serializer\Tests\_Examples\Serializer\SerializerRealLifePresentUUID;
 
-class JsonArrayUnit {
+class JsonArrayMock {
 
     public static function getDeserializer(bool $logLevel=false) : IDeserializer {
         return new JsonDeserializer(
-            LoggerUnit::getLogger("Deserializer", $logLevel)
+            LoggerMock::get($logLevel)
         );
     }
 
@@ -34,7 +34,7 @@ class JsonArrayUnit {
 
     public static function getSerializer(bool $logLevel=false) : ISerializer {
         return new JsonISerializer(
-            LoggerUnit::getLogger("Serializer", $logLevel),
+            LoggerMock::get($logLevel),
             self::getNameConverter()
         );
     }

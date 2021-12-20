@@ -7,11 +7,11 @@ use Terrazza\Component\Serializer\Annotation\AnnotationFactory;
 use Terrazza\Component\Serializer\INameConverter;
 use Terrazza\Component\Serializer\Normalizer\ArrayNormalizer;
 use Terrazza\Component\Serializer\INormalizer;
-use Terrazza\Component\Serializer\Tests\Examples\LoggerUnit;
+use Terrazza\Component\Serializer\Tests\_Mocks\LoggerMock;
 
 class ArrayNormalizerTest extends TestCase {
     function get(bool $log=false) : INormalizer {
-        $logger = LoggerUnit::getLogger("ArrayNormalizer", $log);
+        $logger = LoggerMock::get($log);
         return new ArrayNormalizer(
             $logger,
             new AnnotationFactory(

@@ -3,19 +3,14 @@
 namespace Terrazza\Component\Serializer\Tests\Factory\Json;
 
 use PHPUnit\Framework\TestCase;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifePerson;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifePersonAddress;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProduct;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductAmount;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductLabel;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductUUID;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeUserUUID;
-use Terrazza\Component\Serializer\Tests\Examples\JsonArrayUnit;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeUUID;
-use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentAmount;
-use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentDateTime;
-use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentLabel;
-use Terrazza\Component\Serializer\Tests\Examples\Serializer\SerializerRealLifePresentUUID;
+use Terrazza\Component\Serializer\Tests\_Mocks\JsonArrayMock;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifePerson;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifePersonAddress;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProduct;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductAmount;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductLabel;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductUUID;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeUserUUID;
 
 class JsonSerializerTest extends TestCase {
 
@@ -45,8 +40,8 @@ class JsonSerializerTest extends TestCase {
         );
         $mProduct->setCreatedAt(new \DateTime($dateTime = "2021-01-31"));
 
-        $serializer = JsonArrayUnit::getSerializer();
-        $response = $serializer->serialize($mProduct, JsonArrayUnit::getNameConverter());
+        $serializer = JsonArrayMock::getSerializer();
+        $response = $serializer->serialize($mProduct, JsonArrayMock::getNameConverter());
         $this->assertEquals(<<<JSON
         {"id":"{$id}","price":{"regular":{$mPriceRegular},"offer":null},"user":"{$mUser}","description":"{$mDescription}","vLabels":["{$mLabel1}"],"aLabels":["{$mLabel1}"],"person":{"name":"{$mPersonName}","address":{"street":"{$mAddressStreet}","city":"{$mAddressCity}"}},"createdAt":"{$dateTime}"}
         JSON, $response);
@@ -56,7 +51,7 @@ class JsonSerializerTest extends TestCase {
         $mProduct = new SerializerRealLifeProduct(
             new SerializerRealLifeProductUUID($id = "221"),
         );
-        $serializer = JsonArrayUnit::getSerializer();
+        $serializer = JsonArrayMock::getSerializer();
         $response   = $serializer->serialize($mProduct);
         $this->assertEquals(<<<JSON
         {"id":"221","price":{"regular":null,"offer":null},"user":null,"description":null,"vLabels":[],"aLabels":[],"person":null,"createdAt":null}
