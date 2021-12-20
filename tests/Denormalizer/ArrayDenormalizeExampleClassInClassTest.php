@@ -2,8 +2,9 @@
 namespace Terrazza\Component\Serializer\Tests\Denormalizer;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
+use Terrazza\Component\Serializer\Tests\_Mocks\DenormalizerMock;
 use Terrazza\Component\Serializer\Tests\Examples\DenormalizerUnit;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifePerson;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifePerson;
 
 class ArrayDenormalizeExampleClassInClassTest extends TestCase {
     /**
@@ -19,9 +20,9 @@ class ArrayDenormalizeExampleClassInClassTest extends TestCase {
                 ]
             ]
         ];
-        $deserializer                               = DenormalizerUnit::get();
+        $deserializer                               = DenormalizerMock::get();
         $object                                     = $deserializer->denormalize(JsonDeserializerExampleClassInClass::class, $input);
-        $deserializer                               = DenormalizerUnit::get();
+        $deserializer                               = DenormalizerMock::get();
         $objectUpdate                               = $deserializer->denormalize($object, [
             'person'        => [
                 'name'      => $uPersonName = "uPersonName",
@@ -56,9 +57,9 @@ class ArrayDenormalizeExampleClassInClassTest extends TestCase {
                 'name'          => $mPersonName = "mPersonName"
             ]
         ];
-        $deserializer                               = DenormalizerUnit::get();
+        $deserializer                               = DenormalizerMock::get();
         $object                                     = $deserializer->denormalize(JsonDeserializerExampleClassInClass::class, $input);
-        $deserializer                               = DenormalizerUnit::get();
+        $deserializer                               = DenormalizerMock::get();
         $objectUpdate                               = $deserializer->denormalize($object, [
             'person'        => [
                 'address'       => [

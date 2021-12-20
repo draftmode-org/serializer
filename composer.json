@@ -1,7 +1,7 @@
 {
     "name": "terrazza/serializer",
     "type" : "library",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Terrazza Component Serializer",
     "license": "MIT",
     "config" : {
@@ -32,7 +32,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Terrazza\\Component\\Serializer\\Tests\\Examples\\" : "tests\\Examples"
+            "Terrazza\\Component\\Serializer\\Tests\\_Examples\\" : "tests\\_Examples",
+            "Terrazza\\Component\\Serializer\\Tests\\_Mocks\\" : "tests\\_Mocks"
         }
     },
     "minimum-stability": "dev"

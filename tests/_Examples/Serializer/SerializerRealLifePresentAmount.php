@@ -1,7 +1,7 @@
 <?php
-namespace Terrazza\Component\Serializer\Tests\Examples\Serializer;
+namespace Terrazza\Component\Serializer\Tests\_Examples\Serializer;
 use Terrazza\Component\Serializer\INameConverter;
-use Terrazza\Component\Serializer\Tests\Examples\Model\SerializerRealLifeProductAmount;
+use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductAmount;
 
 class SerializerRealLifePresentAmount implements INameConverter {
     private SerializerRealLifeProductAmount $value;
