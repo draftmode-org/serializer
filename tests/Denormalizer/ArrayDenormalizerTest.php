@@ -1,5 +1,6 @@
 <?php
 namespace Terrazza\Component\Serializer\Tests\Denormalizer;
+use DateTime;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
@@ -117,6 +118,19 @@ class ArrayDenormalizerTest extends TestCase {
         $this->assertEquals($date, $objectDate->date->format("d.m.Y"));
     }
 
+    function testOptionalDateTime() {
+        $denormalizer = DenormalizerMock::get();
+        $object                                     = $denormalizer->denormalize(ArrayDenormalizerTest1OptionalDateTime::class,
+            ["id" => $id = 12]);
+        $this->assertEquals([
+            $id,
+            null
+        ], [
+            $object->getId(),
+            $object->getUpdated()
+        ]);
+    }
+
     /**
      * @throws ReflectionException
      */
@@ -154,4 +168,19 @@ class ArrayDenormalizerTestMultipleParams {
 class ArrayDenormalizerTestProtectedConstructor {
     protected int $value;
     protected function __construct() {}
+}
+
+class ArrayDenormalizerTest1OptionalDateTime {
+    private int $id;
+    private ?DateTime $updated;
+    public function __construct(int $id, ?DateTime $updated) {
+        $this->id = $id;
+        $this->updated = $updated;
+    }
+    function getId() : int {
+        return $this->id;
+    }
+    function getUpdated() :?DateTime {
+        return $this->updated;
+    }
 }
