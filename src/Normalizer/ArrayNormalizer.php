@@ -7,7 +7,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use RuntimeException;
-use Terrazza\Component\Serializer\Annotation\IAnnotationFactory;
+use Terrazza\Component\Annotation\IAnnotationFactory;
 use Terrazza\Component\Serializer\INameConverter;
 use Terrazza\Component\Serializer\INormalizer;
 use Terrazza\Component\Serializer\TraceKeyTrait;
@@ -59,16 +59,13 @@ class ArrayNormalizer implements INormalizer {
      * @throws ReflectionException
      */
     private function getAttributeValue(object $object, string $attributeName) {
-        $logMethod                                  = __METHOD__."()";
         $refClass                                   = new ReflectionClass($object);
-        $this->logger->debug("$logMethod $attributeName in class ".$refClass->getName(),
-            ["line" => __LINE__]);
+        $this->logger->debug("$attributeName in class ".$refClass->getName());
         $refProperty                                = $refClass->getProperty($attributeName);
         $property                                   = $this->annotationFactory->getAnnotationProperty($refProperty);
         $refProperty->setAccessible(true);
         if ($refProperty->isInitialized($object)) {
-            $this->logger->debug("$logMethod property", [
-                "line"              => __LINE__,
+            $this->logger->debug("property", [
                 "name"              => $property->getName(),
                 "isArray"           => $property->isArray(),
                 "isBuiltIn"         => $property->isBuiltIn(),
@@ -107,10 +104,9 @@ class ArrayNormalizer implements INormalizer {
      * @throws ReflectionException
      */
     private function getAttributeValueByTypeClass(string $propertyTypeClass, $attributeValue) {
-        $logMethod                                  = __METHOD__."()";
         if ($nameConverterClass = $this->getNameConverterClass($propertyTypeClass)) {
-            $this->logger->debug("$logMethod nameConverterClass for property found",
-                ["line" => __LINE__, 'className' => $propertyTypeClass]);
+            $this->logger->debug("nameConverterClass for property found",
+                ['className' => $propertyTypeClass]);
             if (class_exists($nameConverterClass)) {
                 $converter                          = new ReflectionClass($nameConverterClass);
                 if ($converter->implementsInterface(INameConverter::class)) {
@@ -129,8 +125,8 @@ class ArrayNormalizer implements INormalizer {
                 throw new RuntimeException("$nameConverterClass does not exists");
             }
         } else {
-            $this->logger->debug("$logMethod nameConverterClass for property not found",
-                ["line" => __LINE__, 'className' => $propertyTypeClass]);
+            $this->logger->debug("nameConverterClass for property not found",
+                ['className' => $propertyTypeClass]);
             return $this->normalize($attributeValue);
         }
     }
@@ -141,14 +137,11 @@ class ArrayNormalizer implements INormalizer {
      * @throws ReflectionException
      */
     private function getNameConverterClass(string $fromType) :?string {
-        $logMethod                                  = __METHOD__."()";
         if (array_key_exists($fromType, $this->nameConverter)) {
-            $this->logger->debug("$logMethod nameConverter for $fromType found",
-                ["line" => __LINE__]);
+            $this->logger->debug("nameConverter for $fromType found");
             return $this->nameConverter[$fromType];
         } else {
-            $this->logger->debug("$logMethod no nameConverter for $fromType",
-                ["line" => __LINE__]);
+            $this->logger->debug("no nameConverter for $fromType");
             $converter                              = new ReflectionClass($fromType);
             if ($parentClass = $converter->getParentClass()) {
                 return $this->getNameConverterClass($parentClass->getName());
@@ -172,7 +165,6 @@ class ArrayNormalizer implements INormalizer {
      * @return array
      */
     private function getAttributes(object $object) : array {
-        $logMethod                                  = __METHOD__."()";
         /*
         if (stdClass::class === get_class($object)) {
             return array_keys((array) $object);
@@ -186,23 +178,20 @@ class ArrayNormalizer implements INormalizer {
                 $method->isConstructor() ||
                 $method->isDestructor()
             ) {
-                $this->logger->debug("$logMethod skip method $methodName", ["line" => __LINE__]);
+                $this->logger->debug("skip method $methodName");
                 continue;
             }
             $attributeName                          = null;
             if ($this->_str_starts_with($methodName, $needle = 'get')) {
                 $attributeName                      = substr($methodName, 3);
-                $this->logger->debug("$logMethod method $methodName starts with $needle",
-                    ["line" => __LINE__]);
+                $this->logger->debug("method $methodName starts with $needle");
             }
             elseif ($this->_str_starts_with($methodName, $needle = 'has')) {
                 $attributeName                      = substr($methodName, 3);
-                $this->logger->debug("$logMethod method $methodName starts with $needle",
-                    ["line" => __LINE__]);
+                $this->logger->debug("method $methodName starts with $needle");
             } elseif ($this->_str_starts_with($methodName, $needle = 'is')) {
                 $attributeName                      = substr($methodName, 2);
-                $this->logger->debug("$logMethod method $methodName starts with $needle",
-                    ["line" => __LINE__]);
+                $this->logger->debug("method $methodName starts with $needle");
             }
             if ($attributeName !== null) {
                 $attributeName                      = lcfirst($attributeName);
@@ -215,18 +204,15 @@ class ArrayNormalizer implements INormalizer {
         foreach ($refClass->getProperties() as $property) {
             $propertyName                           = $property->getName();
             if (array_key_exists($propertyName, $attributes)) {
-                $this->logger->debug("$logMethod skip property $propertyName, already found as method",
-                    ["line" => __LINE__]);
+                $this->logger->debug("skip property $propertyName, already found as method");
                 continue;
             }
             if (!$property->isPublic()) {
-                $this->logger->debug("$logMethod skip property $propertyName, is not public",
-                    ["line" => __LINE__]);
+                $this->logger->debug("skip property $propertyName, is not public");
                 continue;
             }
             if ($property->isStatic()) {
-                $this->logger->debug("$logMethod skip property $propertyName, is static",
-                    ["line" => __LINE__]);
+                $this->logger->debug("skip property $propertyName, is static");
                 continue;
             }
             $attributeName                          = $property->getName();

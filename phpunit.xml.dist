@@ -23,9 +23,6 @@
     <ini name="error_reporting" value="-1"/>
   </php>
   <testsuites>
-    <testsuite name="Annotation">
-      <directory>./tests/Annotation</directory>
-    </testsuite>
     <testsuite name="Decoder">
       <directory>./tests/Decoder</directory>
     </testsuite>

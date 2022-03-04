@@ -4,7 +4,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use RuntimeException;
-use Terrazza\Component\Serializer\Tests\_Mocks\DenormalizerMock;
+use Terrazza\Component\Serializer\Tests\_Mocks\ArrayDenormalizer;
 use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerExampleVariadicViaParam;
 
 class ArrayDenormalizeExceptionTest extends TestCase {
@@ -14,14 +14,14 @@ class ArrayDenormalizeExceptionTest extends TestCase {
      */
     function testUnknownClass() {
         $input                                      = [];
-        $deserializer                               = DenormalizerMock::get();
+        $deserializer                               = ArrayDenormalizer::get();
         $this->expectException(RuntimeException::class);
         $deserializer->denormalize("SerializerExampleConstructorSimple::class", $input);
     }
 
     function testInvalidArgumentIsArrayExpectArray() {
         $input                                      = json_encode(['int' => [$i1 = 2,$i2 = 3]]);
-        $deserializer                               = DenormalizerMock::get();
+        $deserializer                               = ArrayDenormalizer::get();
         $this->expectException(InvalidArgumentException::class);
         $deserializer->denormalize(SerializerExampleVariadicViaParam::class, $input);
     }

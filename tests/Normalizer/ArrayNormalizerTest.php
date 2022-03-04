@@ -2,22 +2,18 @@
 namespace Terrazza\Component\Serializer\Tests\Normalizer;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Terrazza\Component\ReflectionClass\ClassNameResolver;
-use Terrazza\Component\Serializer\Annotation\AnnotationFactory;
 use Terrazza\Component\Serializer\INameConverter;
 use Terrazza\Component\Serializer\Normalizer\ArrayNormalizer;
 use Terrazza\Component\Serializer\INormalizer;
-use Terrazza\Component\Serializer\Tests\_Mocks\LoggerMock;
+use Terrazza\Component\Serializer\Tests\_Mocks\AnnotationFactory;
+use Terrazza\Component\Serializer\Tests\_Mocks\Logger;
 
 class ArrayNormalizerTest extends TestCase {
-    function get(bool $log=false) : INormalizer {
-        $logger = LoggerMock::get($log);
+    function get($stream=null) : INormalizer {
+        $logger = Logger::get($stream);
         return new ArrayNormalizer(
             $logger,
-            new AnnotationFactory(
-                $logger,
-                new ClassNameResolver()
-            )
+            AnnotationFactory::get($logger)
         );
     }
 

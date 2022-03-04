@@ -9,8 +9,8 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use RuntimeException;
-use Terrazza\Component\Serializer\Annotation\IAnnotationFactory;
-use Terrazza\Component\Serializer\Annotation\IAnnotationType;
+use Terrazza\Component\Annotation\IAnnotationFactory;
+use Terrazza\Component\Annotation\IAnnotationType;
 use Terrazza\Component\Serializer\IDenormalizer;
 use Terrazza\Component\Serializer\TraceKeyTrait;
 
