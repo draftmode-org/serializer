@@ -43,7 +43,7 @@ class JsonSerializerTest extends TestCase {
         $serializer = JsonFactory::getSerializer();
         $response = $serializer->serialize($mProduct, JsonFactory::getNameConverter());
         $this->assertEquals(<<<JSON
-        {"id":"{$id}","price":{"regular":{$mPriceRegular},"offer":null},"user":"{$mUser}","description":"{$mDescription}","vLabels":["{$mLabel1}"],"aLabels":["{$mLabel1}"],"person":{"name":"{$mPersonName}","address":{"street":"{$mAddressStreet}","city":"{$mAddressCity}"}},"createdAt":"{$dateTime}"}
+        {"id":"{$id}","price":{"regular":{$mPriceRegular},"offer":null},"user":"{$mUser}","description":"{$mDescription}","vLabels":["{$mLabel1}"],"aLabels":["{$mLabel1}"],"person":{"name":"{$mPersonName}","address":{"street":"{$mAddressStreet}","city":"{$mAddressCity}","zip":null}},"createdAt":"{$dateTime}"}
         JSON, $response);
     }
 

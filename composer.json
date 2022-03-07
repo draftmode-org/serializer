@@ -15,7 +15,6 @@
     ],
     "require": {
         "php": ">=7.4",
-        "terrazza/reflectionclass": "dev-main",
         "terrazza/annotation": "dev-main",
         "psr/log": "1.1.*",
         "ext-json": "*",

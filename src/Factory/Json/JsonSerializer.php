@@ -1,12 +1,10 @@
 <?php
-
 namespace Terrazza\Component\Serializer\Factory\Json;
 
 use Psr\Log\LoggerInterface;
-use Terrazza\Component\Annotation\IAnnotationFactory;
 use Terrazza\Component\Serializer\Encoder\JsonEncoder;
 use Terrazza\Component\Serializer\IEncoder;
-use Terrazza\Component\Serializer\Normalizer\ArrayNormalizer;
+use Terrazza\Component\Serializer\Normalizer;
 use Terrazza\Component\Serializer\INormalizer;
 use Terrazza\Component\Serializer\Serializer;
 use Terrazza\Component\Serializer\ISerializer;
@@ -14,12 +12,9 @@ use Terrazza\Component\Serializer\ISerializer;
 class JsonSerializer implements ISerializer {
     private INormalizer $normalizer;
     private IEncoder $encoder;
-    public function __construct(LoggerInterface $logger, IAnnotationFactory $annotationFactory, array $nameConverter=null) {
+    public function __construct(LoggerInterface $logger, array $nameConverter=null) {
         $this->encoder                              = new JsonEncoder();
-        $this->normalizer                           = new ArrayNormalizer(
-            $logger,
-            $annotationFactory
-        );
+        $this->normalizer                           = new Normalizer($logger);
         //
         // extend nameConverter
         //

@@ -7,7 +7,7 @@ use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProduc
 class JsonSerializerDeserializeTest extends TestCase {
 
     function testBoth() {
-        $input = json_encode([
+        $input = json_encode($arrInput = [
             'id'            => "121",
             'price' => [
                 'regular'   => 95.40,
@@ -35,6 +35,8 @@ class JsonSerializerDeserializeTest extends TestCase {
         $deserializer   = JsonFactory::getDeserializer();
         $sProduct       = $deserializer->deserialize(SerializerRealLifeProduct::class, $input, true, true);
 
+        $arrInput["person"]["address"]["zip"] = null;
+        $input          = json_encode($arrInput);
         $serializer     = JsonFactory::getSerializer();
         $output         = $serializer->serialize($sProduct);
 

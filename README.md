@@ -5,6 +5,8 @@ This component is meant to be used to turn objects into a specific format (XML,J
     1. [Deserialize](#method---deserialize)
        1. [Decode](#decode)
        2. [Denormalize](#denormalize)
+          1. [method: denormalize](#denormalize-denormalize)
+          2. [method: denormalizeMethodValues](#denormalize-denormalizeMethodValues)
     2. [Serialize](#method---serialize)
        1. [Normalize](#normalize)
        2. [Encode](#encode)
@@ -15,7 +17,7 @@ This component is meant to be used to turn objects into a specific format (XML,J
 
 <a id="deserialize" name="deserialize"></a>
 <a id="user-content-deserialize" name="user-content-deserialize"></a>
-## Method - Deserialize
+## Deserialize
 Deserialize is a combination of 
 1. decode (JSON,XML,CSV) into an array
 2. denormalize into an object
@@ -30,34 +32,42 @@ Actually Terrazza/Serializer supports
 <a id="denormalize" name="denormalize"></a>
 <a id="user-content-denormalize" name="user-content-denormalize"></a>
 ### Denormalize
-The Denormalizer supports two methods.<br>
-a) create a new object<br>
-<i>input: class-method</i><br>
-b) update an existing object<br>
-<i>input: existing class</i>
+The Denormalizer supports two methods.
 
-in any case 2 options are provided
+<a id="denormalize-denormalize" name="denormalize-denormalize"></a>
+<a id="user-content-denormalize-denormalize" name="user-content-denormalize-denormalize"></a>
+#### method: denormalize
+This method convert in input into the given className and
+- validate input types
+- load/handle nested objects
+
+Properties:
+- className (string)
+- input (mixed)
 - restrictUnInitialized (default: false)
 - restrictArguments (default: false)
 
-#### Logic: create an object
-1. try to handle __constructor (if he is public)
-2. handled unused arguments with "setter"-methods (if they are public)
+_Business logic_<br>
+1. initialize className with __constructor (if public)
+2. handle unused arguments with "setter"-methods (if public)
 
-#### Logic: update an object<br>
-<i>notice:<br>
-The common way is, to ignore the __constructor and just update based on setter methods.
-</i>
-1. clone input object ```unserialize(serialize($object))```
-2. handle all arguments with "setter"-methods (if they are public)
-
+<a id="denormalize-denormalizeMethodValues" name="denormalize-denormalizeMethodValues"></a>
+<a id="user-content-denormalize-denormalizeMethodValues" name="user-content-denormalize-denormalizeMethodValues"></a>
+#### method: denormalizeMethodValues
+This method map/convert given arguments into/based on an object and his methodName.<br><br> 
+Properties:
+- object
+- methodName (string)
+- input (mixed)
+- restrictArguments (default: false)
+ 
 #### How should a class be designed
 We suggest that all required arguments are handled by the __constructor<br>
 and all optional arguments are handled by the setter.
 
 <a id="serialize" name="serialize"></a>
 <a id="user-content-serialize" name="user-content-serialize"></a>
-## Method - Serialize
+## Serialize
 Serialize is a combination of
 1. normalize object to array
 2. encode array to (JSON,XML,CSV,..)
@@ -93,7 +103,7 @@ composer require terrazza/serializer
 - ext-libxml 
 ### composer packages
 - psr/log
-- terrazza/reflectionclass
+- terrazza/annotation
 ### composer packages (require-dev)
 - terrazza/logger
 
@@ -112,13 +122,16 @@ $input = json_encode(
     ]
 );
 //
-// $logger has to be a psr/log/LoggerInterface implementation
+// $logger has to be a Psr\Log\LoggerInterface implementation
 //
+use Terrazza\Component\Serializer\Factory\Json\JsonSerializer;
+use Terrazza\Component\Serializer\Factory\Json\JsonDeserializer;
+
 $object = (new JsonDeserializer($logger))
     ->deserialize(TargetObject::class, $input);
    
-echo $object->getId(); // 1
-echo $object->getName(); // Max 
+echo $object->getId();      // 1
+echo $object->getName();    // Max 
 
 $json = (new JsonSerializer($logger))
     ->serialize($object);
@@ -142,8 +155,11 @@ class TargetObject {
     }    
 }
 ```
-### Deserialize + Serialize JSON (update)
+### Deserialize::denormalizeMethodValues
 ```php
+use Terrazza\Component\Serializer\Factory\Json\JsonDeserializer;
+use \Terrazza\Component\Serializer\Denormalizer;
+
 $input = json_encode(
     [
         'id' => 1,
@@ -151,37 +167,23 @@ $input = json_encode(
     ]
 );
 //
-// $logger has to be a psr/log/LoggerInterface implementation
+// $logger has to be a Psr\Log\LoggerInterface implementation
 //
 
 // create object
 $object = (new JsonDeserializer($logger))
     ->deserialize(TargetObject::class, $input);
 
-// update object
-$input = json_encode(
-    [
-        'id' => 2,
-        'name' => 'Update'
-    ]
-);    
-$object = (new JsonDeserializer($logger))
-    ->deserialize($object, $input);    
-      
-echo $object->getId(); // 1, cause constructor will be ignored
-echo $object->getName(); // Update
+$values = (new Denormalizer($logger))->denormalizeMethodValues($object, ["amount" => 12]);
 
-$json = (new JsonSerializer($logger))
-    ->serialize($object);
-    
-var_dump(json_encode([
-    'id' => 1,
-    'name' => "Update"
-]) === $json);
+var_dump([
+    'amount' => 12
+] === $values);
 
 class TargetObject {
     public int $id;
     public ?string $name=null;
+    public ?int $amount=null;
     public function __construct(int $id) {
         $this->id = $id;
     }
@@ -194,5 +196,11 @@ class TargetObject {
     public function setName(?string $name) : void {
         $this->name = $name;
     }    
+    public function setAmount(?int $amount) : void {
+        $this->amount = $amount;
+    }
+    public function getAmonut() :?int {
+        return $this->amount;
+    }
 }
 ```

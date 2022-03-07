@@ -4,6 +4,7 @@ namespace Terrazza\Component\Serializer\Tests\_Examples\Model;
 class SerializerRealLifePersonAddress {
     private string $street;
     private string $city;
+    private ?int $zip=null;
 
     /**
      * @param string $street
@@ -12,6 +13,7 @@ class SerializerRealLifePersonAddress {
     public function __construct(string $street, string $city) {
         $this->street = $street;
         $this->city = $city;
+        $this->zip = null;
     }
 
     /**
@@ -46,5 +48,19 @@ class SerializerRealLifePersonAddress {
         $this->city = $city;
     }
 
+    /**
+     * @param int|null $zip
+     */
+    public function setZip(?int $zip): void {
+        $this->zip = $zip;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getZip(): ?int
+    {
+        return $this->zip;
+    }
 
 }

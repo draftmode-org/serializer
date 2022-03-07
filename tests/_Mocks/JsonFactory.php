@@ -19,19 +19,12 @@ class JsonFactory {
 
     public static function getDeserializer($stream=null) : IDeserializer {
         $logger = Logger::get($stream);
-        return new JsonDeserializer(
-            $logger,
-            AnnotationFactory::get($logger)
-        );
+        return new JsonDeserializer($logger);
     }
 
     public static function getSerializer($stream=null) : ISerializer {
         $logger = Logger::get($stream);
-        return new JsonSerializer(
-            $logger,
-            AnnotationFactory::get($logger),
-            self::getNameConverter()
-        );
+        return new JsonSerializer($logger, self::getNameConverter());
     }
 
     public static function getNameConverter() : array {

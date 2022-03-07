@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3eb37881bd0cb7194b5b3f38842ab79b",
+    "content-hash": "07d8c03964de918f4cae2be6ceb6aafd",
     "packages": [
         {
             "name": "psr/log",
@@ -62,21 +62,22 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/terrazza/annotation.git",
-                "reference": "e4ea857159390f7dbf7db0d646c2e73410e3505c"
+                "reference": "cc1b362ff324f56095452b290bc8af092840d58f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/terrazza/annotation/zipball/e4ea857159390f7dbf7db0d646c2e73410e3505c",
-                "reference": "e4ea857159390f7dbf7db0d646c2e73410e3505c",
+                "url": "https://api.github.com/repos/terrazza/annotation/zipball/cc1b362ff324f56095452b290bc8af092840d58f",
+                "reference": "cc1b362ff324f56095452b290bc8af092840d58f",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.4",
-                "psr/log": "1.1.*"
+                "psr/log": "1.1.*",
+                "terrazza/reflectionclass": "dev-main"
             },
             "require-dev": {
                 "phpunit/phpunit": "^9.3",
-                "terrazza/reflectionclass": "dev-main"
+                "terrazza/logger": "dev-main"
             },
             "default-branch": true,
             "type": "library",
@@ -100,7 +101,7 @@
                 "issues": "https://github.com/terrazza/annotation/issues",
                 "source": "https://github.com/terrazza/annotation/tree/main"
             },
-            "time": "2022-03-04T14:57:47+00:00"
+            "time": "2022-03-07T20:07:15+00:00"
         },
         {
             "name": "terrazza/reflectionclass",
@@ -1394,12 +1395,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "9f4335cf4951de192c6aa763b19638bdc41a1290"
+                "reference": "2e9da11878c4202f97915c1cb4bb1ca318a63f5f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/9f4335cf4951de192c6aa763b19638bdc41a1290",
-                "reference": "9f4335cf4951de192c6aa763b19638bdc41a1290",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/2e9da11878c4202f97915c1cb4bb1ca318a63f5f",
+                "reference": "2e9da11878c4202f97915c1cb4bb1ca318a63f5f",
                 "shasum": ""
             },
             "require": {
@@ -1455,7 +1456,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.15"
             },
             "funding": [
                 {
@@ -1463,7 +1464,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-03-03T16:15:10+00:00"
+            "time": "2022-03-07T09:28:20+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -1712,12 +1713,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "5ff8c545a50226c569310a35f4fa89d79f1ddfdc"
+                "reference": "475686471c1e2869340e95dad0c749be3be0ad27"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/5ff8c545a50226c569310a35f4fa89d79f1ddfdc",
-                "reference": "5ff8c545a50226c569310a35f4fa89d79f1ddfdc",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/475686471c1e2869340e95dad0c749be3be0ad27",
+                "reference": "475686471c1e2869340e95dad0c749be3be0ad27",
                 "shasum": ""
             },
             "require": {
@@ -1807,7 +1808,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-02-23T17:10:58+00:00"
+            "time": "2022-03-07T16:54:23+00:00"
         },
         {
             "name": "psr/container",
@@ -2290,12 +2291,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/exporter.git",
-                "reference": "65e8b7db476c5dd267e65eea9cab77584d3cfff9"
+                "reference": "428c31e2ea8b292aa814bc460cf28d58eba4d2ba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/exporter/zipball/65e8b7db476c5dd267e65eea9cab77584d3cfff9",
-                "reference": "65e8b7db476c5dd267e65eea9cab77584d3cfff9",
+                "url": "https://api.github.com/repos/sebastianbergmann/exporter/zipball/428c31e2ea8b292aa814bc460cf28d58eba4d2ba",
+                "reference": "428c31e2ea8b292aa814bc460cf28d58eba4d2ba",
                 "shasum": ""
             },
             "require": {
@@ -2359,7 +2360,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-11-11T14:18:36+00:00"
+            "time": "2022-03-06T06:59:32+00:00"
         },
         {
             "name": "sebastian/global-state",
@@ -3752,12 +3753,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/vimeo/psalm.git",
-                "reference": "e1997c92f2de5cd7a0af0535fdfeff2ffcdc8131"
+                "reference": "769e316f52452ee3fbc5329a28a2ee73e167d12d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vimeo/psalm/zipball/e1997c92f2de5cd7a0af0535fdfeff2ffcdc8131",
-                "reference": "e1997c92f2de5cd7a0af0535fdfeff2ffcdc8131",
+                "url": "https://api.github.com/repos/vimeo/psalm/zipball/769e316f52452ee3fbc5329a28a2ee73e167d12d",
+                "reference": "769e316f52452ee3fbc5329a28a2ee73e167d12d",
                 "shasum": ""
             },
             "require": {
@@ -3851,7 +3852,7 @@
                 "issues": "https://github.com/vimeo/psalm/issues",
                 "source": "https://github.com/vimeo/psalm/tree/4.x"
             },
-            "time": "2022-03-02T19:02:37+00:00"
+            "time": "2022-03-07T18:00:37+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -3968,7 +3969,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "terrazza/reflectionclass": 20,
         "terrazza/annotation": 20,
         "vimeo/psalm": 20,
         "terrazza/logger": 20

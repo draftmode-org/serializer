@@ -17,7 +17,7 @@ class Deserializer implements IDeserializer {
     }
 
     /**
-     * @param class-string<T>|T $className
+     * @param class-string<T> $className
      * @param mixed $input
      * @param bool $restrictUnInitialized
      * @param bool $restrictArguments
@@ -26,18 +26,14 @@ class Deserializer implements IDeserializer {
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */
-    public function deserialize($className, $input, bool $restrictUnInitialized=false, bool $restrictArguments=false) {
+    public function deserialize(string $className, $input, bool $restrictUnInitialized=false, bool $restrictArguments=false) {
         $data                                       = $this->decoder->decode($input);
-        $className                                  = $this->cloneClass($className);
+        //$className                                  = $this->cloneClass($className);
         return $this->denormalizer->denormalize($className, $data, $restrictUnInitialized, $restrictArguments);
     }
 
-    /**
-     * @param class-string<T>|T $className
-     * @return T
-     * @template T of object
-     */
+    /*
     private function cloneClass($className) {
         return (is_object($className)) ? unserialize(serialize($className)) : $className;
-    }
+    }*/
 }
