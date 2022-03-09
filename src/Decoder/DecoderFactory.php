@@ -1,15 +1,18 @@
 <?php
 namespace Terrazza\Component\Serializer\Decoder;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 
 class DecoderFactory {
+    private LoggerInterface $logger;
     /**
      * @var array|IDecoder[]
      */
     private array $decoders;
     private array $contentTypePatterns;
 
-    public function __construct() {
+    public function __construct(LoggerInterface $logger) {
+        $this->logger                               = $logger;
         $this->decoders                             = [
             "json"                                  => new JsonDecoder(),
             "xml"                                   => new XMLDecoder()
@@ -38,13 +41,17 @@ class DecoderFactory {
      * @return IDecoder|null
      */
     private function getDecoder(string $contentType) :?IDecoder {
+        $this->logger->debug("try to get decoder for contentType:$contentType");
         $contentType                                = strtolower($contentType);
         if ($decoder = $this->decoders[$contentType] ?? null) {
+            $this->logger->debug("decoder found: contentType");
             return $decoder;
         }
         foreach ($this->contentTypePatterns as $useContentType => $pattern) {
+            $this->logger->debug("try to get decoder in pattern $pattern");
             if (preg_match("#$pattern#", $contentType)) {
-                return $this->decoders[$contentType] ?? null;
+                $this->logger->debug("decoder found in pattern, use contentType $useContentType");
+                return $this->decoders[$useContentType] ?? null;
             }
         }
         return null;

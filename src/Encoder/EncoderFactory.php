@@ -1,14 +1,18 @@
 <?php
 namespace Terrazza\Component\Serializer\Encoder;
 
+use Psr\Log\LoggerInterface;
+
 class EncoderFactory {
+    private LoggerInterface $logger;
     /**
      * @var array|IEncoder[]
      */
     private array $encoders;
     private array $contentTypePatterns;
 
-    public function __construct() {
+    public function __construct(LoggerInterface $logger) {
+        $this->logger                               = $logger;
         $this->encoders                             = [
             "json"                                  => new JsonEncoder()
         ];
@@ -36,12 +40,16 @@ class EncoderFactory {
      * @return IEncoder|null
      */
     private function getEncoder(string $contentType) :?IEncoder {
+        $this->logger->debug("try to get encode for contentType:$contentType");
         $contentType                                = strtolower($contentType);
         if ($decoder = $this->encoders[$contentType] ?? null) {
+            $this->logger->debug("encode found: contentType");
             return $decoder;
         }
         foreach ($this->contentTypePatterns as $useContentType => $pattern) {
+            $this->logger->debug("try to get encoder in pattern $pattern");
             if (preg_match("#$pattern#", $contentType)) {
+                $this->logger->debug("encoder found in pattern, use contentType $useContentType");
                 return $this->decoders[$contentType] ?? null;
             }
         }

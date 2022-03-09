@@ -14,7 +14,7 @@ class DeserializerFactory implements IDeserializerFactory {
     private DecoderFactory $decoderFactory;
     private IDenormalizer $denormalizer;
     public function __construct(LoggerInterface $logger) {
-        $this->decoderFactory                       = new DecoderFactory();
+        $this->decoderFactory                       = new DecoderFactory($logger);
         $this->denormalizer                         = new Denormalizer($logger);
     }
 

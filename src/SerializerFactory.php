@@ -13,7 +13,7 @@ class SerializerFactory implements ISerializerFactory {
     private EncoderFactory $encoderFactory;
     private INormalizer $normalizer;
     public function __construct(LoggerInterface $logger, array $nameConverter=null) {
-        $this->encoderFactory                       = new EncoderFactory();
+        $this->encoderFactory                       = new EncoderFactory($logger);
         $normalizer                                 = new Normalizer($logger);
         if ($nameConverter) {
             $normalizer                             = $normalizer->withNameConverter($nameConverter);
