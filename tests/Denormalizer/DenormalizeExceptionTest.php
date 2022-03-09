@@ -16,13 +16,13 @@ class ArrayDenormalizeExceptionTest extends TestCase {
         $input                                      = [];
         $deserializer                               = Denormalizer::get();
         $this->expectException(RuntimeException::class);
-        $deserializer->denormalize("SerializerExampleConstructorSimple::class", $input);
+        $deserializer->denormalizeClass("SerializerExampleConstructorSimple::class", $input);
     }
 
     function testInvalidArgumentIsArrayExpectArray() {
         $input                                      = json_encode(['int' => [$i1 = 2,$i2 = 3]]);
         $deserializer                               = Denormalizer::get();
         $this->expectException(InvalidArgumentException::class);
-        $deserializer->denormalize(SerializerExampleVariadicViaParam::class, $input);
+        $deserializer->denormalizeClass(SerializerExampleVariadicViaParam::class, $input);
     }
 }

@@ -3,10 +3,8 @@
 namespace Terrazza\Component\Serializer\Tests\_Mocks;
 
 use DateTime;
-use Terrazza\Component\Serializer\IDeserializer;
-use Terrazza\Component\Serializer\Factory\Json\JsonDeserializer;
-use Terrazza\Component\Serializer\Factory\Json\JsonSerializer;
-use Terrazza\Component\Serializer\ISerializer;
+use Terrazza\Component\Serializer\DeserializerFactory;
+use Terrazza\Component\Serializer\SerializerFactory;
 use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductAmount;
 use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductLabel;
 use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeUUID;
@@ -15,16 +13,16 @@ use Terrazza\Component\Serializer\Tests\_Examples\Serializer\SerializerRealLifeP
 use Terrazza\Component\Serializer\Tests\_Examples\Serializer\SerializerRealLifePresentLabel;
 use Terrazza\Component\Serializer\Tests\_Examples\Serializer\SerializerRealLifePresentUUID;
 
-class JsonFactory {
+class ConverterFactory {
 
-    public static function getDeserializer($stream=null) : IDeserializer {
+    public static function getDeserializer($stream=null) : DeserializerFactory {
         $logger = Logger::get($stream);
-        return new JsonDeserializer($logger);
+        return new DeserializerFactory($logger);
     }
 
-    public static function getSerializer($stream=null) : ISerializer {
+    public static function getSerializer($stream=null) : SerializerFactory {
         $logger = Logger::get($stream);
-        return new JsonSerializer($logger, self::getNameConverter());
+        return new SerializerFactory($logger, self::getNameConverter());
     }
 
     public static function getNameConverter() : array {

@@ -2,7 +2,12 @@
 namespace Terrazza\Component\Serializer;
 use InvalidArgumentException;
 use ReflectionException;
+use Terrazza\Component\Serializer\Decoder\IDecoder;
 
+/**
+ * 1. decode an input into an array (use IDecoder)
+ * 2. denormalize array into a class
+ */
 class Deserializer implements IDeserializer {
     private IDenormalizer $denormalizer;
     private IDecoder $decoder;
@@ -19,21 +24,14 @@ class Deserializer implements IDeserializer {
     /**
      * @param class-string<T> $className
      * @param mixed $input
-     * @param bool $restrictUnInitialized
      * @param bool $restrictArguments
      * @return T
      * @template T of object
      * @throws ReflectionException
      * @throws InvalidArgumentException
      */
-    public function deserialize(string $className, $input, bool $restrictUnInitialized=false, bool $restrictArguments=false) {
+    public function deserialize(string $className, $input, bool $restrictArguments=false) {
         $data                                       = $this->decoder->decode($input);
-        //$className                                  = $this->cloneClass($className);
-        return $this->denormalizer->denormalize($className, $data, $restrictUnInitialized, $restrictArguments);
+        return $this->denormalizer->denormalizeClass($className, $data, $restrictArguments);
     }
-
-    /*
-    private function cloneClass($className) {
-        return (is_object($className)) ? unserialize(serialize($className)) : $className;
-    }*/
 }

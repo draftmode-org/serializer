@@ -17,7 +17,7 @@ class DenormalizeExampleVariadicClassTest extends TestCase {
             'int' => [$i1 = 1, $i2 = 2]
         ];
         $deserializer                               = Denormalizer::get();
-        $object                                     = $deserializer->denormalize(SerializerExampleVariadicAsClass::class, $input);
+        $object                                     = $deserializer->denormalizeClass(SerializerExampleVariadicAsClass::class, $input);
         /*$objectUpdate                               = $deserializer->denormalize($object, [
             'int' => [$i3 = 3]
         ]);*/
@@ -38,7 +38,7 @@ class DenormalizeExampleVariadicClassTest extends TestCase {
             'int' => [$i1 = 2,$i2 = 3]
         ];
         $deserializer                               = Denormalizer::get();
-        $object                                     = $deserializer->denormalize(SerializerExampleVariadicViaParam::class, $input);
+        $object                                     = $deserializer->denormalizeClass(SerializerExampleVariadicViaParam::class, $input);
         /*$deserializer                               = Denormalizer::get();
         $objectUpdate                               = $deserializer->denormalize($object, [
             'int' => [$i3 = 4]

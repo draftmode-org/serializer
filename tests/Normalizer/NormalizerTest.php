@@ -2,7 +2,7 @@
 namespace Terrazza\Component\Serializer\Tests\Normalizer;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Terrazza\Component\Serializer\INameConverter;
+use Terrazza\Component\Serializer\INormalizerNameConverter;
 use Terrazza\Component\Serializer\INormalizer;
 use Terrazza\Component\Serializer\Tests\_Mocks\Normalizer;
 
@@ -31,20 +31,18 @@ class NormalizerTest extends TestCase {
 
     function testNameConverterDoesNotExists() {
         $normalizer     = $this->get();
-        $normalizer     = $normalizer->withNameConverter([
+        $this->expectException(RuntimeException::class);
+        $normalizer->withNameConverter([
             ArrayNormalizerTestEmbeddedClass::class => "unknownConverterClass"
         ]);
-        $this->expectException(RuntimeException::class);
-        $normalizer->normalize(new ArrayNormalizerTestWithClass(new ArrayNormalizerTestEmbeddedClass(12)));
     }
 
     function testNameConverterInterfaceFailure() {
         $normalizer     = $this->get();
-        $normalizer     = $normalizer->withNameConverter([
+        $this->expectException(RuntimeException::class);
+        $normalizer->withNameConverter([
             ArrayNormalizerTestEmbeddedClass::class => ArrayNormalizerTestEmbeddedClass::class
         ]);
-        $this->expectException(RuntimeException::class);
-        $normalizer->normalize(new ArrayNormalizerTestWithClass(new ArrayNormalizerTestEmbeddedClass(12)));
     }
 
     function testNameConverterGetFailure() {
@@ -90,7 +88,7 @@ class ArrayNormalizerTestUndefinedType {
         $this->number = $number;
     }
 }
-class ArrayNormalizerTestEmbeddedClassPresenter implements INameConverter {
+class ArrayNormalizerTestEmbeddedClassPresenter implements INormalizerNameConverter {
     private ArrayNormalizerTestEmbeddedClass $number;
     public function __construct(ArrayNormalizerTestEmbeddedClass $number) {
         $this->number = $number;

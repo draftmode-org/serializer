@@ -1,7 +1,12 @@
 <?php
-
 namespace Terrazza\Component\Serializer;
 
+use Terrazza\Component\Serializer\Encoder\IEncoder;
+
+/**
+ * 1. normalize an object into an array
+ * 2. encode an array based on give IEncoder
+ */
 class Serializer implements ISerializer {
     use TraceKeyTrait;
     private IEncoder $encoder;
@@ -10,9 +15,13 @@ class Serializer implements ISerializer {
     /**
      * @param IEncoder $encoder
      * @param INormalizer $normalizer
+     * @param array|null $nameConverter
      */
-    public function __construct(IEncoder $encoder, INormalizer $normalizer) {
+    public function __construct(IEncoder $encoder, INormalizer $normalizer, array $nameConverter=null) {
         $this->encoder                              = $encoder;
+        if ($nameConverter) {
+            $normalizer                             = $normalizer->withNameConverter($nameConverter);
+        }
         $this->normalizer                           = $normalizer;
     }
 

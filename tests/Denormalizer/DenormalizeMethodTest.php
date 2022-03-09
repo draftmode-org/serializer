@@ -55,7 +55,7 @@ class DenormalizeMethodTest extends TestCase {
         $this->assertEquals([
             [$id],
             [$id, $name],
-            [$id, $name, $denormalizer->denormalize(SerializerRealLifePerson::class, $person)],
+            [$id, $name, $denormalizer->denormalizeClass(SerializerRealLifePerson::class, $person)],
         ],[
             $method1,
             $method2,

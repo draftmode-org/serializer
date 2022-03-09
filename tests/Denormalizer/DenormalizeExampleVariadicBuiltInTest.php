@@ -15,7 +15,7 @@ class DenormalizeExampleVariadicBuiltInTest extends TestCase {
             'int' => [$i1 = 1,$i2 = 2]
         ];
         $deserializer                               = Denormalizer::get();
-        $object                                     = $deserializer->denormalize(SerializerExampleVariadicBuiltIn::class, $input);
+        $object                                     = $deserializer->denormalizeClass(SerializerExampleVariadicBuiltIn::class, $input);
         /*$deserializer                               = Denormalizer::get();
         $objectUpdate                               = $deserializer->denormalize($object, [
             'int' => [$i3 = 3]

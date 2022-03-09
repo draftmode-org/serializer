@@ -73,7 +73,7 @@ class JsonDeserializerRealLifeExampleTest extends TestCase {
         // create with serializer
         //
         $denormalize= Denormalizer::get();
-        $sProduct   = $denormalize->denormalize(SerializerRealLifeProduct::class, [
+        $sProduct   = $denormalize->denormalizeClass(SerializerRealLifeProduct::class, [
             'id'            => $id,
             'price' => [
                 'regular'   => $mPriceRegular,

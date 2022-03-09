@@ -10,15 +10,14 @@ interface IDenormalizer {
     /**
      * @param class-string<T> $className
      * @param mixed $input
-     * @param bool $restrictUnInitialized
      * @param bool $restrictArguments
      * @return T
-     * @template T of object
      * @throws ReflectionException
      * @throws InvalidArgumentException
      * @throws RuntimeException
+     * @template T of object
      */
-    public function denormalize(string $className, $input, bool $restrictUnInitialized=false, bool $restrictArguments=false) : object;
+    public function denormalizeClass(string $className, $input, bool $restrictArguments=false);
 
     /**
      * @param object $object

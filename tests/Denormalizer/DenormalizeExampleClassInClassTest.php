@@ -21,7 +21,7 @@ class ArrayDenormalizeExampleClassInClassTest extends TestCase {
             ]
         ];
         $deserializer                               = Denormalizer::get();
-        $object                                     = $deserializer->denormalize(JsonDeserializerExampleClassInClass::class, $input);
+        $object                                     = $deserializer->denormalizeClass(JsonDeserializerExampleClassInClass::class, $input);
         /*$deserializer                               = Denormalizer::get();
         $objectUpdate                               = $deserializer->denormalize($object, [
             'person'        => [
@@ -58,7 +58,7 @@ class ArrayDenormalizeExampleClassInClassTest extends TestCase {
             ]
         ];
         $deserializer                               = Denormalizer::get();
-        $object                                     = $deserializer->denormalize(JsonDeserializerExampleClassInClass::class, $input);
+        $object                                     = $deserializer->denormalizeClass(JsonDeserializerExampleClassInClass::class, $input);
         /*$deserializer                               = Denormalizer::get();
         $objectUpdate                               = $deserializer->denormalize($object, [
             'person'        => [

@@ -3,7 +3,7 @@
 namespace Terrazza\Component\Serializer\Tests\Decoder;
 
 use PHPUnit\Framework\TestCase;
-use Terrazza\Component\Serializer\Decoder\DecoderException;
+use Terrazza\Component\Serializer\Decoder\Exception\DecoderException;
 use Terrazza\Component\Serializer\Decoder\XMLDecoder;
 
 class XMLDecoderTest extends TestCase
@@ -78,7 +78,6 @@ XML;
     }
 
     function testFailureNull() {
-        $this->expectException(DecoderException::class);
         $this->assertNull((new XMLDecoder())->decode(null));
     }
 }

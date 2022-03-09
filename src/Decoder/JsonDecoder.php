@@ -1,6 +1,6 @@
 <?php
 namespace Terrazza\Component\Serializer\Decoder;
-use Terrazza\Component\Serializer\IDecoder;
+use Terrazza\Component\Serializer\Decoder\Exception\DecoderException;
 
 class JsonDecoder implements IDecoder {
     private int $decodeDepth;
@@ -11,21 +11,17 @@ class JsonDecoder implements IDecoder {
     }
 
     /**
-     * @param mixed $data
-     * @param bool $nullable
+     * @param string|null $data
      * @return array|null
+     * @throws DecoderException
      */
-    function decode($data, bool $nullable=false) : ?array {
+    function decode(?string $data) : ?array {
         if (is_null($data)) {
-            if ($nullable) {
-                return null;
-            } else {
-                throw new DecoderException("data is not allowed to be null");
-            }
+            return null;
         }
         $response                                   = json_decode($data, true, $this->decodeDepth, $this->decodeFlags);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new DecoderException(json_last_error_msg());
+            throw new DecoderException("unable to convert json: ".json_last_error_msg());
         }
         return $response;
     }

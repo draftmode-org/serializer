@@ -9,7 +9,7 @@ interface INormalizer {
     public function normalize(object $object) : array;
 
     /**
-     * @param array $nameConverter
+     * @param array|INormalizerNameConverter[] $nameConverter
      * @return INormalizer
      */
     public function withNameConverter(array $nameConverter) : INormalizer;

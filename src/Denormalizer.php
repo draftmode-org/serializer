@@ -17,7 +17,6 @@ class Denormalizer implements IDenormalizer {
     use TraceKeyTrait;
     private LoggerInterface $logger;
     private IAnnotationFactory $annotationFactory;
-    private bool $restrictUnInitialized=false;
     private bool $restrictArguments=false;
 
     public function __construct(LoggerInterface $logger) {
@@ -26,35 +25,17 @@ class Denormalizer implements IDenormalizer {
     }
 
     /**
-     * @psalm-suppress RedundantConditionGivenDocblockType
      * @param class-string<T> $className
      * @param mixed $input
-     * @param bool $restrictUnInitialized
      * @param bool $restrictArguments
      * @return T
-     * @template T of object
      * @throws ReflectionException
-     * @throws InvalidArgumentException
-     * @throws RuntimeException
+     * @template T of object
      */
-    public function denormalize(string $className, $input, bool $restrictUnInitialized=false, bool $restrictArguments=false) : object {
-        if ($restrictUnInitialized)
-            $this->restrictUnInitialized            = true;
+    public function denormalizeClass(string $className, $input, bool $restrictArguments=false) {
         if ($restrictArguments)
             $this->restrictArguments                = true;
-        $this->logger->debug("denormalize class $className");
-        $unmappedKeys                               = [];
-        $object                                     = $this->initializeObject($className, $input);
-        if (is_array($input) && count($input)) {
-            $unmappedKeys                           = $this->updateObject($object, $input);
-        }
-        if ($this->restrictUnInitialized) {
-            $this->isInitializedObject($object);
-        }
-        if ($this->restrictArguments && is_array($unmappedKeys) && count($unmappedKeys)) {
-            throw new InvalidArgumentException($this->getRestrictedArgumentsMessage($unmappedKeys));
-        }
-        return $object;
+        return $this->buildClass($className, $input);
     }
 
     /**
@@ -68,7 +49,6 @@ class Denormalizer implements IDenormalizer {
      * @throws RuntimeException
      */
     public function denormalizeMethodValues(object $object, string $methodName, $input, bool $restrictArguments=false) {
-        $this->restrictUnInitialized                = true;
         if ($restrictArguments)
             $this->restrictArguments                = true;
         $reflect 						            = new ReflectionClass($object);
@@ -84,6 +64,29 @@ class Denormalizer implements IDenormalizer {
             $this->logger->error($message = "method $methodName for class ".$reflect->getName()." does not exists");
             throw new RuntimeException($message);
         }
+    }
+
+    /**
+     * @param class-string<T> $className
+     * @param mixed $input
+     * @return T
+     * @template T of object
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
+     */
+    private function buildClass(string $className, $input) {
+        $this->logger->debug("denormalizeClass class $className");
+        $unmappedKeys                               = [];
+        $object                                     = $this->initializeObject($className, $input);
+        if (is_array($input) && count($input)) {
+            $unmappedKeys                           = $this->updateObject($object, $input);
+        }
+        $this->isInitializedObject($object);
+        if ($this->restrictArguments && is_array($unmappedKeys) && count($unmappedKeys)) {
+            throw new InvalidArgumentException($this->getRestrictedArgumentsMessage($unmappedKeys));
+        }
+        return $object;
     }
 
     /**
@@ -293,11 +296,11 @@ class Denormalizer implements IDenormalizer {
                             }
                             $inValues               = [];
                             foreach ($inputValue as $inValue) {
-                                $inValues[]         = $this->denormalize($typeClassName, $inValue);
+                                $inValues[]         = $this->buildClass($typeClassName, $inValue);
                             }
                             $methodValue            = $inValues;
                         } else {
-                            $methodValue            = $this->denormalize($typeClassName, $inputValue);
+                            $methodValue            = $this->buildClass($typeClassName, $inputValue);
                         }
                     }
                     else {

@@ -20,17 +20,37 @@ class Normalizer implements INormalizer {
     public function __construct(LoggerInterface $logger, array $nameConverter=null) {
         $this->logger                               = $logger;
         $this->annotationFactory                    = new AnnotationFactory($logger);
+        if ($nameConverter) {
+            $this->validateNameConverter($nameConverter);
+        }
         $this->nameConverter                        = $nameConverter ?? [];
     }
 
     /**
-     * @param array $nameConverter
+     * @param array|INormalizerNameConverter[] $nameConverter
      * @return INormalizer
      */
     public function withNameConverter(array $nameConverter) : INormalizer {
+        $this->validateNameConverter($nameConverter);
         $normalizer                                 = clone $this;
         $normalizer->nameConverter                  = $nameConverter;
         return $normalizer;
+    }
+
+    /**
+     * @param array $nameConverter
+     * @throws RuntimeException
+     */
+    private function validateNameConverter(array $nameConverter) : void {
+        foreach ($nameConverter as $nameConverterClass) {
+            if (!class_exists($nameConverterClass)) {
+                throw new RuntimeException("$nameConverterClass does not exist");
+            }
+            $converter                          = new ReflectionClass($nameConverterClass);
+            if (!$converter->implementsInterface(INormalizerNameConverter::class)) {
+                throw new RuntimeException("$nameConverterClass does not implement " . INormalizerNameConverter::class);
+            }
+        }
     }
 
     /**
@@ -105,22 +125,14 @@ class Normalizer implements INormalizer {
         if ($nameConverterClass = $this->getNameConverterClass($propertyTypeClass)) {
             $this->logger->debug("nameConverterClass for property found",
                 ['className' => $propertyTypeClass]);
-            if (class_exists($nameConverterClass)) {
-                $converter                          = new ReflectionClass($nameConverterClass);
-                if ($converter->implementsInterface(INameConverter::class)) {
-                    /** @var INameConverter $convertClass */
-                    $convertClass                   = $converter->newInstance($attributeValue);
-                    try {
-                        return $convertClass->getValue();
-                    } catch (Throwable $exception) {
-                        $errorCode                  = (int)$exception->getCode();
-                        throw new RuntimeException("getValue() for nameConvertClass $propertyTypeClass failure: " . $exception->getMessage(), $errorCode, $exception);
-                    }
-                } else {
-                    throw new RuntimeException("$nameConverterClass does not implement " . INameConverter::class);
-                }
-            } else {
-                throw new RuntimeException("$nameConverterClass does not exists");
+            $converter                              = new ReflectionClass($nameConverterClass);
+            /** @var INormalizerNameConverter $convertClass */
+            $convertClass                   = $converter->newInstance($attributeValue);
+            try {
+                return $convertClass->getValue();
+            } catch (Throwable $exception) {
+                $errorCode                  = (int)$exception->getCode();
+                throw new RuntimeException("getValue() for nameConvertClass $propertyTypeClass failure: " . $exception->getMessage(), $errorCode, $exception);
             }
         } else {
             $this->logger->debug("nameConverterClass for property not found",

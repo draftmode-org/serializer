@@ -3,11 +3,10 @@
 namespace Terrazza\Component\Serializer\Tests\Decoder;
 
 use PHPUnit\Framework\TestCase;
-use Terrazza\Component\Serializer\Decoder\DecoderException;
+use Terrazza\Component\Serializer\Decoder\Exception\DecoderException;
 use Terrazza\Component\Serializer\Decoder\JsonDecoder;
 
-class JsonDecoderTest extends TestCase
-{
+class JsonDecoderTest extends TestCase {
     function testSuccessful() {
         $json = json_encode(
             $value = array(
@@ -51,7 +50,6 @@ class JsonDecoderTest extends TestCase
     }
 
     function testFailureNull() {
-        $this->expectException(DecoderException::class);
         $this->assertNull((new JsonDecoder())->decode(null));
     }
 }

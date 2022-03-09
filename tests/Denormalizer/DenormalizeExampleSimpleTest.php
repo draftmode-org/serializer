@@ -18,7 +18,7 @@ class DenormalizeExampleSimpleTest extends TestCase {
             'array' => $array = [1,2]
         ];
         $deserializer                               = Denormalizer::get();
-        $object                                     = $deserializer->denormalize(SerializerExampleSimple::class, $input);
+        $object                                     = $deserializer->denormalizeClass(SerializerExampleSimple::class, $input);
         /*$deserializer                               = Denormalizer::get();
         $objectUpdate                               = $deserializer->denormalize($object, [
             "number" => $numberUpdate = 3,
