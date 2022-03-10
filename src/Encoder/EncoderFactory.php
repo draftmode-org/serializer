@@ -2,11 +2,13 @@
 namespace Terrazza\Component\Serializer\Encoder;
 
 use Psr\Log\LoggerInterface;
+use RuntimeException;
+use Terrazza\Component\Serializer\EncoderInterface;
 
 class EncoderFactory {
     private LoggerInterface $logger;
     /**
-     * @var array|IEncoder[]
+     * @var array|EncoderInterface[]
      */
     private array $encoders;
     private array $contentTypePatterns;
@@ -24,46 +26,49 @@ class EncoderFactory {
 
     /**
      * @param string $contentType
-     * @param IEncoder $encoder
+     * @param EncoderInterface $encoder
      * @param string|null $contentTypePattern
      */
-    public function addEncoder(string $contentType, IEncoder $encoder, ?string $contentTypePattern) : void {
+    public function addEncoder(string $contentType, EncoderInterface $encoder, string $contentTypePattern=null) : void {
         $contentType                                = strtolower($contentType);
         $this->encoders[$contentType]               = $encoder;
         if ($contentTypePattern) {
-            $this->contentTypePatterns[$contentType]= $contentTypePattern;
+            $this->contentTypePatterns[$contentType]= strtolower($contentTypePattern);
         }
     }
 
     /**
      * @param string $contentType
-     * @return IEncoder|null
+     * @return EncoderInterface|null
      */
-    private function getEncoder(string $contentType) :?IEncoder {
-        $this->logger->debug("try to get encode for contentType:$contentType");
+    public function getEncoder(string $contentType) :?EncoderInterface {
+        $this->logger->debug("get encode for contentType:$contentType", ["patterns" => $this->contentTypePatterns]);
         $contentType                                = strtolower($contentType);
         if ($decoder = $this->encoders[$contentType] ?? null) {
-            $this->logger->debug("encode found: contentType");
+            $this->logger->debug("encode found for contentType $contentType");
             return $decoder;
         }
         foreach ($this->contentTypePatterns as $useContentType => $pattern) {
-            $this->logger->debug("try to get encoder in pattern $pattern");
-            if (preg_match("#$pattern#", $contentType)) {
-                $this->logger->debug("encoder found in pattern, use contentType $useContentType");
-                return $this->decoders[$contentType] ?? null;
+            $this->logger->debug("find encoder with preg match $pattern");
+            if ($found = preg_match("#$pattern#", $contentType)) {
+                $this->logger->debug("encoder found for pattern, use contentType $useContentType");
+                return $this->encoders[$useContentType] ?? null;
+            } else {
+                $this->logger->debug("...found", ["found" => $found]);
             }
         }
         return null;
     }
+
     /**
-     * @param array $data
      * @param string $contentType
-     * @return mixed
+     * @param array|null $data
+     * @return string
      */
-    public function encode(array $data, string $contentType) {
+    public function encode(string $contentType, ?array $data) : string {
         if ($encoder = $this->getEncoder($contentType)) {
             return $encoder->encode($data);
         }
-        return null;
+        throw new RuntimeException("no encoder for contentType found, given ".$contentType);
     }
 }

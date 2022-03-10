@@ -44,7 +44,7 @@ class DenormalizerTest extends TestCase {
      */
     function testMultipleParamsAsBuiltIn() {
         $denormalizer = Denormalizer::get();
-        $object = $denormalizer->denormalizeClass(ArrayDenormalizerTestMultipleParams::class,
+        $object = $denormalizer->denormalizeClass(DenormalizerTestMultipleParams::class,
             ["name" => ["firstName" => $firstName = "f", "lastName" => $lastName = "l"]]
         );
         $this->assertEquals([
@@ -118,9 +118,32 @@ class DenormalizerTest extends TestCase {
         $this->assertEquals($date, $objectDate->date->format("d.m.Y"));
     }
 
+    /**
+     * @throws ReflectionException
+     */
+    function testUpdateOptionalClassNull() {
+        $denormalizer = Denormalizer::get();
+        $object                                     = $denormalizer->denormalizeClass(DenormalizerTestUpdateOptionalClass::class,
+            ["id" => 12, "optionalClass" => null]);
+        $this->assertNull($object->getOptionalClass());
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    function testUpdateRequiredClassNull() {
+        $denormalizer = Denormalizer::get();
+        $this->expectException(InvalidArgumentException::class);
+        $denormalizer->denormalizeClass(DenormalizerTestUpdateOptionalClass::class,
+            ["id" => 12, "requiredClass" => null]);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
     function testOptionalDateTime() {
         $denormalizer = Denormalizer::get();
-        $object                                     = $denormalizer->denormalizeClass(ArrayDenormalizerTest1OptionalDateTime::class,
+        $object                                     = $denormalizer->denormalizeClass(DenormalizerTest1OptionalDateTime::class,
             ["id" => $id = 12]);
         $this->assertEquals([
             $id,
@@ -137,12 +160,12 @@ class DenormalizerTest extends TestCase {
     public function testProtectedConstructor() {
         $denormalizer = Denormalizer::get();
         $this->expectException(RuntimeException::class);
-        $denormalizer->denormalizeClass(ArrayDenormalizerTestProtectedConstructor::class, []);
+        $denormalizer->denormalizeClass(DenormalizerTestProtectedConstructor::class, []);
         $this->assertTrue(true);
     }
 }
 
-class ArrayDenormalizerTestMultipleParams {
+class DenormalizerTestMultipleParams {
     private ?string $firstName=null;
     private ?string $lastName=null;
     function setName(string $firstName, string $lastName) : void {
@@ -157,12 +180,12 @@ class ArrayDenormalizerTestMultipleParams {
     }
 }
 
-class ArrayDenormalizerTestProtectedConstructor {
+class DenormalizerTestProtectedConstructor {
     protected int $value;
     protected function __construct() {}
 }
 
-class ArrayDenormalizerTest1OptionalDateTime {
+class DenormalizerTest1OptionalDateTime {
     private int $id;
     private ?DateTime $updated;
     public function __construct(int $id, ?DateTime $updated) {
@@ -174,5 +197,30 @@ class ArrayDenormalizerTest1OptionalDateTime {
     }
     function getUpdated() :?DateTime {
         return $this->updated;
+    }
+}
+
+class DenormalizerTestUpdateOptionalClass {
+    private int $id;
+    private ?DenormalizerTestMultipleParams $optionalClass;
+    private ?DenormalizerTestMultipleParams $requiredClass=null;
+    public function __construct(int $id) {
+        $this->id               = $id;
+        $this->optionalClass    = new DenormalizerTestMultipleParams();
+    }
+    function getId() : int {
+        return $this->id;
+    }
+    function setRequiredClass(DenormalizerTestMultipleParams $requiredClass) : void {
+        $this->requiredClass = $requiredClass;
+    }
+    function getRequiredClass() :?DenormalizerTestMultipleParams {
+        return $this->requiredClass;
+    }
+    function setOptionalClass(DenormalizerTestMultipleParams $optionalClass=null) : void {
+        $this->optionalClass = $optionalClass;
+    }
+    function getOptionalClass() :?DenormalizerTestMultipleParams {
+        return $this->optionalClass;
     }
 }

@@ -13,7 +13,7 @@ use Terrazza\Component\Annotation\AnnotationFactory;
 use Terrazza\Component\Annotation\IAnnotationFactory;
 use Terrazza\Component\Annotation\IAnnotationType;
 
-class Denormalizer implements IDenormalizer {
+class Denormalizer implements DenormalizerInterface {
     use TraceKeyTrait;
     private LoggerInterface $logger;
     private IAnnotationFactory $annotationFactory;
@@ -170,6 +170,7 @@ class Denormalizer implements IDenormalizer {
                             if ($parameter->isOptional()) {
                                 $setValues          = null;
                             } else {
+                                $this->pushTraceKey($parameter->getName());
                                 throw new InvalidArgumentException($this->getTraceKeys()." is required, given null");
                             }
                         } else {

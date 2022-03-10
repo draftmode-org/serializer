@@ -38,5 +38,8 @@
     <testsuite name="Normalizer">
       <directory>./tests/Normalizer</directory>
     </testsuite>
+    <testsuite name="Readme">
+      <directory>./tests/Readme</directory>
+    </testsuite>
   </testsuites>
 </phpunit>

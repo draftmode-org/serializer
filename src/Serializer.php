@@ -1,23 +1,21 @@
 <?php
 namespace Terrazza\Component\Serializer;
 
-use Terrazza\Component\Serializer\Encoder\IEncoder;
-
 /**
  * 1. normalize an object into an array
  * 2. encode an array based on give IEncoder
  */
-class Serializer implements ISerializer {
+class Serializer implements SerializerInterface {
     use TraceKeyTrait;
-    private IEncoder $encoder;
-    private INormalizer $normalizer;
+    private EncoderInterface $encoder;
+    private NormalizerInterface $normalizer;
 
     /**
-     * @param IEncoder $encoder
-     * @param INormalizer $normalizer
+     * @param EncoderInterface $encoder
+     * @param NormalizerInterface $normalizer
      * @param array|null $nameConverter
      */
-    public function __construct(IEncoder $encoder, INormalizer $normalizer, array $nameConverter=null) {
+    public function __construct(EncoderInterface $encoder, NormalizerInterface $normalizer, array $nameConverter=null) {
         $this->encoder                              = $encoder;
         if ($nameConverter) {
             $normalizer                             = $normalizer->withNameConverter($nameConverter);

@@ -1,8 +1,9 @@
 <?php
 namespace Terrazza\Component\Serializer\Decoder;
 use Terrazza\Component\Serializer\Decoder\Exception\DecoderException;
+use Terrazza\Component\Serializer\DecoderInterface;
 
-class JsonDecoder implements IDecoder {
+class JsonDecoder implements DecoderInterface {
     private int $decodeDepth;
     private int $decodeFlags;
     public function __construct(int $decodeDepth=512, int $decodeFlags = 0) {
@@ -15,7 +16,7 @@ class JsonDecoder implements IDecoder {
      * @return array|null
      * @throws DecoderException
      */
-    function decode(?string $data) : ?array {
+    function decode($data) : ?array {
         if (is_null($data)) {
             return null;
         }

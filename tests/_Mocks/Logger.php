@@ -15,7 +15,7 @@ use Terrazza\Component\Logger\Writer\StreamFile;
 
 class Logger {
     public static function get($stream=null) : LoggerInterface {
-        $logger                                     = new rLogger("Serializer");
+        $logger                                     = new rLogger("SerializerInterface");
         $format                                     = [
             "message" => "{Date} {Namespace}:{Method} (#{Line}) {Message} {Context}"
         ];

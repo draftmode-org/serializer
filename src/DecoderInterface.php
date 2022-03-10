@@ -1,12 +1,12 @@
 <?php
-namespace Terrazza\Component\Serializer\Decoder;
+namespace Terrazza\Component\Serializer;
 use Terrazza\Component\Serializer\Decoder\Exception\DecoderException;
 
-interface IDecoder {
+interface DecoderInterface {
     /**
-     * @param string|null $data
+     * @param mixed $data
      * @return array|null
      * @throws DecoderException
      */
-    function decode(?string $data) :?array;
+    function decode($data) :?array;
 }

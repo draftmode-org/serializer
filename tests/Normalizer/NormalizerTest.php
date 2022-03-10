@@ -2,12 +2,14 @@
 namespace Terrazza\Component\Serializer\Tests\Normalizer;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Terrazza\Component\Serializer\INormalizerNameConverter;
-use Terrazza\Component\Serializer\INormalizer;
+use Terrazza\Component\Serializer\NormalizerConverterInterface;
+use Terrazza\Component\Serializer\NormalizerInterface;
+use Terrazza\Component\Serializer\Tests\_Mocks\ConverterFactory;
+use Terrazza\Component\Serializer\Tests\_Mocks\Logger;
 use Terrazza\Component\Serializer\Tests\_Mocks\Normalizer;
 
 class NormalizerTest extends TestCase {
-    function get($stream=null) : INormalizer {
+    function get($stream=null) : NormalizerInterface {
         return Normalizer::get($stream);
     }
 
@@ -29,6 +31,12 @@ class NormalizerTest extends TestCase {
         $normalizer->normalize(new ArrayNormalizerTestUndefinedType(12));
     }
 
+    function testLoadWithConverter() {
+        $logger         = Logger::get();
+        new \Terrazza\Component\Serializer\Normalizer($logger, ConverterFactory::getNameConverter());
+        $this->assertTrue(true);
+    }
+
     function testNameConverterDoesNotExists() {
         $normalizer     = $this->get();
         $this->expectException(RuntimeException::class);
@@ -48,7 +56,7 @@ class NormalizerTest extends TestCase {
     function testNameConverterGetFailure() {
         $normalizer     = $this->get();
         $normalizer     = $normalizer->withNameConverter([
-            ArrayNormalizerTestEmbeddedClass::class => ArrayNormalizerTestEmbeddedClassPresenter::class
+            ArrayNormalizerTestEmbeddedClass::class => ArrayNormalizerTestEmbeddedClassPresenterInterface::class
         ]);
         $this->expectException(RuntimeException::class);
         $normalizer->normalize(new ArrayNormalizerTestWithClass(new ArrayNormalizerTestEmbeddedClass(12)));
@@ -88,7 +96,7 @@ class ArrayNormalizerTestUndefinedType {
         $this->number = $number;
     }
 }
-class ArrayNormalizerTestEmbeddedClassPresenter implements INormalizerNameConverter {
+class ArrayNormalizerTestEmbeddedClassPresenterInterface implements NormalizerConverterInterface {
     private ArrayNormalizerTestEmbeddedClass $number;
     public function __construct(ArrayNormalizerTestEmbeddedClass $number) {
         $this->number = $number;

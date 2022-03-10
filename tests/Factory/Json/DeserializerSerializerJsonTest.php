@@ -1,11 +1,10 @@
 <?php
 namespace Terrazza\Component\Serializer\Tests\Factory\Json;
 use PHPUnit\Framework\TestCase;
-use Terrazza\Component\Serializer\DeserializerFactory;
 use Terrazza\Component\Serializer\Tests\_Mocks\ConverterFactory;
 use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProduct;
 
-class JsonSerializeDeserializeTest extends TestCase {
+class DeserializerSerializerJsonTest extends TestCase {
 
     function testBoth() {
         $input = json_encode($arrInput = [
@@ -34,7 +33,7 @@ class JsonSerializeDeserializeTest extends TestCase {
             'createdAt'     => "2021-01-31"
         ]);
         $deserializer   = ConverterFactory::getDeserializer();
-        $sProduct       = $deserializer->deserialize(SerializerRealLifeProduct::class, $input, "json", true);
+        $sProduct       = $deserializer->deserialize(SerializerRealLifeProduct::class, "json", $input, true);
 
         $serializer     = ConverterFactory::getSerializer();
         $output         = $serializer->serialize($sProduct, "json");

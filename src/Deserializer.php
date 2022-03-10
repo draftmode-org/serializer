@@ -2,21 +2,20 @@
 namespace Terrazza\Component\Serializer;
 use InvalidArgumentException;
 use ReflectionException;
-use Terrazza\Component\Serializer\Decoder\IDecoder;
 
 /**
  * 1. decode an input into an array (use IDecoder)
  * 2. denormalize array into a class
  */
-class Deserializer implements IDeserializer {
-    private IDenormalizer $denormalizer;
-    private IDecoder $decoder;
+class Deserializer implements DeserializerInterface {
+    private DenormalizerInterface $denormalizer;
+    private DecoderInterface $decoder;
 
     /**
-     * @param IDecoder $decoder
-     * @param IDenormalizer $denormalizer
+     * @param DecoderInterface $decoder
+     * @param DenormalizerInterface $denormalizer
      */
-    public function __construct(IDecoder $decoder, IDenormalizer $denormalizer) {
+    public function __construct(DecoderInterface $decoder, DenormalizerInterface $denormalizer) {
         $this->decoder                              = $decoder;
         $this->denormalizer                         = $denormalizer;
     }

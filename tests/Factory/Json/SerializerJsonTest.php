@@ -12,7 +12,7 @@ use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProduc
 use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeProductUUID;
 use Terrazza\Component\Serializer\Tests\_Examples\Model\SerializerRealLifeUserUUID;
 
-class JsonSerializeTest extends TestCase {
+class SerializerJsonTest extends TestCase {
 
     function testFull() {
         $mProduct = new SerializerRealLifeProduct(
@@ -41,7 +41,7 @@ class JsonSerializeTest extends TestCase {
         $mProduct->setCreatedAt(new \DateTime($dateTime = "2021-01-31"));
 
         $serializer = ConverterFactory::getSerializer();
-        $response = $serializer->serialize($mProduct, "json", ConverterFactory::getNameConverter());
+        $response   = $serializer->serialize($mProduct, "json", ConverterFactory::getNameConverter());
         $this->assertEquals(<<<JSON
         {"id":"{$id}","price":{"regular":{$mPriceRegular},"offer":null},"user":"{$mUser}","description":"{$mDescription}","vLabels":["{$mLabel1}"],"aLabels":["{$mLabel1}"],"person":{"name":"{$mPersonName}","address":{"street":"{$mAddressStreet}","city":"{$mAddressCity}","zip":null}},"createdAt":"{$dateTime}"}
         JSON, $response);

@@ -2,30 +2,34 @@
 This component is meant to be used to turn objects into a specific format (XML,JSON,YAML,...) and the other way around.
 
 1. Methods
-    1. [Deserialize](#method---deserialize)
-       1. [Decode](#decode)
-       2. [Denormalize](#denormalize)
-          1. [method: denormalize](#denormalize-denormalize)
+    1. [Deserializer](#deserializer)
+       1. [Decoder](#decode)
+       2. [Denormalizer](#denormalize)
+          1. [method: denormalize](#denormalize-denormalizeClass)
           2. [method: denormalizeMethodValues](#denormalize-denormalizeMethodValues)
-    2. [Serialize](#method---serialize)
-       1. [Normalize](#normalize)
-       2. [Encode](#encode)
-2. [Install](#install)
-3. [Requirements](#require)
-4. [Examples](#examples)
-    - [Json](#examples-json)
+    2. [Serializer](#serializer)
+       1. [Normalizer](#normalizer)
+       2. [Encoder](#encoder)
+    3. [Factory](#factory)
+       1. [DeserializerFactory](#deserializer-factory)
+       2. [SerializerFactory](#serializer-factory)
+2. [Examples](#examples)
+    - [Deserialize + Serialize Json (without Factory)](#example-fulfill-json)
+    - [Denormalize::denormalizeMethodValues](#example-denormalizeMethodValues)
+3. [Install](#install)
+4. [Requirements](#require) 
 
-<a id="deserialize" name="deserialize"></a>
-<a id="user-content-deserialize" name="user-content-deserialize"></a>
-## Deserialize
-Deserialize is a combination of 
-1. decode (JSON,XML,CSV) into an array
-2. denormalize into an object
+<a id="deserializer" name="deserializer"></a>
+<a id="user-content-deserializer" name="user-content-deserializer"></a>
+## Deserializer
+Deserializer is a combination of 
+1. decode (JSON,XML,CSV) a given string into an array
+2. denormalize into a class
 
-<a id="deserialize" name="decode"></a>
+<a id="decode" name="decode"></a>
 <a id="user-content-decode" name="user-content-decode"></a>
 ### Decode
-The decoder converts an input object to an array.
+The decoder converts a given string into an array.
 Actually Terrazza/Serializer supports
 - JSON
 - XML
@@ -34,9 +38,9 @@ Actually Terrazza/Serializer supports
 ### Denormalize
 The Denormalizer supports two methods.
 
-<a id="denormalize-denormalize" name="denormalize-denormalize"></a>
-<a id="user-content-denormalize-denormalize" name="user-content-denormalize-denormalize"></a>
-#### method: denormalize
+<a id="denormalize-denormalizeClass" name="denormalize-denormalizeClass"></a>
+<a id="user-content-denormalize-denormalizeClass" name="user-content-denormalize-denormalizeClass"></a>
+#### method: denormalizeClass
 This method convert in input into the given className and
 - validate input types
 - load/handle nested objects
@@ -44,7 +48,6 @@ This method convert in input into the given className and
 Properties:
 - className (string)
 - input (mixed)
-- restrictUnInitialized (default: false)
 - restrictArguments (default: false)
 
 _Business logic_<br>
@@ -65,26 +68,217 @@ Properties:
 We suggest that all required arguments are handled by the __constructor<br>
 and all optional arguments are handled by the setter.
 
-<a id="serialize" name="serialize"></a>
-<a id="user-content-serialize" name="user-content-serialize"></a>
-## Serialize
+<a id="serializer" name="serializer"></a>
+<a id="user-content-serializer" name="user-content-serializer"></a>
+## Serializer
 Serialize is a combination of
 1. normalize object to array
-2. encode array to (JSON,XML,CSV,..)
+2. encode array to (JSON,..)
 
-<a id="normalize" name="normalize"></a>
-<a id="user-content-normalize" name="user-content-normalize"></a>
-### Normalize
-the order to get the properties of an object is:
-1. try to find for all properties there "getter" (get{}, is{}, has{})
-<br><i>found: retrieve his related property</i><br><br>
-2. for all properties, public accessible mandatory
-<br><i>found: retrieve property</i>
+<a id="normalizer" name="normalizer"></a>
+<a id="user-content-normalizer" name="user-content-normalizer"></a>
+### Normalizer
+The Normalizer converts an object into an array.<br>
 
-<a id="encode" name="encode"></a>
-<a id="user-content-encode" name="user-content-encode"></a>
-### Encode
-Teh Encoder converts an array to an output format (e.g. JSON)
+_Business logic_<br>
+1. try to find for all properties by there "getter" methods (get{}, is{}, has{})
+<br><i>found: retrieve related property value</i><br><br>
+2. for all properties, public accessible mandatory (not handled by methods)
+<br><i>found: retrieve property value</i>
+
+<a id="encode" name="encoder"></a>
+<a id="user-content-encoder" name="user-content-encoder"></a>
+### Encoder
+The encoder converts an array to a string by using.<br><br>
+actually provided encodings:
+- Json
+
+<a id="factory" name="factory"></a>
+<a id="user-content-factory" name="user-content-factory"></a>
+## Factory
+Every factory covers his parent and provides, "contentType" based, an automatic execution.
+
+<a id="deserializer-factory" name="deserializer-factory"></a>
+<a id="user-content-deserializer-factory" name="user-content-deserializer-factory"></a>
+### DeserializerFactory
+````
+//
+// $logger has to be a Psr\Log\LoggerInterface implementation
+//
+
+use Terrazza\Component\Serializer\Factory\DeserializerFactory;
+
+class ReadmeTargetObject {
+    public int $id;
+    public ?int $amount=null;
+    public function __construct(int $id) {
+        $this->id = $id;
+    }
+    public function getId() : int {
+        return $this->id;
+    }
+    public function setAmount(?int $amount) : void {
+        $this->amount = $amount;
+    }
+    public function getAmount() :?int {
+        return $this->amount;
+    }
+}
+
+$content = json_encode(
+    [
+        'id' => 12,
+        'amount' => 100
+    ]
+);
+
+$deserializer   = new DeserializerFactory($logger);
+$object         = $deserializer->deserialize(TargetObject::class, "json", $content);
+var_dump($object);
+
+/*
+class ReadmeTargetObject {
+  public int $id =>
+  int(12)
+  public ?int $amount =>
+  int(100)
+}
+*/
+````
+<a id="serializer-factory" name="serializer-factory"></a>
+<a id="user-content-serializer-factory" name="user-content-serializer-factory"></a>
+### SerializerFactory
+````
+//
+// $logger has to be a Psr\Log\LoggerInterface implementation
+//
+
+use Terrazza\Component\Serializer\Factory\SerializerFactory;
+
+class ReadmeTargetObject {
+    public int $id;
+    public ?int $amount=null;
+    public function __construct(int $id) {
+        $this->id = $id;
+    }
+    public function getId() : int {
+        return $this->id;
+    }
+    public function setAmount(?int $amount) : void {
+        $this->amount = $amount;
+    }
+    public function getAmount() :?int {
+        return $this->amount;
+    }
+}
+
+$object         = new ReadmeTargetObject(12);
+$object->setAmount(100);
+$serializer     = new SerializerFactory($logger);
+$response       = $serializer->serialize($object, "json");
+
+var_dump($response);
+/*
+{"id":12,"amount":100}
+*/
+````
+
+<a id="examples" name="examples"/></a>
+<a id="user-content-examples" name="user-content-examples"/></a>
+## Examples
+
+<a id="example-fulfill-json" name="example-fulfill-json"></a>
+<a id="user-content-example-fulfill-json" name="user-content-example-fulfill-json"></a>
+### Unserialize + Serialize JSON (without Factory)
+````
+//
+// $logger has to be a Psr\Log\LoggerInterface implementation
+//
+
+use Terrazza\Component\Serializer\Decoder\JsonDecoder;
+use Terrazza\Component\Serializer\Denormalizer;
+use Terrazza\Component\Serializer\Encoder\JsonEncoder;
+use Terrazza\Component\Serializer\Normalizer;
+use Terrazza\Component\Serializer\Serializer;
+use Terrazza\Component\Serializer\Deserializer;
+
+class ReadmeTargetObject {
+    public int $id;
+    public ?int $amount=null;
+    public function __construct(int $id) {
+        $this->id = $id;
+    }
+    public function getId() : int {
+        return $this->id;
+    }
+    public function setAmount(?int $amount) : void {
+        $this->amount = $amount;
+    }
+    public function getAmount() :?int {
+        return $this->amount;
+    }
+}
+
+$data = [
+    'id'        => 1,
+    'amount'    => 13
+];
+$input          = json_encode($data);
+$logger         = Logger::get();
+$deserializer   = (new Deserializer(
+    new JsonDecoder(),
+    new Denormalizer($logger)
+));
+$object         = $deserializer->deserialize(ReadmeTargetObject::class, $input);
+echo $object->getId();      // 1
+echo $object->getName();    // Max 
+
+$serializer = (new Serializer(
+    new JsonEncoder(),
+    new Normalizer($logger)
+));
+var_dump(json_encode($data) === $serializer->serialize($object)); // true     
+````
+
+<a id="example-denormalizeMethodValues" name="example-denormalizeMethodValues"></a>
+<a id="user-content-example-denormalizeMethodValues" name="user-content-example-denormalizeMethodValues"></a>
+### Denormalizer::denormalizeMethodValues
+````
+//
+// $logger has to be a Psr\Log\LoggerInterface implementation
+//
+
+use \Terrazza\Component\Serializer\Denormalizer;
+
+class ReadmeTargetObject {
+    public int $id;
+    public ?int $amount=null;
+    public function __construct(int $id) {
+        $this->id = $id;
+    }
+    public function getId() : int {
+        return $this->id;
+    }
+    public function setAmount(?int $amount) : void {
+        $this->amount = $amount;
+    }
+    public function getAmonut() :?int {
+        return $this->amount;
+    }
+}
+
+$object         = new ReadmeTargetObject(12);
+$denormalizer   = new Denormalizer($logger);
+$values         = $denormalizer->denormalizeMethodValues($object, "setAmount", [
+    "amount" => 12, "unknown" => 11
+]);
+//
+// property "unkonwn" has been removed: property does not exists in method
+//
+var_dump([
+            12
+        ] === $values);
+````
 
 <a id="install" name="install"></a>
 <a id="user-content-install" name="user-content-install"></a>
@@ -98,109 +292,11 @@ composer require terrazza/serializer
 ## Requirements
 ### php version
 - \>= 7.4
-### php extension 
+### php extension
 - ext-json
-- ext-libxml 
+- ext-libxml
 ### composer packages
 - psr/log
 - terrazza/annotation
 ### composer packages (require-dev)
 - terrazza/logger
-
-<a id="examples" name="examples"/></a>
-<a id="user-content-examples" name="user-content-examples"/></a>
-## Examples
-
-<a id="examples-json" name="examples-json"></a>
-<a id="user-content-examples-json" name="user-content-examples-json"></a>
-### Deserialize + Serialize JSON (create)
-```php
-$input = json_encode(
-    [
-        'id' => 1,
-        'name' => 'Max'
-    ]
-);
-//
-// $logger has to be a Psr\Log\LoggerInterface implementation
-//
-use Terrazza\Component\Serializer\Factory\Json\JsonSerializer;
-use Terrazza\Component\Serializer\Factory\Json\JsonDeserializer;
-
-$object = (new JsonDeserializer($logger))
-    ->deserialize(TargetObject::class, $input);
-   
-echo $object->getId();      // 1
-echo $object->getName();    // Max 
-
-$json = (new JsonSerializer($logger))
-    ->serialize($object);
-    
-var_dump($input === $json); // true    
-
-class TargetObject {
-    public int $id;
-    public ?string $name=null;
-    public function __construct(int $id) {
-        $this->id = $id;
-    }
-    public function getId() : int {
-        return $this->id;
-    }
-    public function getName() :?string {
-        return $this->name;
-    }    
-    public function setName(?string $name) : void {
-        $this->name = $name;
-    }    
-}
-```
-### Deserialize::denormalizeMethodValues
-```php
-use Terrazza\Component\Serializer\Factory\Json\JsonDeserializer;
-use \Terrazza\Component\Serializer\Denormalizer;
-
-$input = json_encode(
-    [
-        'id' => 1,
-        'name' => 'Max'
-    ]
-);
-//
-// $logger has to be a Psr\Log\LoggerInterface implementation
-//
-
-// create object
-$object = (new JsonDeserializer($logger))
-    ->deserialize(TargetObject::class, $input);
-
-$values = (new Denormalizer($logger))->denormalizeMethodValues($object, ["amount" => 12]);
-
-var_dump([
-    'amount' => 12
-] === $values);
-
-class TargetObject {
-    public int $id;
-    public ?string $name=null;
-    public ?int $amount=null;
-    public function __construct(int $id) {
-        $this->id = $id;
-    }
-    public function getId() : int {
-        return $this->id;
-    }
-    public function getName() :?string {
-        return $this->name;
-    }    
-    public function setName(?string $name) : void {
-        $this->name = $name;
-    }    
-    public function setAmount(?int $amount) : void {
-        $this->amount = $amount;
-    }
-    public function getAmonut() :?int {
-        return $this->amount;
-    }
-}
-```

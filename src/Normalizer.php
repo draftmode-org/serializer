@@ -11,7 +11,7 @@ use Terrazza\Component\Annotation\AnnotationFactory;
 use Terrazza\Component\Annotation\IAnnotationFactory;
 use Throwable;
 
-class Normalizer implements INormalizer {
+class Normalizer implements NormalizerInterface {
     use TraceKeyTrait;
     private LoggerInterface $logger;
     private IAnnotationFactory $annotationFactory;
@@ -27,10 +27,10 @@ class Normalizer implements INormalizer {
     }
 
     /**
-     * @param array|INormalizerNameConverter[] $nameConverter
-     * @return INormalizer
+     * @param array|NormalizerConverterInterface[] $nameConverter
+     * @return NormalizerInterface
      */
-    public function withNameConverter(array $nameConverter) : INormalizer {
+    public function withNameConverter(array $nameConverter) : NormalizerInterface {
         $this->validateNameConverter($nameConverter);
         $normalizer                                 = clone $this;
         $normalizer->nameConverter                  = $nameConverter;
@@ -47,8 +47,8 @@ class Normalizer implements INormalizer {
                 throw new RuntimeException("$nameConverterClass does not exist");
             }
             $converter                          = new ReflectionClass($nameConverterClass);
-            if (!$converter->implementsInterface(INormalizerNameConverter::class)) {
-                throw new RuntimeException("$nameConverterClass does not implement " . INormalizerNameConverter::class);
+            if (!$converter->implementsInterface(NormalizerConverterInterface::class)) {
+                throw new RuntimeException("$nameConverterClass does not implement " . NormalizerConverterInterface::class);
             }
         }
     }
@@ -126,7 +126,7 @@ class Normalizer implements INormalizer {
             $this->logger->debug("nameConverterClass for property found",
                 ['className' => $propertyTypeClass]);
             $converter                              = new ReflectionClass($nameConverterClass);
-            /** @var INormalizerNameConverter $convertClass */
+            /** @var NormalizerConverterInterface $convertClass */
             $convertClass                   = $converter->newInstance($attributeValue);
             try {
                 return $convertClass->getValue();
