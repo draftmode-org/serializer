@@ -20,7 +20,7 @@ class EncoderFactory {
         ];
         $this->contentTypePatterns                  = [
             "json"                                  => "application/json",
-            "xml"                                   => "(application/xml|text/xml)",
+            //"xml"                                   => "(application/xml|text/xml)",
         ];
     }
 

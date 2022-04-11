@@ -39,8 +39,7 @@ class Denormalizer implements DenormalizerInterface {
     }
 
     /**
-     * @param object $object
-     * @param string $methodName
+     * @param ReflectionMethod $method
      * @param mixed $input
      * @param bool $restrictArguments
      * @return mixed
@@ -48,22 +47,15 @@ class Denormalizer implements DenormalizerInterface {
      * @throws InvalidArgumentException
      * @throws RuntimeException
      */
-    public function denormalizeMethodValues(object $object, string $methodName, $input, bool $restrictArguments=false) {
+    public function denormalizeMethod(ReflectionMethod $method, $input, bool $restrictArguments=false) {
         if ($restrictArguments)
             $this->restrictArguments                = true;
-        $reflect 						            = new ReflectionClass($object);
-        if ($reflect->hasMethod($methodName)) {
-            $method                                 = $reflect->getMethod($methodName);
-            $methodValues                           = $this->getMethodValues($method, $input);
-            if ($restrictArguments && is_array($input) && count($input)) {
-                $unmappedKeys                       = array_keys($input);
-                throw new InvalidArgumentException($this->getRestrictedArgumentsMessage($unmappedKeys));
-            }
-            return $methodValues;
-        } else {
-            $this->logger->error($message = "method $methodName for class ".$reflect->getName()." does not exists");
-            throw new RuntimeException($message);
+        $methodValues                           = $this->getMethodValues($method, $input);
+        if ($restrictArguments && is_array($input) && count($input)) {
+            $unmappedKeys                       = array_keys($input);
+            throw new InvalidArgumentException($this->getRestrictedArgumentsMessage($unmappedKeys));
         }
+        return $methodValues;
     }
 
     /**
@@ -359,6 +351,20 @@ class Denormalizer implements DenormalizerInterface {
             }
             if ($parameterType === "float" && $inputType === "int") {
                 return floatval($input);
+            }
+            if ($inputType === "string" && $parameterType === "int") {
+                if (strval(intval($input)) === $input) {
+                    return intval($input);
+                }
+                if (strval(floatval($input)) === $input) {
+                    $inputType                      = "float";
+                }
+            }
+            if ($inputType === "string" && $parameterType === "float") {
+                if (strval(floatval($input)) === $input ||
+                    strval(intval($input)) === $input) {
+                    return floatval($input);
+                }
             }
             if ($inputType === "array" && $parameter->isArray()) {
                 return $input;

@@ -4,8 +4,159 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "07d8c03964de918f4cae2be6ceb6aafd",
+    "content-hash": "fde87f7126ef05bfe1e3ec537f0ef538",
     "packages": [
+        {
+            "name": "composer/installers",
+            "version": "1.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/composer/installers.git",
+                "reference": "d20a64ed3c94748397ff5973488761b22f6d3f19"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/composer/installers/zipball/d20a64ed3c94748397ff5973488761b22f6d3f19",
+                "reference": "d20a64ed3c94748397ff5973488761b22f6d3f19",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^1.0 || ^2.0"
+            },
+            "replace": {
+                "roundcube/plugin-installer": "*",
+                "shama/baton": "*"
+            },
+            "require-dev": {
+                "composer/composer": "1.6.* || ^2.0",
+                "composer/semver": "^1 || ^3",
+                "phpstan/phpstan": "^0.12.55",
+                "phpstan/phpstan-phpunit": "^0.12.16",
+                "symfony/phpunit-bridge": "^4.2 || ^5",
+                "symfony/process": "^2.3"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Composer\\Installers\\Plugin",
+                "branch-alias": {
+                    "dev-main": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Composer\\Installers\\": "src/Composer/Installers"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kyle Robinson Young",
+                    "email": "kyle@dontkry.com",
+                    "homepage": "https://github.com/shama"
+                }
+            ],
+            "description": "A multi-framework Composer library installer",
+            "homepage": "https://composer.github.io/installers/",
+            "keywords": [
+                "Craft",
+                "Dolibarr",
+                "Eliasis",
+                "Hurad",
+                "ImageCMS",
+                "Kanboard",
+                "Lan Management System",
+                "MODX Evo",
+                "MantisBT",
+                "Mautic",
+                "Maya",
+                "OXID",
+                "Plentymarkets",
+                "Porto",
+                "RadPHP",
+                "SMF",
+                "Starbug",
+                "Thelia",
+                "Whmcs",
+                "WolfCMS",
+                "agl",
+                "aimeos",
+                "annotatecms",
+                "attogram",
+                "bitrix",
+                "cakephp",
+                "chef",
+                "cockpit",
+                "codeigniter",
+                "concrete5",
+                "croogo",
+                "dokuwiki",
+                "drupal",
+                "eZ Platform",
+                "elgg",
+                "expressionengine",
+                "fuelphp",
+                "grav",
+                "installer",
+                "itop",
+                "joomla",
+                "known",
+                "kohana",
+                "laravel",
+                "lavalite",
+                "lithium",
+                "magento",
+                "majima",
+                "mako",
+                "mediawiki",
+                "miaoxing",
+                "modulework",
+                "modx",
+                "moodle",
+                "osclass",
+                "pantheon",
+                "phpbb",
+                "piwik",
+                "ppi",
+                "processwire",
+                "puppet",
+                "pxcms",
+                "reindex",
+                "roundcube",
+                "shopware",
+                "silverstripe",
+                "sydes",
+                "sylius",
+                "symfony",
+                "tastyigniter",
+                "typo3",
+                "wordpress",
+                "yawik",
+                "zend",
+                "zikula"
+            ],
+            "support": {
+                "issues": "https://github.com/composer/installers/issues",
+                "source": "https://github.com/composer/installers/tree/v1.12.0"
+            },
+            "funding": [
+                {
+                    "url": "https://packagist.com",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/composer",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/composer/composer",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2021-09-13T08:19:44+00:00"
+        },
         {
             "name": "psr/log",
             "version": "1.1.4",
@@ -62,12 +213,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/terrazza/annotation.git",
-                "reference": "cc1b362ff324f56095452b290bc8af092840d58f"
+                "reference": "412abc5e13a81ad777e6605230e289f0f564967c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/terrazza/annotation/zipball/cc1b362ff324f56095452b290bc8af092840d58f",
-                "reference": "cc1b362ff324f56095452b290bc8af092840d58f",
+                "url": "https://api.github.com/repos/terrazza/annotation/zipball/412abc5e13a81ad777e6605230e289f0f564967c",
+                "reference": "412abc5e13a81ad777e6605230e289f0f564967c",
                 "shasum": ""
             },
             "require": {
@@ -86,7 +237,12 @@
                     "Terrazza\\Component\\Annotation\\": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Terrazza\\Component\\Annotation\\Tests\\_Mocks\\": "tests\\_Mocks",
+                    "Terrazza\\Component\\Annotation\\Tests\\_Examples\\": "tests\\_Examples"
+                }
+            },
             "license": [
                 "MIT"
             ],
@@ -97,11 +253,7 @@
                 }
             ],
             "description": "Terrazza Component Annotation",
-            "support": {
-                "issues": "https://github.com/terrazza/annotation/issues",
-                "source": "https://github.com/terrazza/annotation/tree/main"
-            },
-            "time": "2022-03-07T20:07:15+00:00"
+            "time": "2022-03-12T14:26:37+00:00"
         },
         {
             "name": "terrazza/reflectionclass",
@@ -1713,12 +1865,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "d62a25e0a8ec2efef34d85023cdae489af08a786"
+                "reference": "fef420d8d81c1b5082c07472c83a95be4983db87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/d62a25e0a8ec2efef34d85023cdae489af08a786",
-                "reference": "d62a25e0a8ec2efef34d85023cdae489af08a786",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/fef420d8d81c1b5082c07472c83a95be4983db87",
+                "reference": "fef420d8d81c1b5082c07472c83a95be4983db87",
                 "shasum": ""
             },
             "require": {
@@ -1808,7 +1960,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-03-09T06:54:34+00:00"
+            "time": "2022-03-12T13:32:10+00:00"
         },
         {
             "name": "psr/container",
@@ -3753,12 +3905,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/vimeo/psalm.git",
-                "reference": "510456c7c42a131d6370bea39dc73550ec482a43"
+                "reference": "c1ad5f6be0ccb2bda85ab805bf2bc75ef18013e8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vimeo/psalm/zipball/510456c7c42a131d6370bea39dc73550ec482a43",
-                "reference": "510456c7c42a131d6370bea39dc73550ec482a43",
+                "url": "https://api.github.com/repos/vimeo/psalm/zipball/c1ad5f6be0ccb2bda85ab805bf2bc75ef18013e8",
+                "reference": "c1ad5f6be0ccb2bda85ab805bf2bc75ef18013e8",
                 "shasum": ""
             },
             "require": {
@@ -3853,7 +4005,7 @@
                 "issues": "https://github.com/vimeo/psalm/issues",
                 "source": "https://github.com/vimeo/psalm/tree/4.x"
             },
-            "time": "2022-03-07T21:50:20+00:00"
+            "time": "2022-03-12T07:27:23+00:00"
         },
         {
             "name": "webmozart/assert",

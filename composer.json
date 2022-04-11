@@ -1,6 +1,6 @@
 {
     "name": "terrazza/serializer",
-    "type" : "library",
+    "type" : "cakephp-plugin",
     "version": "1.0.1",
     "description": "Terrazza Component Serializer",
     "license": "MIT",
@@ -13,8 +13,16 @@
             "email": "it@noframework.io"
         }
     ],
+    "repositories": [
+        {
+            "url": "https://github.com/terrazza/annotation.git",
+            "type": "github",
+            "no-api": true
+        }
+    ],
     "require": {
         "php": ">=7.4",
+        "composer/installers": "~1.0",
         "terrazza/annotation": "dev-main",
         "psr/log": "1.1.*",
         "ext-json": "*",
@@ -34,6 +42,11 @@
         "psr-4": {
             "Terrazza\\Component\\Serializer\\Tests\\_Examples\\" : "tests\\_Examples",
             "Terrazza\\Component\\Serializer\\Tests\\_Mocks\\" : "tests\\_Mocks"
+        }
+    },
+    "extra": {
+        "installer-paths": {
+            "libs/{$name}/" : ["terrazza/annotation"]
         }
     },
     "minimum-stability": "dev"

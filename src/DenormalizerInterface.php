@@ -4,6 +4,7 @@ namespace Terrazza\Component\Serializer;
 
 use InvalidArgumentException;
 use ReflectionException;
+use ReflectionMethod;
 use RuntimeException;
 
 interface DenormalizerInterface {
@@ -20,8 +21,7 @@ interface DenormalizerInterface {
     public function denormalizeClass(string $className, $input, bool $restrictArguments=false);
 
     /**
-     * @param object $object
-     * @param string $methodName
+     * @param ReflectionMethod $method
      * @param mixed $input
      * @param bool $restrictArguments
      * @return mixed
@@ -29,5 +29,5 @@ interface DenormalizerInterface {
      * @throws InvalidArgumentException
      * @throws RuntimeException
      */
-    public function denormalizeMethodValues(object $object, string $methodName, $input, bool $restrictArguments=false);
+    public function denormalizeMethod(ReflectionMethod $method, $input, bool $restrictArguments=false);
 }
